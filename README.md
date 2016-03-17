@@ -1,4 +1,7 @@
 # GrayStar4
+
+To see application: http://www.ap.smu.ca/~ishort/OpenStars/GrayStar3/GrayStarV4.html
+
 Web-based pedagogical stellar modeling
 Approximate stellar atmospheric and spectral line modeling in JavaScript with visualization in HTML.  
 Suitable for wide range of educationa and public outreach (EPO) levels depending on which
