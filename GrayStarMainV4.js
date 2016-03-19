@@ -3097,21 +3097,42 @@ function main() {
     // **********  Basic canvas parameters: These are numbers in px - needed for calculations:
     // All plots and other output must fit within this region to be white-washed between runs
 
-    var xRangeT = 1550;
-    var yRangeT = 65;
-    var xOffsetT = 10;
-    var yOffsetT = 10;
-    var charToPxT = 4; // width of typical character font in pixels - CAUTION: finesse!
+    var xRangeText = 1550;
+    var yRangeText = 65;
+    var xOffsetText = 10;
+    var yOffsetText = 10;
+    var charToPxText = 4; // width of typical character font in pixels - CAUTION: finesse!
 
     var zeroInt = 0;
     //these are the corresponding strings ready to be assigned to HTML style attributes
 
 
-    var xRangeTStr = numToPxStrng(xRangeT);
-    var yRangeTStr = numToPxStrng(yRangeT);
-    var xOffsetTStr = numToPxStrng(xOffsetT);
-    var yOffsetTStr = numToPxStrng(yOffsetT);
+    var xRangeTextStr = numToPxStrng(xRangeText);
+    var yRangeTextStr = numToPxStrng(yRangeText);
+    var xOffsetTextStr = numToPxStrng(xOffsetText);
+    var yOffsetTextStr = numToPxStrng(yOffsetText);
     // Very first thing on each load: White-wash the canvas!!
+
+
+    var washTId = document.createElement("div");
+    var washTWidth = xRangeText + xOffsetText;
+    var washTHeight = yRangeText + yOffsetText;
+    var washTTop = yOffsetText;
+    var washTWidthStr = numToPxStrng(washTWidth);
+    var washTHeightStr = numToPxStrng(washTHeight);
+    var washTTopStr = numToPxStrng(washTTop);
+    washTId.id = "washT";
+    washTId.style.position = "absolute";
+    washTId.style.width = washTWidthStr;
+    washTId.style.height = washTHeightStr;
+    washTId.style.marginTop = washTTopStr;
+    washTId.style.marginLeft = "0px";
+    washTId.style.opacity = 1.0;
+    washTId.style.backgroundColor = "#EEEEEE";
+    washTId.style.zIndex = 0;
+    textId.appendChild(washTId);
+
+
     var roundNum, remain;
     // R & L_Bol:
     var colr = 0;
@@ -3393,7 +3414,7 @@ Spectral line \n\
 
 // Browser viewport coordinates for upper left corner of panel:
         panelX = xOffset + plotCol * spacingX; 
-        panelY = yOffsetT + yRangeT +
+        panelY = yOffsetText + yRangeText +
              yOffset + plotRow * spacingY;
         panelXStr = numToPxStrng(panelX);
         panelYStr = numToPxStrng(panelY);
