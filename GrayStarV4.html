@@ -14,7 +14,7 @@
         <meta name="author" content="Ian Short"/>
         <!-- <base href="http://www.ap.smu.ca/~ishort/GrayStar"/> -->
         <!-- <base href="file://C:\users\Ian\Documents\NetBeansProjects\GrayStar3"/> -->
-        <title>grayStar 3.0</title>
+        <title>grayStar 4.0</title>
         <link type="text/css" rel="stylesheet" href="GrayStarV3.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -82,7 +82,7 @@
                     showTooltip: "true",
                     editableTooltip: "true"
                 });
-                $("#kappaScale").roundSlider({
+                $("#zScale").roundSlider({
                     radius: "55",
                     width: "10",
                     handleSize: "24,12",
@@ -170,7 +170,7 @@
         -->
 
 
-        <h2><span style="color:#666666">gray</span>Star<span style="color:#FF00FF"><strong>3</strong></span></h2>
+        <h2><span style="color:#666666">gray</span>Star<span style="color:#FF00FF"><strong>4</strong></span></h2>
         <span style="color:#8888FF" title="The openStar project"><strong>openStar</strong></span> 
         pedagogical <a href="http://en.wikipedia.org/wiki/Model_photosphere" target="_blank">star</a> and <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">planet</a> modeling</a> in JavaScript.
         Visualization in HTML<span style="color:red; font-weight:bold">5</span>.  <span style="color:#AA00AA">Hover for tips.  <command>Ctrl +/-</command> to zoom</span> <br />
@@ -224,7 +224,7 @@
                             <td>
                                 <span title="Surface temperature of spherical blackbody radiation emitter of equivalent bolometric surface flux, in Kelvins (K)"> 
                                     <a href="http://en.wikipedia.org/wiki/Effective_temperature" target="_blank">Effective temperature, <em>T</em><sub>eff</sub></a> <br />
-                                    <span style="color:red">(500-6000)</span> <span style="color:blue">(6000-50000</span> 
+                                    (500 - 50000) 
                                     <a href="http://en.wikipedia.org/wiki/Kelvin" target="_blank">K</a>) <br />
                                     <!-- <input id="Teff" type="number" name="Teff" value=5800 size="5" min="3500" max="25000" step="25"/> -->
                                     <!-- <input id="Teff" type="range" name="Teff" value="5800" min="3500" max="25000" step="10" onchange="displayTeff()"/> -->
@@ -260,18 +260,25 @@
 
                             </td>
                             <td>
-                                <span title="Rosseland mean extinction multiplier - simulates varying metallicity"> 
+                                <span title="Overall log_10 metallicity [Fe/H]"> 
                                     <a href="http://en.wikipedia.org/wiki/Complex_index_of_refraction#Complex_index_of_refraction_and_absorption" target = "_blank">Metal content</a> <br />
                                     (log<sub>10</sub> 0.001 - 10.0 x solar) <br />
-                                    <!-- <input id="kappaScale" type="number" name="kappaScale" value=1.0 size="3" min="0.1" max="3.0" step="0.1"/>-->
-                                    <!-- <input id="kappaScale" type="range" name="kappaScale" value=1.0 min="0.1" max="3.0" step="0.1" onchange="displayKappa()"/>-->
-                                    <div id="kappaScale"></div>
+                                    <!-- <input id="zScale" type="number" name="zScale" value=1.0 size="3" min="0.1" max="3.0" step="0.1"/>-->
+                                    <!-- <input id="zScale" type="range" name="zScale" value=1.0 min="0.1" max="3.0" step="0.1" onchange="displayKappa()"/>-->
+                                    <div id="zScale"></div>
                                 </span>
                                 <!-- <div id="echoKappa"></div> -->
 
                             </td>         
-                        </tr> 
-
+                        </tr>
+                        <tr> 
+                            <td>
+                                <span title="Logarithmic mass extinction adjustment - can be positive or negative">
+                                    &#954<sub>Fudge</sub> log<sub>10</sub> mass extinction (-2.0 - 2.0 log cm<sup>2</sup> g<sup>-1</sup>) <br />
+                                    <input id="logKapFudge" type="number" name="logKapFudge" value="0.0" size="3" min="-2.0" max="2.0" step="0.1"/>
+                                </span>
+                            </td>
+                        </tr>
                     </table>
                 </fieldset> 
             </div>
@@ -339,8 +346,8 @@
                             <!-- <span title="log of total number density of absorbing particle at Tau_Ros=1 in cm<sup>-3</sup>">Log<sub>10</sub> Number density, <em>N</em> (5.0 - 9.0 log cm<sup>-3</sup>) <input type="number" name="logN" value=6.5 size="3"/></span> -->
                             <td>
                                 <span title="A_12 = (log of total number density of absorbing particle per H particle) + 12 at Tau_Ros=1 in re-scaled log(cm<sup>-3</sup>)">
-                                    A<sub>12</sub> Number density (2.0 - 10.0) <br />
-                                    <input id="A12" type="number" name="A12" value=3.5 size="3" min="2.0" max="10.0" step="0.1"/>
+                                    A<sub>12</sub> Number density (2.0 - 11.0) <br />
+                                    <input id="A12" type="number" name="A12" value=3.5 size="3" min="2.0" max="11.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
@@ -352,27 +359,56 @@
                                 </span>
                             </td>
                             <td>
+                            <span title="Ionization stage of line">Ionization stage<br />
+                                <select id="stage" name = "stage" value=0>
+                                   <option value = 0>I</option>
+                                   <option value = 1>II</option>
+                                   <option value = 2>III</option>
+                                   <option value = 3>IV</option>
+                                </select>
+                            </span>
+                            </td>
+                            <td>
                                 <span title="">
                                     <a href="http://en.wikipedia.org/wiki/Ionization_energy" target="_blank">
                                         Stage I ground ionization E, <em>&#967</em><sub>I</sub></a> 
                                     (<a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
-                                    ) (5.0 - 25.0) <br />
-                                    <input id="chi_I1" type="number" name="chi_I1" value=8.0 size="4" min="0.0" max="25.0" step="0.1"/>
+                                    ) (4.0 - 25.0) <br />
+                                    <input id="chi_I1" type="number" name="chi_I1" value=8.0 size="4" min="4.0" max="25.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
                                 <span title="">
-                                    <a href="http://en.wikipedia.org/wiki/Ionization_energy" target="_blank">Stage II ground ionization E, <em>&#967</em><sub>I</sub></a>(
+                                    <a href="http://en.wikipedia.org/wiki/Ionization_energy" target="_blank">
+                                        Stage II ground ionization E, <em>&#967</em><sub>II</sub></a>(
                                     <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
-                                    ) (5.0 - 50.0) <br />
-                                    <input id="chi_I2" type="number" name="chi_I2" value=8.0 size="4" min="0.0" max="50.0" step="0.1"/>
+                                    ) (5.0 - 55.0) <br />
+                                    <input id="chi_I2" type="number" name="chi_I2" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
-                                <span title="The excitation energy with respect to the ground state of the lower atomic E-level of the line transition in electron Volts (eV) - affects line strength in a Teff-dependent way ** Values <= IonE: Neutral stage, Values > Ion.E.: Ionized stage">
+                                <span title="">
+                                    <a href="http://en.wikipedia.org/wiki/Ionization_energy" target="_blank">
+                                        Stage III ground ionization E, <em>&#967</em><sub>III</sub></a>(
+                                    <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
+                                    ) (5.0 - 55.0) <br />
+                                    <input id="chi_I3" type="number" name="chi_I3" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="">
+                                    <a href="http://en.wikipedia.org/wiki/Ionization_energy" target="_blank">
+                                        Stage IV ground ionization E, <em>&#967</em><sub>IV</sub></a>(
+                                    <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
+                                    ) (5.0 - 55.0) <br />
+                                    <input id="chi_I4" type="number" name="chi_I4" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="The excitation energy with respect to the ground state of the lower atomic E-level of the line transition in electron Volts (eV) - affects line strength in a Teff-dependent way ">
                                     <a href="http://en.wikipedia.org/wiki/Excited_state" target="_blank">Excitation E, <em>&#967</em><sub>l</sub></a> (
                                     <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
-                                    ) (0 - <em>&#967</em><sub>I</sub> - <em>&#967</em><sub>I</sub>+5) <br />
+                                    ) (0 - <em>&#967</em><sub>I</sub>) <br />
                                     <input id="chi_L" type="number" name="chi_L" value=0.0 size="4" step="0.1"/>
                                 </span>
                             </td>
@@ -390,6 +426,20 @@
                                     <a href="https://en.wikipedia.org/wiki/Statistical_weight" target="_blank">Stage II ground statistical wght, <it>g</it><sub>2</sub></a>
                                     (unitless) (1 - 100) <br />
                                     <input id="gw_2" type="number" name="gw_2" value=1 size="4"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="... or Stage III partition funtion">
+                                    <a href="https://en.wikipedia.org/wiki/Statistical_weight" target="_blank">Stage III ground statistical wght, <it>g</it><sub>3</sub></a>
+                                    (unitless) (1 - 100) <br />
+                                    <input id="gw_3" type="number" name="gw_2" value=1 size="4"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="... or Stage II partition funtion">
+                                    <a href="https://en.wikipedia.org/wiki/Statistical_weight" target="_blank">Stage IV ground statistical wght, <it>g</it><sub>4</sub></a>
+                                    (unitless) (1 - 100) <br />
+                                    <input id="gw_4" type="number" name="gw_2" value=1 size="4"/>
                                 </span>
                             </td>
                             <td>
@@ -608,41 +658,41 @@
                     </legend> 
                     <table>
                         <tr>
-                            <td>
+                       <!--     <td>
                                 <span title="Fast mode - everything OFF">
                                     <input id="fastmode" type="radio" name="switchPerf" value="Fast" checked="checked" />Fast mode (default)
                                 </span>
-                            </td>
-                            <td>
+                            </td> -->
+                          <!--  <td>
                                 <span title="Realistic mode - everything ON (SLOW!)">
                                     <input id="realmode" type="radio" name="switchPerf" value="Real" />Realistic mode (<strong>Slow!</strong>)
                                 </span>
-                            </td>
-                            <td>
+                            </td> -->
+                           <!-- <td>
                                 <span title="Use check boxes to right">
                                     <input id="usermode" type="radio" name="switchPerf" value="User" />User selection:
                                 </span>
-                            </td>
-                            <td>
+                            </td> -->
+                           <!-- <td>
                                 <span title="Ten &#923 iterations with multi-gray opacity and scattering - best for cooler stars">
                                     <input id="tcorr" type="checkbox" name="tcorr" /><em>T</em> Corrections
                                 </span>
-                            </td>
-                            <td>
+                            </td> -->
+                           <!-- <td>
                                 <span title="Photon scattering in line source function - epsilon=0.01">
                                     <input id="scatter" type="checkbox" name="scatter" />Line scattering
                                 </span>
-                            </td>                                                        
-                            <td>
+                            </td> -->                                                        
+                           <!-- <td>
                                 <span title="True Voigt profile for high resolution line (otherwise Gaussian + Lorentzian)">
                                     <input id="voigt" type="checkbox" name="voigt" />Voigt line profile
                                 </span>
-                            </td>
-                            <td>
+                            </td> -->
+                            <!-- <td>
                                 <span title="Mixing-length superadiabitc convection: ONLY works well for solar-type stars">
                                     <input id="convec" type="checkbox" name="convec" />Convection (dangerous!)
                                 </span>
-                            </td>
+                            </td> -->
                             <td>
                                 <span style="color:indigo" title="Stores atmospheric structure if ONLY re-computing line - faster.">
                                     <input id="lineOnly" type="checkbox" name="lineOnly" />ONLY update spectral line 
@@ -702,6 +752,29 @@
                 <span title="Turn high resolution spectral line plots on/off">
                     <input id="showLine" type="checkbox" name="showLine" />High resolution spectral line
                 </span>   
+               <span title="Turn ionization equilibrium plot on/off">
+                    <!-- <input id="showLogNums" type="checkbox" name="showLogNums" /a>Ion equilibrium -->
+                    <select id="showLogNums" name = "showLogNums">
+                       <option value = "None">None</option>
+                       <option value = "H">H</option>
+                       <option value = "He">He</option>
+                       <option value = "Li">Li</option>
+                       <option value = "C">C</option>
+                       <option value = "N">N</option>
+                       <option value = "O">O</option>
+                       <option value = "Na">Na</option>
+                       <option value = "Al">Al</option>
+                       <option value = "Mg">Mg</option>
+                       <option value = "Si">Si</option>
+                       <option value = "S">S</option>
+                       <option value = "K">K</option>
+                       <option value = "Ca">Ca</option>
+                       <option value = "Ti">Ti</option>
+                       <option value = "Fe">Fe</option>
+                       <option value = "Co">Co</option>
+                       <option value = "Ni">Ni</option>
+                    </select>Ionization Eq
+                </span>
             </fieldset>
             <fieldset>
                 <legend>Detailed print-out (below graphs):</legend>
@@ -795,6 +868,23 @@
         <div id="plotEight" class="linePanel" style="display:none">
             <canvas id="plotEightCnvs" width="450" height="350"></canvas>
         </div> 
+
+        <!-- Opacity vs depth -->
+        <div id="plotFourteen">
+            <canvas id="plotFourteenCnvs" width="450" height="350"></canvas>
+        </div>        
+
+        <!-- Opacity vs lambda -->
+        <div id="plotFifteen">
+            <canvas id="plotFifteenCnvs" width="450" height="350"></canvas>
+        </div>        
+
+        <!-- Opacity vs lambda -->
+        <div id="plotSixteen">
+            <canvas id="plotSixteenCnvs" width="450" height="350"></canvas>
+        </div>        
+
+        <!-- HR DIagram -->
 
         <!-- Print-out panel -->
         <div id="printModel" style="display:block"></div>

@@ -764,3 +764,1415 @@ var minMax2 = function(x) {
         return newY;
  };
 
+
+
+//Atomic masses in atomic mass units (amu. "mu")
+//From CIAAW
+//Atomic weights of the elements 2015 ciaaw.org/atomic-weights.htm, Aug. 2015
+//Heaviest element treated in La (57)
+
+
+    var getMass = function(elName){
+
+    var elMass = 1.0;  //default initialization
+
+    if (elName == "H"){
+       elMass = 1.007;
+        }
+   
+    if (elName == "He"){
+       elMass  = 4.002;
+       }
+   
+    if (elName == "Li"){
+       elMass = 6.938;
+      }
+ 
+    if (elName == "Be"){
+       elMass  = 9.012;
+  }
+ 
+    if (elName == "B"){
+       elMass = 10.806;
+   }
+   
+    if (elName == "C"){
+       elMass = 12.0096;
+  }
+   
+    if (elName == "N"){
+       elMass = 14.006;
+  }
+ 
+    if (elName == "O"){
+       elMass = 15.999;
+  }
+ 
+    if (elName == "F"){
+       elMass = 18.998;
+  }
+ 
+    if (elName == "Ne"){
+       elMass  = 20.1797;
+  }
+ 
+    if (elName == "Na"){
+       elMass  = 22.989;
+  }
+ 
+    if (elName == "Mg"){
+       elMass  = 24.304;
+  }
+ 
+    if (elName == "Al"){
+       elMass  = 26.981;
+  }
+ 
+    if (elName == "Si"){
+       elMass  = 28.084;
+  }
+ 
+    if (elName == "P"){
+       elMass = 30.973;
+  }
+ 
+    if (elName == "S"){
+       elMass = 32.059;
+ }
+ 
+    if (elName == "Cl"){
+       elMass  = 35.446;
+  }
+ 
+    if (elName == "Ar"){
+       elMass  = 39.948;
+  }
+ 
+    if (elName == "K"){
+       elMass = 39.0983;
+  }
+ 
+    if (elName == "Ca"){
+       elMass  = 40.078;
+  }
+ 
+    if (elName == "Sc"){
+       elMass  = 44.955;
+  }
+ 
+    if (elName == "Ti"){
+       elMass  = 47.867;
+  }
+ 
+    if (elName == "Va"){
+       elMass  = 50.9415;
+  }
+ 
+    if (elName == "Cr"){
+       elMass  = 51.9961;
+  }
+ 
+    if (elName == "Mn"){
+       elMass  = 54.938;
+  }
+ 
+    if (elName == "Fe"){
+       elMass  = 55.845;
+  }
+ 
+    if (elName == "Co"){
+       elMass  = 58.933;
+  }
+ 
+    if (elName == "Ni"){
+       elMass  = 58.6934;
+  }
+ 
+    if (elName == "Cu"){
+       elMass  = 63.546;
+  }
+ 
+    if (elName == "Zn"){
+       elMass  = 65.38;
+  }
+ 
+    if (elName == "Ga"){
+       elMass  = 69.723;
+  }
+ 
+    if (elName == "Ge"){
+       elMass  = 72.630;
+  }
+ 
+    if (elName == "As"){
+       elMass  = 74.921;
+  }
+ 
+    if (elName == "Se"){
+       elMass  = 78.971;
+  }
+ 
+    if (elName == "Br"){
+       elMass  = 79.901;
+  }
+ 
+    if (elName == "Kr"){
+       elMass  = 83.798;
+  }
+ 
+    if (elName == "Rb"){
+       elMass  = 85.4678;
+  }
+ 
+    if (elName == "Sr"){
+       elMass  = 87.62;
+  }
+ 
+    if (elName == "Y"){
+       elMass = 88.905;
+  }
+ 
+    if (elName == "Zr"){
+       elMass  = 91.224;
+  }
+ 
+    if (elName == "Nb"){
+       elMass  = 92.906;
+  }
+ 
+    if (elName == "Mo"){
+       elMass  = 95.95;
+  }
+ 
+    if (elName == "Ru"){
+       elMass  = 101.07;
+  }
+ 
+    if (elName == "Rh"){
+       elMass  = 102.905;
+  }
+ 
+    if (elName == "Pd"){
+       elMass  = 106.42;
+  }
+ 
+    if (elName == "Ag"){
+       elMass  = 107.8682;
+  }
+ 
+    if (elName == "Cd"){
+       elMass  = 112.414;
+  }
+ 
+    if (elName == "In"){
+       elMass  = 114.818;
+  }
+ 
+    if (elName == "Sn"){
+       elMass  = 118.710;
+  }
+ 
+    if (elName == "Sb"){
+       elMass  = 121.760;
+  }
+ 
+    if (elName == "Te"){
+       elMass  = 127.60;
+  }
+ 
+    if (elName == "I"){
+       elMass = 126.904;
+  }
+ 
+    if (elName == "Xe"){
+       elMass  = 131.293;
+  }
+ 
+    if (elName == "Cs"){
+       elMass  = 132.905;
+  }
+ 
+    if (elName == "Ba"){
+       elMass  = 137.327;
+  }
+ 
+    if (elName == "La"){
+       elMass  = 138.905;
+  }
+
+// 
+    return elMass; 
+
+
+}; // end of getMass method
+
+
+
+// Graound state ionization energies in eV 
+//From NIST Atomic Spectra Database
+//Ionization Energies Data
+//Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2014). NIST Atomic Spectra Database (ver. 5.2), [Online]. Available: http://physics.nist.gov/asd [2015, November 23]. National Institute of Standards and Technology, Gaithersburg, MD.
+//Heaviest element treatable: La
+
+
+//Ionization stages that don't exist (eg. "HIII") are given extremely large ioization energies (999 ev)
+
+
+   var getIonE = function(species){
+
+   var ionE = 8.0; //default initialization
+
+      if (species == "HI"){
+         ionE = 13.598434005136;
+       }
+      if (species == "HII"){
+         ionE = 999999.0;
+       }
+      if (species == "HIII"){
+         ionE = 999999.0;
+       }
+      if (species == "HIV"){
+         ionE = 999999.0;
+       }
+      if (species == "HeI"){
+         ionE = 24.587387936;
+        }     
+      if (species == "HeII"){
+         ionE = 54.417763110;
+        }   
+      if (species == "HeIII"){
+         ionE = 999999.0;
+        }   
+      if (species == "HeIV"){
+         ionE = 999999.0;
+        }   
+      if (species == "LiI"){
+         ionE = 5.391714761;
+        }   
+      if (species == "LiII"){
+         ionE = 75.6400937;
+        }             
+      if (species == "LiIII"){
+         ionE = 122.45435380;
+        }           
+      if (species == "LiIV"){
+         ionE = 999999.0;
+        }           
+      if (species == "BeI"){
+         ionE = 9.3226990;
+        }            
+      if (species == "BeII"){
+         ionE = 18.211153;
+        }            
+      if (species == "BeIII"){
+         ionE = 153.8961980;
+        }         
+      if (species == "BeIV"){
+         ionE = 217.7185766;
+        }         
+      if (species == "BI"){
+         ionE = 8.2980190;
+        }         
+      if (species == "BII"){
+         ionE = 25.154830;
+        }         
+      if (species == "BIII"){
+         ionE = 37.930580;
+        }        
+      if (species == "BIV"){
+         ionE = 259.3715;
+        }        
+      if (species == "CI"){
+         ionE = 11.260300;
+        }       
+      if (species == "CII"){
+         ionE = 24.38450;
+        }      
+      if (species == "CIII"){
+         ionE = 47.88778;
+        }      
+      if (species == "CIV"){
+         ionE = 64.49351;
+        }      
+      if (species == "NI"){
+         ionE = 14.534130;
+        }    
+      if (species == "NII"){
+         ionE = 29.601250;
+        }  
+      if (species == "NIII"){
+         ionE = 47.4453;
+        }   
+      if (species == "NIV"){
+         ionE = 77.47350;
+        }   
+      if (species == "OI"){
+         ionE = 13.6180540;
+        }               
+      if (species == "OII"){
+         ionE = 35.121110;
+        }               
+      if (species == "OIII"){
+         ionE = 54.93554;
+        }              
+      if (species == "OIV"){
+         ionE = 77.41350;
+        }              
+      if (species == "FI"){
+         ionE = 17.422820;
+        }             
+      if (species == "FII"){
+         ionE = 34.97081;
+        }             
+      if (species == "FIII"){
+         ionE = 62.70800;
+        }           
+      if (species == "FIV"){
+         ionE = 87.175;
+        }           
+      if (species == "NeI"){
+         ionE = 21.5645400;
+        }         
+      if (species == "NeII"){
+         ionE = 40.962960;
+        }         
+      if (species == "NeIII"){
+         ionE = 63.42331;
+        }         
+      if (species == "NeIV"){
+         ionE = 97.1900;
+        }         
+      if (species == "NaI"){
+         ionE = 5.13907670;
+        }     
+      if (species == "NaII"){
+         ionE = 47.28636;
+        }       
+      if (species == "NaIII"){
+         ionE = 71.6200;
+        }      
+      if (species == "NaIV"){
+         ionE = 98.936;
+        }      
+      if (species == "MgI"){
+         ionE = 7.6462350;
+        }               
+      if (species == "MgII"){
+         ionE = 15.0352670;
+        }              
+      if (species == "MgIII"){
+         ionE = 80.14360;
+        }               
+      if (species == "MgIV"){
+         ionE = 109.2654;
+        }               
+      if (species == "AlI"){
+         ionE = 5.9857684;
+        }            
+      if (species == "AlII"){
+         ionE = 18.828550;
+        }            
+      if (species == "AlIII"){
+         ionE = 28.447640;
+        }           
+      if (species == "AlIV"){
+         ionE = 119.9924;
+        }           
+      if (species == "SiI"){
+         ionE = 8.151683;
+        }          
+      if (species == "SiII"){
+         ionE = 16.345845;
+        }         
+      if (species == "SiIII"){
+         ionE = 33.493000;
+        }        
+      if (species == "SiIV"){
+         ionE = 45.141790;
+        }        
+      if (species == "PI"){
+         ionE = 10.486686;
+        }       
+      if (species == "PII"){
+         ionE = 19.769490;
+        }     
+      if (species == "PIII"){
+         ionE = 30.202640;
+        }     
+      if (species == "PIV"){
+         ionE = 51.44387;
+        }     
+      if (species == "SI"){
+         ionE = 10.36001;
+        }     
+      if (species == "SII"){
+         ionE = 23.33788;
+        }    
+      if (species == "SIII"){
+         ionE = 34.856;
+        }    
+      if (species == "SIV"){
+         ionE = 47.222;
+        }    
+      if (species == "ClI"){
+         ionE = 12.967632;
+        } 
+      if (species == "ClII"){
+         ionE = 23.81364;
+        }                
+      if (species == "ClIII"){
+         ionE = 39.80;
+        }                 
+      if (species == "ClIV"){
+         ionE = 53.24;
+        }                 
+      if (species == "ArI"){
+         ionE = 15.75961120;
+        }           
+      if (species == "ArII"){
+         ionE = 27.62967;
+        }             
+      if (species == "ArIII"){
+         ionE = 40.735;
+        }             
+      if (species == "ArIV"){
+         ionE = 59.58;
+        }             
+      if (species == "KI"){
+         ionE = 4.340663540;
+        }
+      if (species == "KII"){
+         ionE = 31.62500;
+        }
+      if (species == "KIII"){
+         ionE = 45.8031;
+         }         
+      if (species == "KIV"){
+         ionE = 60.917;
+         }         
+      if (species == "CaI"){
+         ionE = 6.11315520;
+         }     
+      if (species == "CaII"){
+         ionE = 11.8717180;
+         }     
+      if (species == "CaIII"){
+       ionE = 50.91315;
+         }    
+      if (species == "CaIV"){
+       ionE = 67.273;
+         }    
+      if (species == "ScI"){
+         ionE = 6.561490;
+         }     
+      if (species == "ScII"){
+         ionE = 12.79977;
+         }     
+      if (species == "ScIII"){
+         ionE = 24.756838;
+         }  
+      if (species == "ScIV"){
+         ionE = 73.48940;
+         }  
+      if (species == "TiI"){
+         ionE = 6.828120;
+         } 
+      if (species == "TiII"){
+         ionE = 13.5755;
+         }                   
+      if (species == "TiIII"){
+         ionE = 27.49171;
+         }                 
+      if (species == "TiIV"){
+         ionE = 43.26717;
+         }                 
+      if (species == "VI"){
+         ionE = 6.746187;
+         }               
+      if (species == "VII"){
+         ionE = 14.6200;
+         }                
+      if (species == "VIII"){
+         ionE = 29.3110;
+         }               
+      if (species == "VIV"){
+         ionE = 46.7090;
+         }               
+      if (species == "CrI"){
+         ionE = 6.766510;
+         }            
+      if (species == "CrII"){
+         ionE = 16.486305;
+         }           
+      if (species == "CrIII"){
+         ionE = 30.960;
+         }             
+      if (species == "CrIV"){
+         ionE = 49.160 ;
+         }             
+      if (species == "MnI"){
+         ionE = 7.4340377;
+         }        
+      if (species == "MnII"){
+         ionE = 15.639990;
+         }        
+      if (species == "MnIII"){
+         ionE = 33.668;
+         }          
+      if (species == "MnIV"){
+         ionE = 51.20;
+         }          
+      if (species == "FeI"){
+         ionE = 7.9024678;
+         }     
+      if (species == "FeII"){
+         ionE = 16.199200;
+         }     
+      if (species == "FeIII"){
+         ionE = 30.651;
+         }       
+      if (species == "FeIV"){
+         ionE = 54.910;
+         }       
+      if (species == "CoI"){
+         ionE = 7.88101;
+         }    
+      if (species == "CoII)"){
+         ionE = 17.0844;
+         }    
+      if (species == "CoIII"){
+         ionE = 33.500;
+         }   
+      if (species == "CoIV"){
+         ionE = 51.27;
+         }   
+      if (species == "NiI"){
+         ionE = 7.639877;
+         }                 
+      if (species == "NiII"){
+         ionE = 18.168837;
+         }                
+      if (species == "NiIII"){
+         ionE = 35.190;
+         }                  
+      if (species == "NiIV"){
+         ionE = 54.90;
+         }                  
+      if (species == "CuI"){
+         ionE = 7.7263800;
+         }             
+      if (species == "CuII"){
+         ionE = 20.292390;
+         }             
+      if (species == "CuIII"){
+         ionE = 36.841;
+         }               
+      if (species == "CuIV"){
+         ionE = 57.380;
+         }               
+      if (species == "ZnI"){
+         ionE = 9.3941970;
+         }          
+      if (species == "ZnII"){
+        ionE = 17.96439;
+         }           
+      if (species == "ZnIII"){
+         ionE = 39.72300;
+         }          
+      if (species == "ZnIV"){
+         ionE = 59.573;
+         }          
+      if (species == "GaI"){
+         ionE = 5.9993018;
+         }       
+      if (species == "GaII"){
+         ionE = 20.51514;
+         }        
+      if (species == "GaIII"){
+         ionE = 30.72600;
+         }       
+      if (species == "GaIV"){
+         ionE = 63.2410;
+         }       
+      if (species == "KrI"){
+         ionE = 13.9996049;
+         }
+      if (species == "KrII"){
+         ionE = 24.35984;
+        }     
+      if (species == "KrIII"){
+         ionE = 35.838;
+        }      
+      if (species == "KrIV"){
+         ionE = 50.85;
+        }      
+      if (species == "RbI"){
+         ionE = 4.1771280;
+        } 
+      if (species == "RbII"){
+         ionE = 27.289540;
+        }                 
+      if (species == "RbIII"){
+         ionE = 39.2470;
+        }                 
+      if (species == "RbIV"){
+         ionE = 52.20;
+        }                 
+      if (species == "SrI"){
+         ionE = 5.69486720;
+        }             
+      if (species == "SrII"){
+         ionE = 11.0302760;
+        }             
+      if (species == "SrIII"){
+         ionE = 42.88353;
+        }              
+      if (species == "SrIV"){
+         ionE = 56.2800;
+        }              
+      if (species == "YI"){
+         ionE = 6.21726;
+        }             
+      if (species == "YII"){
+         ionE = 12.22400;
+        }            
+      if (species == "YIII"){
+         ionE = 20.52441;
+        }           
+      if (species == "YIV"){
+         ionE = 60.6070;
+        }           
+      if (species == "ZrI"){
+         ionE = 6.633900;
+        }                 
+      if (species == "ZrII"){
+         ionE = 13.13;
+        }                    
+      if (species == "ZrIII"){
+         ionE = 23.1700;
+        }                
+      if (species == "ZrIV"){
+         ionE = 34.418360;
+        }                
+      if (species == "NbI"){
+         ionE = 6.758850;
+        }              
+      if (species == "NbII"){
+         ionE = 14.32;
+        }                
+      if (species == "NbIII"){
+         ionE = 25.0;
+        }                
+      if (species == "NbIV"){
+         ionE = 37.611;
+        }                
+      if (species == "CsI"){
+         ionE = 3.893905548;
+        }              
+      if (species == "CsII"){
+         ionE = 23.157450;
+        }                
+      if (species == "CsIII"){
+         ionE = 33.1950;
+        }                
+      if (species == "CsIV"){
+         ionE = 43.0;
+        }                
+      if (species == "BaI"){
+         ionE = 5.2116640;
+        }             
+      if (species == "BaII"){
+         ionE = 10.003826;
+        }             
+      if (species == "BaIII"){
+         ionE = 35.8400;
+        }              
+      if (species == "BaIV"){
+         ionE = 47.03;
+        }              
+      if (species == "LaI"){
+         ionE = 5.57690;
+        }            
+      if (species == "LaII"){
+         ionE = 11.184920;
+        }          
+      if (species == "LaIII"){
+         ionE = 19.17730;
+        }          
+      if (species == "LaIV"){
+         ionE = 49.950;
+        }          
+
+//
+return ionE;
+
+};  //end of method getIonE    
+
+
+// Ground state ionization energies in eV 
+//From NIST Atomic Spectra Database
+//Ionization Energies Data
+//Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2014). NIST Atomic Spectra Database (ver. 5.2), [Online]. Available: http://physics.nist.gov/asd [2015, November 23]. National Institute of Standards and Technology, Gaithersburg, MD.
+//Heaviest element treatable: La
+
+// CAUTION: Return Base 10 log_10 of partition fn
+//Ionization stages that don't exist (eg. "HIII") are given dummy values of 0.0;
+
+
+   var getPartFn = function(species){
+
+// CAUTION: log_10 base 10!!
+   var log10PartFn = []; 
+   log10PartFn.length = 2; 
+   
+   //default initialization
+   log10PartFn[0] = 0.0;  //for theta = 5040.0/T = 1.0
+   log10PartFn[1] = 0.0;  //for theta = 5040.0/T = 0.5
+   
+
+      if (species == "HI"){
+         log10PartFn[0] = 0.30; 
+         log10PartFn[1] = 0.30;
+       }
+      if (species == "HII"){
+         log10PartFn[0] = 0.0;  //dummy 
+         log10PartFn[1] = 0.0;   //dummy
+       }
+      if (species == "HIII"){
+         log10PartFn[0] = 0.0;   //dummy
+         log10PartFn[1] = 0.0;   //dummy
+       }
+      if (species == "HIV"){
+         log10PartFn[0] = 0.0;   //dummy
+         log10PartFn[1] = 0.0;   //dummy
+       }
+      if (species == "HeI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }     
+      if (species == "HeII"){
+         log10PartFn[0] = 0.30; 
+         log10PartFn[1] = 0.30;
+        }   
+      if (species == "HeIII"){
+         log10PartFn[0] = 0.0;  //dummy 
+         log10PartFn[1] = 0.0;  //dummy 
+        }   
+      if (species == "HeIV"){
+         log10PartFn[0] = 0.0;  //dummy 
+         log10PartFn[1] = 0.0;  //dummy 
+        }   
+      if (species == "LiI"){
+         log10PartFn[0] = 0.32; 
+         log10PartFn[1] = 0.49;
+        }   
+      if (species == "LiII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }             
+      if (species == "LiIII"){
+         log10PartFn[0] = Math.log10(2.0);   
+         log10PartFn[1] = Math.log10(2.0); 
+        }           
+      if (species == "LiIV"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }           
+      if (species == "BeI"){
+         log10PartFn[0] = 0.01; 
+         log10PartFn[1] = 0.13; 
+        }            
+      if (species == "BeII"){
+         log10PartFn[0] = 0.30; 
+         log10PartFn[1] = 0.30; 
+        }            
+      if (species == "BeIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] = Math.log10(1.0); 
+        }         
+      if (species == "BeIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }         
+      if (species == "BI"){
+         log10PartFn[0] = 0.78; 
+         log10PartFn[1] =  0.78;
+        }         
+      if (species == "BII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }         
+      if (species == "BIII"){
+         log10PartFn[0] = Math.log10(2.0);
+         log10PartFn[1] = Math.log10(2.0);
+        }        
+      if (species == "BIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }        
+      if (species == "CI"){
+         log10PartFn[0] = 0.97; 
+         log10PartFn[1] = 1.0; 
+        }       
+      if (species == "CII"){
+         log10PartFn[0] = 0.78; 
+         log10PartFn[1] = 0.78; 
+        }      
+      if (species == "CIII"){
+         log10PartFn[0] = Math.log10(1.0);
+         log10PartFn[1] = Math.log10(1.0);
+        }      
+      if (species == "CIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] = 0.0;
+        }      
+      if (species == "NI"){
+         log10PartFn[0] = 0.61; 
+         log10PartFn[1] = 0.66; 
+        }    
+      if (species == "NII"){
+         log10PartFn[0] = 0.95; 
+         log10PartFn[1] = 0.97; 
+        }  
+      if (species == "NIII"){
+         log10PartFn[0] = Math.log10(6.0);
+         log10PartFn[1] = Math.log10(6.0);
+        }   
+      if (species == "NIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }   
+      if (species == "OI"){
+         log10PartFn[0] = 0.94; 
+         log10PartFn[1] = 0.97; 
+        }               
+      if (species == "OII"){
+         log10PartFn[0] = 0.60; 
+         log10PartFn[1] = 0.61; 
+        }               
+      if (species == "OIII"){
+         log10PartFn[0] = Math.log10(9.0);
+         log10PartFn[1] = Math.log10(9.0);
+        }              
+      if (species == "OIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }              
+      if (species == "FI"){
+         log10PartFn[0] = 0.75; 
+         log10PartFn[1] =  0.77;
+        }             
+      if (species == "FII"){
+         log10PartFn[0] = 0.92; 
+         log10PartFn[1] = 0.94; 
+        }             
+      if (species == "FIII"){
+         log10PartFn[0] = Math.log10(4.0);
+         log10PartFn[1] = Math.log10(4.0);
+        }           
+      if (species == "FIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }           
+      if (species == "NeI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }         
+      if (species == "NeII"){
+         log10PartFn[0] = 0.73; 
+         log10PartFn[1] = 0.75; 
+        }         
+      if (species == "NeIII"){
+         log10PartFn[0] = Math.log10(9.0); 
+         log10PartFn[1] = Math.log10(9.0); 
+        }         
+      if (species == "NeIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }         
+      if (species == "NaI"){
+         log10PartFn[0] = 0.31; 
+         log10PartFn[1] = 0.60; 
+        }     
+      if (species == "NaII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }       
+      if (species == "NaIII"){
+         log10PartFn[0] = Math.log10(6.0); 
+         log10PartFn[1] =  Math.log10(6.0);
+        }      
+      if (species == "NaIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }      
+      if (species == "MgI"){
+         log10PartFn[0] = 0.01; 
+         log10PartFn[1] = 0.15; 
+        }               
+      if (species == "MgII"){
+         log10PartFn[0] = 0.31; 
+         log10PartFn[1] = 0.31; 
+        }              
+      if (species == "MgIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }               
+      if (species == "MgIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }               
+      if (species == "AlI"){
+         log10PartFn[0] = 0.77; 
+         log10PartFn[1] = 0.81; 
+        }            
+      if (species == "AlII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.01; 
+        }            
+      if (species == "AlIII"){
+         log10PartFn[0] = Math.log10(2.0); 
+         log10PartFn[1] =  Math.log10(2.0);
+        }           
+      if (species == "AlIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }           
+      if (species == "SiI"){
+         log10PartFn[0] = 0.98; 
+         log10PartFn[1] = 1.04; 
+        }          
+      if (species == "SiII"){
+         log10PartFn[0] = 0.76; 
+         log10PartFn[1] = 0.77; 
+        }         
+      if (species == "SiIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }        
+      if (species == "SiIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }        
+      if (species == "PI"){
+         log10PartFn[0] = 0.65; 
+         log10PartFn[1] = 0.79; 
+        }       
+      if (species == "PII"){
+         log10PartFn[0] = 0.91; 
+         log10PartFn[1] = 0.94; 
+        }     
+      if (species == "PIII"){
+         log10PartFn[0] = Math.log10(6.0); 
+         log10PartFn[1] =  Math.log10(6.0);
+        }     
+      if (species == "PIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }     
+      if (species == "SI"){
+         log10PartFn[0] = 0.91; 
+         log10PartFn[1] = 0.94; 
+        }     
+      if (species == "SII"){
+         log10PartFn[0] = 0.62; 
+         log10PartFn[1] = 0.72; 
+        }    
+      if (species == "SIII"){
+         log10PartFn[0] = Math.log10(9.0); 
+         log10PartFn[1] =  Math.log10(9.0);
+        }    
+      if (species == "SIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }    
+      if (species == "ClI"){
+         log10PartFn[0] = 0.72; 
+         log10PartFn[1] = 0.75; 
+        } 
+      if (species == "ClII"){
+         log10PartFn[0] = 0.89; 
+         log10PartFn[1] = 0.92; 
+        }                
+      if (species == "ClIII"){
+         log10PartFn[0] = Math.log10(4.0); 
+         log10PartFn[1] =  Math.log10(4.0);
+        }                 
+      if (species == "ClIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }                 
+      if (species == "ArI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }           
+      if (species == "ArII"){
+         log10PartFn[0] = 0.69; 
+         log10PartFn[1] = 0.71; 
+        }             
+      if (species == "ArIII"){
+         log10PartFn[0] = Math.log10(9.0); 
+         log10PartFn[1] =  Math.log10(9.0);
+        }             
+      if (species == "ArIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }             
+      if (species == "KI"){
+         log10PartFn[0] = 0.34; 
+         log10PartFn[1] = 0.60; 
+        }
+      if (species == "KII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }
+      if (species == "KIII"){
+         log10PartFn[0] = Math.log10(6.0); 
+         log10PartFn[1] =  Math.log10(6.0);
+         }         
+      if (species == "KIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }         
+      if (species == "CaI"){
+         log10PartFn[0] = 0.07; 
+         log10PartFn[1] = 0.55; 
+         }     
+      if (species == "CaII"){
+         log10PartFn[0] = 0.34; 
+         log10PartFn[1] = 0.54; 
+         }     
+      if (species == "CaIII"){
+       log10PartFn[0] =  Math.log10(1.0);
+       log10PartFn[1] =  Math.log10(1.0);
+         }    
+      if (species == "CaIV"){
+       log10PartFn[0] = 0.00; 
+       log10PartFn[1] = 0.00; 
+         }    
+      if (species == "ScI"){
+         log10PartFn[0] = 1.08; 
+         log10PartFn[1] = 1.49; 
+         }     
+      if (species == "ScII"){
+         log10PartFn[0] = 1.36; 
+         log10PartFn[1] = 1.52; 
+         }     
+      if (species == "ScIII"){
+         log10PartFn[0] = Math.log10(10.0); 
+         log10PartFn[1] =  Math.log10(10.0);
+         }  
+      if (species == "ScIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }  
+      if (species == "TiI"){
+         log10PartFn[0] = 1.48; 
+         log10PartFn[1] = 1.88; 
+         } 
+      if (species == "TiII"){
+         log10PartFn[0] = 1.75; 
+         log10PartFn[1] = 1.92; 
+         }                   
+      if (species == "TiIII"){
+         log10PartFn[0] = Math.log10(21.0); 
+         log10PartFn[1] =  Math.log10(21.0);
+         }                 
+      if (species == "TiIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }                 
+      if (species == "VI"){
+         log10PartFn[0] = 1.62; 
+         log10PartFn[1] = 2.03; 
+         }               
+      if (species == "VII"){
+         log10PartFn[0] = 1.64; 
+         log10PartFn[1] = 1.89; 
+         }                
+      if (species == "VIII"){
+         log10PartFn[0] = Math.log10(28.0); 
+         log10PartFn[1] =  Math.log10(28.0);
+         }               
+      if (species == "VIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }               
+      if (species == "CrI"){
+         log10PartFn[0] = 1.02; 
+         log10PartFn[1] = 1.51; 
+         }            
+      if (species == "CrII"){
+         log10PartFn[0] = 0.86; 
+         log10PartFn[1] = 1.22; 
+         }           
+      if (species == "CrIII"){
+         log10PartFn[0] = Math.log10(25.0); 
+         log10PartFn[1] =  Math.log10(25.0);
+         }             
+      if (species == "CrIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }             
+      if (species == "MnI"){
+         log10PartFn[0] = 0.81; 
+         log10PartFn[1] = 1.16; 
+         }        
+      if (species == "MnII"){
+         log10PartFn[0] = 0.89; 
+         log10PartFn[1] = 1.13; 
+         }        
+      if (species == "MnIII"){
+         log10PartFn[0] = Math.log10(6.0); 
+         log10PartFn[1] =  Math.log10(6.0);
+         }          
+      if (species == "MnIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }          
+      if (species == "FeI"){
+         log10PartFn[0] = 1.43; 
+         log10PartFn[1] = 1.74; 
+         }     
+      if (species == "FeII"){
+         log10PartFn[0] = 1.63; 
+         log10PartFn[1] = 1.80; 
+         }     
+      if (species == "FeIII"){
+         log10PartFn[0] = Math.log10(25.0); 
+         log10PartFn[1] =  Math.log10(25.0);
+         }       
+      if (species == "FeIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }       
+      if (species == "CoI"){
+         log10PartFn[0] = 1.52; 
+         log10PartFn[1] = 1.76; 
+         }    
+      if (species == "CoII)"){
+         log10PartFn[0] = 1.46; 
+         log10PartFn[1] = 1.66; 
+         }    
+      if (species == "CoIII"){
+         log10PartFn[0] = Math.log10(28.0); 
+         log10PartFn[1] =  Math.log10(28.0);
+         }   
+      if (species == "CoIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }   
+      if (species == "NiI"){
+         log10PartFn[0] = 1.47; 
+         log10PartFn[1] = 1.60; 
+         }                 
+      if (species == "NiII"){
+         log10PartFn[0] = 1.02; 
+         log10PartFn[1] = 1.28; 
+         }                
+      if (species == "NiIII"){
+         log10PartFn[0] = Math.log10(21.0); 
+         log10PartFn[1] =  Math.log10(21.0);
+         }                  
+      if (species == "NiIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }                  
+      if (species == "CuI"){
+         log10PartFn[0] = 0.36; 
+         log10PartFn[1] = 0.58; 
+         }             
+      if (species == "CuII"){
+         log10PartFn[0] = 0.01; 
+         log10PartFn[1] = 0.18; 
+         }             
+      if (species == "CuIII"){
+         log10PartFn[0] = Math.log10(10.0); 
+         log10PartFn[1] =  Math.log10(10.0);
+         }               
+      if (species == "CuIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }               
+      if (species == "ZnI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.03; 
+         }          
+      if (species == "ZnII"){
+        log10PartFn[0] = 0.30; 
+        log10PartFn[1] = 0.30; 
+         }           
+      if (species == "ZnIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+         }          
+      if (species == "ZnIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }          
+      if (species == "GaI"){
+         log10PartFn[0] = 0.73; 
+         log10PartFn[1] = 0.77; 
+         }       
+      if (species == "GaII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+         }        
+      if (species == "GaIII"){
+         log10PartFn[0] = Math.log10(2.0); 
+         log10PartFn[1] =  Math.log10(2.0);
+         }       
+      if (species == "GaIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+         }       
+      if (species == "KrI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+         }
+      if (species == "KrII"){
+         log10PartFn[0] = 0.62; 
+         log10PartFn[1] = 0.66; 
+        }     
+      if (species == "KrIII"){
+         log10PartFn[0] = Math.log10(9.0); 
+         log10PartFn[1] =  Math.log10(9.0);
+        }      
+      if (species == "KrIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }      
+      if (species == "RbI"){
+         log10PartFn[0] = 0.36; 
+         log10PartFn[1] = 0.70; 
+        } 
+      if (species == "RbII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }                 
+      if (species == "RbIII"){
+         log10PartFn[0] = Math.log10(6.0); 
+         log10PartFn[1] =  Math.log10(6.0);
+        }                 
+      if (species == "RbIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }                 
+      if (species == "SrI"){
+         log10PartFn[0] = 0.10; 
+         log10PartFn[1] = 0.70; 
+        }             
+      if (species == "SrII"){
+         log10PartFn[0] = 0.34; 
+         log10PartFn[1] = 0.53; 
+        }             
+      if (species == "SrIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }              
+      if (species == "SrIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }              
+      if (species == "YI"){
+         log10PartFn[0] = 1.08; 
+         log10PartFn[1] = 1.50; 
+        }             
+      if (species == "YII"){
+         log10PartFn[0] = 1.18; 
+         log10PartFn[1] = 1.41; 
+        }            
+      if (species == "YIII"){
+         log10PartFn[0] = Math.log10(10.0); 
+         log10PartFn[1] =  Math.log10(10.0);
+        }           
+      if (species == "YIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }           
+      if (species == "ZrI"){
+         log10PartFn[0] = 1.53; 
+         log10PartFn[1] = 1.99; 
+        }                 
+      if (species == "ZrII"){
+         log10PartFn[0] = 1.66; 
+         log10PartFn[1] = 1.91; 
+        }                    
+      if (species == "ZrIII"){
+         log10PartFn[0] = Math.log10(21.0); 
+         log10PartFn[1] =  Math.log10(21.0);
+        }                
+      if (species == "ZrIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }                
+      if (species == "NbI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }              
+      if (species == "NbII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }                
+      if (species == "NbIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }                
+      if (species == "NbIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }                
+      if (species == "CsI"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }              
+      if (species == "CsII"){
+         log10PartFn[0] = 0.00; 
+         log10PartFn[1] = 0.00; 
+        }                
+      if (species == "CsIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }                
+      if (species == "CsIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }                
+      if (species == "BaI"){
+         log10PartFn[0] = 0.36; 
+         log10PartFn[1] = 0.92; 
+        }             
+      if (species == "BaII"){
+         log10PartFn[0] = 0.62; 
+         log10PartFn[1] = 0.85; 
+        }             
+      if (species == "BaIII"){
+         log10PartFn[0] = Math.log10(1.0); 
+         log10PartFn[1] =  Math.log10(1.0);
+        }              
+      if (species == "BaIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }              
+      if (species == "LaI"){
+         log10PartFn[0] = 1.41; 
+         log10PartFn[1] = 1.85; 
+        }            
+      if (species == "LaII"){
+         log10PartFn[0] = 1.47; 
+         log10PartFn[1] = 1.71; 
+        }          
+      if (species == "LaIII"){
+         log10PartFn[0] =  Math.log10(10.0);
+         log10PartFn[1] =  Math.log10(10.0);
+        }          
+      if (species == "LaIV"){
+         log10PartFn[0] = 0.0; 
+         log10PartFn[1] =  0.0;
+        }          
+
+//
+return log10PartFn;
+
+};  //end of method getIonE    
+

@@ -692,10 +692,9 @@ var lineSource = function(numDeps, tau, temp, lambda) {
 // tauRos structure
 // temp structure 
 // rho structure
-//var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI, chiL, linePoints, lineProf,
-//        numDeps, kappaScale, tauRos, temp, rho) {
+/*
 var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI1, chiI2, chiL, gw1, gw2, gwL,
-        numDeps, kappaScale, tauRos, temp, rho) {
+        numDeps, zScale, tauRos, temp, rho) {
 
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
@@ -724,7 +723,7 @@ var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI1, chiI2, chiL, gw1, 
     var log2 = Math.log(2.0);
 
     var logNl = logNlIn * ln10;  // Convert to base e
-    var logKScale = Math.log(kappaScale);
+    var logKScale = Math.log(zScale);
     //console.log("levelPops: logKScale: " + logKScale);
 
     //Assume ground state statistical weight (or partition fn) of Stage III is 1.0;
@@ -815,19 +814,6 @@ var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI1, chiI2, chiL, gw1, 
       //      console.log("lam0In " + lam0In);
        //     console.log("logNum 2 " + logE * logNum + " logNe " + logE * logNe + " rho[1][id] " + logE * rho[1][id] + " refLogRho " + logE * refLogRho);
        // }
-        /*
-         //
-         // ********** Accounting for only TWO ionization stages (I & II):
-         //
-         // This assumes partition fns of unity:
-         logSaha = logSahaFac - logNe - boltzFacI / temp[0][id] + (3.0) / (2.0) * temp[1][id]; // log(RHS) of standard Saha equation
-         saha = Math.exp(logSaha);   //RHS of standard Saha equation
-         //System.out.println("logSahaFac, logNe, logSaha= " + logE*logSahaFac + " " + logE*logNe + " " + logE*logSaha);
-         
-         logIonFracII = logSaha - Math.log(1.0 + saha); // log ionization fraction in stage II
-         logIonFracI = -1.0 * Math.log(1.0 + saha);     // log ionization fraction in stage I
-         */
-
         //
         // ********** Accounting for THREE ionization stages (I, II, III):
         //
@@ -882,7 +868,7 @@ var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI1, chiI2, chiL, gw1, 
 
     return logNums;
 };
-
+*/
 
 // Assumes CRD, LTE, ???
 // Input parameters:
@@ -903,10 +889,10 @@ var levelPops = function(lam0In, logNlIn, Ne, ionized, chiI1, chiI2, chiL, gw1, 
 // temp structure 
 // rho structure
 //var lineKap = function(lam0In, logNlIn, logFluIn, ionized, chiI, chiL, linePoints, lineProf,
-//        numDeps, kappaScale, tauRos, temp, rho) {
+//        numDeps, zScale, tauRos, temp, rho) {
 // Level population now computed in LevelPops.levelPops():
 var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
-        numDeps, kappaScale, tauRos, temp, rho) {
+        numDeps, zScale, tauRos, temp, rho) {
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
     var k = 1.3806488E-16; // Boltzmann constant in ergs/K
@@ -929,7 +915,7 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
     var logLam0 = Math.log(lam0);
     //var logNl = logNlIn * ln10;  // Convert to base e
     var logFlu = logFluIn * ln10; // Convert to base e
-    var logKScale = Math.log(kappaScale);
+    var logKScale = Math.log(zScale);
     //console.log("lineKap: logKScale: " + logKScale);
 
     // chiI = chiI * eV;  // Convert lower E-level from eV to ergs
@@ -1006,11 +992,11 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
             // This direct approach won't work - is not consistent with fake Kramer's law scaling of Kapp_Ros with g instead of rho
             logKappaL[il][id] = logKappaL[il][id] - rho[1][id];
             //var refRhoIndx = 16;
-      //      if (id == 12) {
-      //          console.log("LINEKAPPA: id, il " + id + " " + il + " logKappaL " + logE * logKappaL[il][id]
-      //                  + " logPreFac " + logE * logPreFac + " logStimEm " + logE * logStimEm + " logNum " + logE * logNum
-      //                  + " log(lineProf[1]) " + logE * Math.log(lineProf[1][il]) + " rho[1][id] " + logE * rho[1][id]);
-      //       }
+          //  if (id == 12) {
+           //     console.log("LINEKAPPA: id, il " + id + " " + il + " logKappaL " + logE * logKappaL[il][id]
+            //            + " logPreFac " + logE * logPreFac + " logStimEm " + logE * logStimEm + " logNum " + logE * logNum
+             //           + " log(lineProf[il]) " + logE * Math.log(lineProf[il][id]) + " rho[1][id] " + logE * rho[1][id]);
+           //  }
             //if (id === 36) {
             //    console.log("il " + il + " linePoints[0][il] " + 1.0e7*linePoints[0][il] + " id " + id + " logKappaL " + logE*logKappaL[il][id]);
             //}
@@ -1024,10 +1010,9 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
 
 //Create total extinction throughout line profile:
 var lineTotalKap = function(linePoints, logKappaL,
-        numDeps, kappaScale, kappa) {
+        numDeps, kappa, numPoints, numLams, lambdaScale) {
 
     var logE = logTen(Math.E); // for debug output
-    var numPoints = linePoints[0].length;
 
     // return a 2D numPoints x numDeps array of monochromatic *TOTAL* extinction line profiles
     // return a 2D numPoints x numDeps array of monochromatic extinction line profiles
@@ -1035,20 +1020,50 @@ var lineTotalKap = function(linePoints, logKappaL,
     logTotKappa.length = numPoints;
     //Must use Array constructor here:
     for (var row = 0; row < numPoints; row++) {
-        logTotKappa[row] = new Array(numDeps);
+        logTotKappa[row] = [];
+        logTotKappa[row].length = numDeps;
     }
     //double[][] logTotKappa = new double[numPoints][numDeps];
+
+//Interpolate continuum opacity onto onto line-blanketed opacity lambda array:
+        var kappaC = [];
+        kappaC.length = numLams;
+        var kappaC2 = [];
+        kappaC2.length = numPoints;
+        var kappa2 = [];
+        kappa2.length = numPoints;
+        for (var i = 0; i < numPoints; i++){
+           kappa2[i] = [];
+           kappa2[i].length = numDeps;
+        }
+        for (var id = 0; id < numDeps; id++) {
+           for (var il = 0; il < numLams; il++) {
+              kappaC[il] = kappa[il][id];
+              //if (id == 36){
+                //console.log("il " + il + " lambdaScale " + lambdaScale[il] + " kappaC[il] " + kappaC[il]);
+              //}
+           }
+           kappaC2 = interpolV(kappaC, lambdaScale, linePoints);
+           for (var il = 0; il < numPoints; il++){
+              kappa2[il][id] = kappaC2[il];
+              //if (id == 36){
+                //console.log("il " + il + " linePoints " + linePoints[il] + " kappaC2[il] " + kappaC2[il]);
+              //}
+           }
+        } // id loop
+
 
     var kappaL;
 
     for (var id = 0; id < numDeps; id++) {
         for (var il = 0; il < numPoints; il++) {
             //Both kappaL and kappa (continuum) are *mass* extinction (cm^2/g) at thsi point: 
-            kappaL = Math.exp(logKappaL[il][id]) + kappa[0][id];
+            //kappaL = Math.exp(logKappaL[il][id]) + kappa[0][id];
+            kappaL = Math.exp(logKappaL[il][id]) + Math.exp(kappa2[il][id]);
             logTotKappa[il][id] = Math.log(kappaL);
             //if (id === 36) {
-            //    console.log("il " + il + " linePoints[0][il] " + 1.0e7*linePoints[0][il] + " logKappaL[il][id] " + logE*logKappaL[il][id] + " kappa[1][id] " + logE*kappa[1][id]);
-            // }
+            //console.log("il " + il + " linePoints[il] " + 1.0e7*linePoints[il] + " logKappaL[il][id] " + logE*logKappaL[il][id] + " kappa2[il][id] " + logE*kappa2[il][id]);
+            //}
         }
     }
 
@@ -1080,7 +1095,7 @@ var lineTotalKap = function(linePoints, logKappaL,
  * co-efficients, too!
  */
 var tauLambda = function(numDeps, numPoints, logKappaL,
-        kappa, tauRos) {
+        kappa, tauRos, numLams, lambdaScale, lambdaPoints) {
 
     //No monochromatic optical depth can be less than the Rosseland optical depth,
     // so prevent zero tau_lambda values by setting each tau_lambda(lambda) at the 
@@ -1097,11 +1112,35 @@ var tauLambda = function(numDeps, numPoints, logKappaL,
     logTauL.length = numPoints + 1;
     //Must use Array constructor here:
     for (var row = 0; row < numPoints + 1; row++) {
-        logTauL[row] = new Array(numDeps);
+        logTauL[row] = [];
+        logTauL[row].length = numDeps;
     }
 
     var tau1, tau2, delta, tauL,
             integ, logKapRat, logKappaC, lastLogKapRat;
+
+//Interpolate continuum opacity onto onto line-blanketed opacity lambda array:
+        var kappaC = [];
+        kappaC.length = numLams;
+        var kappaC2 = [];
+        kappaC2.length = numPoints;
+        var kappa2 = [];
+        kappa2.length = numPoints;
+        for (var i = 0; i < numPoints; i++){
+           kappa2[i] = [];
+           kappa2[i].length = numDeps;
+        }
+        for (var id = 0; id < numDeps; id++) {
+           for (var il = 0; il < numLams; il++) {
+    //         console.log("id " + id + " il " + il + " kappa[il][id] " + kappa[il][id]);
+              kappaC[il] = kappa[il][id];
+           }
+           kappaC2 = interpolV(kappaC, lambdaScale, lambdaPoints);
+           for (var il = 0; il < numPoints; il++){
+              kappa2[il][id] = kappaC2[il];
+           }
+        }
+
 
     for (var il = 0; il < numPoints; il++) {
 
@@ -1115,12 +1154,13 @@ var tauLambda = function(numDeps, numPoints, logKappaL,
 
         // Convert kappa_Ros to cm^-1 for consistency with kappaL:
         //logKappaC = kappa[1][0] + rhoSun[1][0];
-        logKappaC = kappa[1][0];
+        //logKappaC = kappa[1][0];
 
         //delta = tauRos[0][1] - tauRos[0][0];
         //logKapRat = logKappaL[il][0] - kappa[1][0];
-        //console.log(" il " + il + " logKappaL[il][0] " + logKappaL[il][0] + " logKappaC " + logKappaC);
-        lastLogKapRat = logKappaL[il][0] - logKappaC;
+        //console.log(" il " + il + " logKappaL[il][0] " + logKappaL[il][0] + " kappa2[il][0] " + kappa2[il][0]);
+        //lastLogKapRat = logKappaL[il][0] - logKappaC;
+        lastLogKapRat = logKappaL[il][0] - kappa2[il][0];
 
         //tau2 = tau1 + ((Math.exp(logKapRat) + 1.0) * delta);
         //opacity being handed in is now total oppcity: line plux continuum:
@@ -1136,11 +1176,12 @@ var tauLambda = function(numDeps, numPoints, logKappaL,
 
             // Convert kappa_Ros to cm^-1 for consistency with kappaL:
             //logKappaC = kappa[1][id] + rhoSun[1][id];
-            logKappaC = kappa[1][id];
+            //logKappaC = kappa[1][id];
 
             delta = tauRos[0][id] - tauRos[0][id - 1];
             //logKapRat = logKappaL[il][id] - kappa[1][id];
-            logKapRat = logKappaL[il][id] - logKappaC;
+            //logKapRat = logKappaL[il][id] - logKappaC;
+            logKapRat = logKappaL[il][id] - kappa2[il][id];
 
             //tau2 = tau1 + ((Math.exp(logKapRat) + 1.0) * delta);
             //opacity being handed in is now total oppcity: line plux continuum:
@@ -1152,13 +1193,11 @@ var tauLambda = function(numDeps, numPoints, logKappaL,
             tau1 = tau2;
             lastLogKapRat = logKapRat;
 
-            //if (id === 36) {
+           // if (id === 12) {
             //    console.log("il " + il + " id " + id + " logTauL[il][id] " + logE * logTauL[il][id]);
-            //}
-
-            // console.log("tauLambda: il, id, logRhoSun, logKappaL, logKappaC, logKapRat, logTauL : " 
-            //        + il + " " + id + " " + logE*rhoSun[1][id] + " " + logE*logKappaL[il][id] + " " + logE*logKappaC + " " + logE*logKapRat + " " + logE*logTauL[il][id] );
-
+             //console.log("tauLambda: il, id, lambdaPoints, logKappaL, logKappa2, logKapRat, logTauL : " 
+              //   + il + " " + id + " " + lambdaPoints[il] + " " + logE*logKappaL[il][id] + " " + logE*kappa2[il][id] + " " + logE*logKapRat + " " + logE*logTauL[il][id] );
+           // }
 
         } //id loop
 
@@ -1254,7 +1293,8 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
     logMasterKapsOut.length = numTot;
     //Must use Array constructor here:
     for (var i = 0; i < numTot; i++) {
-        logMasterKapsOut[i] = new Array(numDeps);
+        logMasterKapsOut[i] = [];
+        logMasterKapsOut[i].length = numDeps;
     }
     //double[][] kappa2 = new double[2][numTot];
     //double[][] lineKap2 = new double[2][numTot];
@@ -1267,7 +1307,7 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
     kappa1D.length = numNow;
     var lineKap1D = [];
     lineKap1D.length = numPoints;
-    //System.out.println("iL   masterLams    logMasterKappa");
+    //console.log("iL   masterLams    logMasterKappa");
     for (var iD = 0; iD < numDeps; iD++) {
 
         //Extract 1D *linear* opacity vectors for interpol()
@@ -1290,8 +1330,10 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
             //test lineKap2 = 1.0e-99;  //test
             totKap = kappa2 + lineKap2;
             logMasterKapsOut[iL][iD] = Math.log(totKap);
-            //if (iD === 36) {
-            //    System.out.format("%02d   %12.8e   %12.8f%n", iL, masterLams[iL], logE * logMasterKappa[iL][iD]);
+           // if (iD === 36) {
+            //    console.log("iL " + iL + " masterLamsOut " + masterLamsOut[iL] + " lineKap2 " + logE*Math.log(lineKap2) 
+             //    + " kappa2 " + logE*Math.log(kappa2) 
+              //   + " lineKap/kappa " + logE*(Math.log(lineKap2)-Math.log(kappa2)));
             //}
         }
     }
@@ -1302,3 +1344,360 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
 
 
 
+ // Returns depth distribution of occupation numbers in lower level of b-b transition,
+
+// Input parameters:
+// lam0 - line centre wavelength in nm
+// logNStage - log_e density of absorbers in relevent ion stage (cm^-3)
+// logFlu - log_10 oscillator strength (unitless)
+// chiL - energy of lower atomic E-level of b-b transition in eV
+// Also needs atsmopheric structure information:
+// numDeps
+// tauRos structure
+// temp structure 
+// rho structure
+
+    var levelPops = function(lam0In, logNStage, chiL, log10UwStage, 
+                    gwL, numDeps, tauRos, temp) {
+
+
+var c = 2.9979249E+10; // light speed in vaccuum in cm/s
+var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var h = 6.62606957E-27; //Planck's constant in ergs sec
+var ee = 4.80320425E-10; //fundamental charge unit in statcoulombs (cgs)
+var mE = 9.10938291E-28; //electron mass (g)
+//Conversion factors
+var amu = 1.66053892E-24; // atomic mass unit in g
+var eV = 1.602176565E-12; // eV in ergs
+
+//Methods:
+//Natural logs more useful than base 10 logs - Eg. Formal soln module: 
+// Fundamental constants
+var logC = Math.log(c);
+var logSigma = Math.log(sigma);
+var logK = Math.log(k);
+var logH = Math.log(h);
+var logEe = Math.log(ee); //Named so won't clash with log_10(e)
+var logMe = Math.log(mE);
+//Conversion factors
+var logAmu = Math.log(amu);
+var logEv = Math.log(eV);
+// ********************************************
+
+        var ln10 = Math.log(10.0);
+        var logE = logTen(Math.E); // for debug output
+        var log2pi = Math.log(2.0 * Math.PI);
+        var log2 = Math.log(2.0);
+
+        //double logNl = logNlIn * ln10;  // Convert to base e
+
+
+// Parition functions passed in are 2-element vectore with remperature-dependent base 10 log Us
+// Convert to natural logs:
+        var thisLogUw, Ttheta;
+        thisLogUw = 0.0; //default initialization
+        var logUw = [];  
+        logUw.length = 2;
+        var logE10 = Math.log(10.0);
+        logUw[0] = logE10*log10UwStage[0];
+        logUw[1] = logE10*log10UwStage[1];
+        var logGwL = Math.log(gwL);
+
+        //System.out.println("chiL before: " + chiL);
+        // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
+        ////For testing with Ca II lines using gS3 internal line list only:
+        //boolean ionized = true;
+        //if (ionized) {
+        //    //System.out.println("ionized, doing chiL - chiI: " + ionized);
+        //    //         chiL = chiL - chiI;
+        //             chiL = chiL - 6.113;
+        //          }
+         //   //
+
+        chiL = chiL * eV;  // Convert lower E-level from eV to ergs
+
+        //Log of line-center wavelength in cm
+        var logLam0 = Math.log(lam0In); // * 1.0e-7);
+
+        // energy of b-b transition
+        var logTransE = logH + logC - logLam0; //ergs
+
+        var boltzFacL = chiL / k; // Pre-factor for exponent of excitation Boltzmann factor
+
+        var boltzFacGround = 0.0 / k; //I know - its zero, but let's do it this way anyway'
+
+
+        // return a 1D numDeps array of logarithmic number densities
+        // level population of lower level of bb transition (could be in either stage I or II!) 
+        var logNums = []; 
+        logNums.length = numDeps;
+
+        var num, logNum, expFac;
+
+        for (var id = 0; id < numDeps; id++) {
+
+
+//Determine temeprature dependenet aprtition functions Uw:
+        Ttheta = 5040.0 / temp[0][id];
+
+        if (Ttheta >= 1.0){
+            thisLogUw = logUw[0];
+        }
+        if (Ttheta <= 0.5){
+            thisLogUw = logUw[1];
+        }
+        if (Ttheta > 0.5 && Ttheta < 1.0){
+            thisLogUw = 0.5 * (Ttheta - 0.5) * logUw[1]
+                + 0.5 * (1.0 - Ttheta) * logUw[0];
+        }
+
+                //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
+// Take stat weight of ground state as partition function:
+                logNums[id] = logNStage[id] - boltzFacL / temp[0][id] + logGwL - thisLogUw; // lower level of b-b transition
+                //System.out.println("LevelPopsServer.stagePops id " + id + " logNStage[id] " + logNStage[id] + " boltzFacL " + boltzFacL + " temp[0][id] " + temp[0][id] + " logGwL " + logGwL + " logGwStage " + logGwStage + " logNums[id] " + logNums[id]);
+
+            // System.out.println("LevelPops: id, logNums[0][id], logNums[1][id], logNums[2][id], logNums[3][id]: " + id + " "
+            //          + Math.exp(logNums[0][id]) + " "
+            //         + Math.exp(logNums[1][id]) + " "
+            //          + Math.exp(logNums[2][id]) + " "
+            //        + Math.exp(logNums[3][id]));
+            //System.out.println("LevelPops: id, logNums[0][id], logNums[1][id], logNums[2][id], logNums[3][id], logNums[4][id]: " + id + " "
+            //        + logE * (logNums[0][id]) + " "
+            //        + logE * (logNums[1][id]) + " "
+            //        + logE * (logNums[2][id]) + " "
+            //        + logE * (logNums[3][id]) + " "
+            //        + logE * (logNums[4][id]) );
+            //System.out.println("LevelPops: id, logIonFracI, logIonFracII: " + id + " " + logE*logIonFracI + " " + logE*logIonFracII
+            //        + "logNum, logNumI, logNums[0][id], logNums[1][id] "
+            //        + logE*logNum + " " + logE*logNumI + " " + logE*logNums[0][id] + " " + logE*logNums[1][id]);
+            //System.out.println("LevelPops: id, logIonFracI: " + id + " " + logE*logIonFracI
+            //        + "logNums[0][id], boltzFacL/temp[0][id], logNums[2][id]: " 
+            //        + logNums[0][id] + " " + boltzFacL/temp[0][id] + " " + logNums[2][id]);
+        } //id loop
+
+        return logNums;
+    }; //end method levelPops    
+    
+
+ // Returns depth distribution of ionization stage populations,
+
+// Input parameters:
+// logNl - log_10 column density of absorbers in lower E-level, l (cm^-2)
+// chiI1 - ground state ionization energy of neutral stage 
+// chiI2 - ground state ionization energy of singly ionized stage 
+//   - we are assuming this is the neutral stage
+// Also needs atsmopheric structure information:
+// numDeps
+// tauRos structure
+// temp structure 
+// rho structure
+
+    var stagePops = function(logNum, Ne, chiI1, chiI2, chiI3, chiI4,
+            log10Uw1, log10Uw2, log10Uw3, log10Uw4, 
+            numDeps, zScale, tauRos, temp) {
+
+   //console.log("In stagePops()");
+
+var c = 2.9979249E+10; // light speed in vaccuum in cm/s
+var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var h = 6.62606957E-27; //Planck's constant in ergs sec
+var ee = 4.80320425E-10; //fundamental charge unit in statcoulombs (cgs)
+var mE = 9.10938291E-28; //electron mass (g)
+//Conversion factors
+var amu = 1.66053892E-24; // atomic mass unit in g
+var eV = 1.602176565E-12; // eV in ergs
+
+//Methods:
+//Natural logs more useful than base 10 logs - Eg. Formal soln module: 
+// Fundamental constants
+var logC = Math.log(c);
+var logSigma = Math.log(sigma);
+var logK = Math.log(k);
+var logH = Math.log(h);
+var logEe = Math.log(ee); //Named so won't clash with log_10(e)
+var logMe = Math.log(mE);
+//Conversion factors
+var logAmu = Math.log(amu);
+var logEv = Math.log(eV);
+// ********************************************
+
+
+        var ln10 = Math.log(10.0);
+        var logE = logTen(Math.E); // for debug output
+        var log2pi = Math.log(2.0 * Math.PI);
+        var log2 = Math.log(2.0);
+
+        //double logNl = logNlIn * ln10;  // Convert to base e
+        var logKScale = Math.log(zScale);
+
+        //Assume ground state statistical weight (or partition fn) of Stage III is 1.0;
+        var logGw5 = 0.0;
+
+        //double logUw1 = Math.log(uw1);
+        //double logUw2 = Math.log(uw2);
+        //double logUw3 = Math.log(uw3);
+        //double logUw4 = Math.log(uw4);
+
+// Parition functions passed in are 2-element vectore with remperature-dependent base 10 log Us
+// Convert to natural logs:
+        var thisLogUw1, thisLogUw2, thisLogUw3, thisLogUw4, Ttheta;
+  //Default initializations:
+        thisLogUw1 = 0.0;
+        thisLogUw2 = 0.0;
+        thisLogUw3 = 0.0;
+        thisLogUw4 = 0.0;
+        var logUw1 = []; 
+        logUw1.length = 2;
+        var logUw2 = []; 
+        logUw2.length = 2;
+        var logUw3 = []; 
+        logUw3.length = 2;
+        var logUw4 = []; 
+        logUw4.length = 2;
+        var logE10 = Math.log(10.0);
+        logUw1[0] = logE10*log10Uw1[0];
+        logUw1[1] = logE10*log10Uw1[1];
+        logUw2[0] = logE10*log10Uw2[0];
+        logUw2[1] = logE10*log10Uw2[1];
+        logUw3[0] = logE10*log10Uw3[0];
+        logUw3[1] = logE10*log10Uw3[1];
+        logUw4[0] = logE10*log10Uw4[0];
+        logUw4[1] = logE10*log10Uw4[1];
+
+        //System.out.println("chiL before: " + chiL);
+        // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
+
+        chiI1 = chiI1 * eV;  // Convert lower E-level from eV to ergs
+        chiI2 = chiI2 * eV;  // Convert lower E-level from eV to ergs
+        chiI3 = chiI3 * eV;  // Convert lower E-level from eV to ergs
+        chiI4 = chiI4 * eV;  // Convert lower E-level from eV to ergs
+
+        var boltzFacI1 = chiI1 / k; // Pre-factor for exponent of ionization Boltzmann factor for ion stage I
+        var boltzFacI2 = chiI2 / k; // Pre-factor for exponent of ionization Boltzmann factor for ion stage II
+        var boltzFacI3 = chiI3 / k; // Pre-factor for exponent of ionization Boltzmann factor for ion stage III
+        var boltzFacI4 = chiI4 / k; // Pre-factor for exponent of ionization Boltzmann factor for ion stage IV
+        //System.out.println("boltzFacI1 " + boltzFacI1 + " boltzFacI2 " + boltzFacI2 + " chiI1 " + chiI1 + " chiI2 " + chiI2);
+
+        var logSahaFac = log2 + (3.0 / 2.0) * (log2pi + logMe + logK - 2.0 * logH);
+
+
+        // return a 2D 5 x numDeps array of logarithmic number densities
+        // Row 0: neutral stage ground state population
+        // Row 1: singly ionized stage ground state population
+        // Row 2: doubly ionized stage ground state population        
+        // Row 3: triply ionized stage ground state population        
+        // Row 4: quadruply ionized stage ground state population        
+        var logNums = [];
+        logNums.length = 5;
+        for (var i = 0; i < 5; i++){
+           logNums[i] = [];
+           logNums[i].length = numDeps;
+        }
+
+        var num, expFac, logSaha, saha, logIonFracI, logIonFracII, logIonFracIII, logIonFracIV, logIonFracV;  
+        var saha21, logSaha21, saha32, logSaha32, saha43, logSaha43, saha54, logSaha54;
+        var logNe;
+
+        for (var id = 0; id < numDeps; id++) {
+
+            //// reduce or enhance number density by over-all Rosseland opcity scale parameter
+            //logNum = logNl + logKScale;
+//
+            //Row 1 of Ne is log_e Ne in cm^-3
+            logNe = Ne[1][id];
+
+//Determine temeprature dependenet aprtition functions Uw:
+    Ttheta = 5040.0 / temp[0][id];
+
+       if (Ttheta >= 1.0){
+           thisLogUw1 = logUw1[0];
+           thisLogUw2 = logUw2[0];
+           thisLogUw3 = logUw3[0];
+           thisLogUw4 = logUw4[0];
+       }
+       if (Ttheta <= 0.5){
+           thisLogUw1 = logUw1[1];
+           thisLogUw2 = logUw2[1];
+           thisLogUw3 = logUw3[1];
+           thisLogUw4 = logUw4[1];
+       }
+       if (Ttheta > 0.5 && Ttheta < 1.0){
+           thisLogUw1 = 0.5 * (Ttheta - 0.5) * logUw1[1]
+               + 0.5 * (1.0 - Ttheta) * logUw1[0];
+           thisLogUw2 = 0.5 * (Ttheta - 0.5) * logUw2[1]
+               + 0.5 * (1.0 - Ttheta) * logUw2[0];
+           thisLogUw3 = 0.5 * (Ttheta - 0.5) * logUw3[1]
+               + 0.5 * (1.0 - Ttheta) * logUw3[0];
+           thisLogUw4 = 0.5 * (Ttheta - 0.5) * logUw4[1]
+               + 0.5 * (1.0 - Ttheta) * logUw4[0];
+       }
+       //System.out.println("thisLogUw1, ... thisLogUw4 " + logE*thisLogUw1 + " " + logE*thisLogUw2 + " " + logE*thisLogUw3 + " " + logE*thisLogUw4);
+       var thisLogUw5 = 0.0; //ionization stage V partition fn, U = 1.0
+
+            //
+            // ********** Accounting for FOUR ionization stages (I, II, III, IV):
+            //
+            logSaha21 = logSahaFac - logNe - (boltzFacI1 / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUw2 - thisLogUw1; // log(RHS) of standard Saha equation
+            saha21 = Math.exp(logSaha21);   //RHS of standard Saha equation
+            logSaha32 = logSahaFac - logNe - (boltzFacI2 / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUw3 - thisLogUw2; // log(RHS) of standard Saha equation
+            saha32 = Math.exp(logSaha32);   //RHS of standard Saha equation
+            logSaha43 = logSahaFac - logNe - (boltzFacI3 / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUw4 - thisLogUw3; // log(RHS) of standard Saha equation
+            saha43 = Math.exp(logSaha43);   //RHS of standard Saha equation
+            logSaha54 = logSahaFac - logNe - (boltzFacI4 / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUw5 - thisLogUw4; // log(RHS) of standard Saha equation
+            saha54 = Math.exp(logSaha54);   //RHS of standard Saha equation
+            //console.log("logSahaFac, logNe, logSaha21, logSaha32, logSaha43, logSaha54 = " + logE*logSahaFac + " " + logE*logNe 
+   // + " " + logE*logSaha21 + " " + logE*logSaha32 + " " + logE*logSaha43 + " " + logE*logSaha54);
+
+//System.out.println("LevelPopsServer: id " + id + " logSaha21 " + logSaha21 + " logSaha32 " + logSaha32 + " logNe " + logNe + " boltzFacI1 " + boltzFacI1 + " boltzFacI2 " + boltzFacI2 + " temp[0][id] " + temp[0][id] + " temp[1][id] " + temp[1][id] + " logGw2 " + logGw2 + " logGw1 " + logGw1 + " logGw3 " + logGw3); 
+
+            var logDenominator = Math.log( 1.0 + saha21 + (saha32 * saha21) + (saha43 * saha32 * saha21) + (saha54 * saha43 * saha32 * saha21) );
+            logIonFracI = -1.0 * logDenominator;     // log ionization fraction in stage I
+            logIonFracII = logSaha21 - logDenominator; // log ionization fraction in stage II
+            logIonFracIII = logSaha32 + logSaha21 - logDenominator; //log ionization fraction in stage III
+            logIonFracIV = logSaha43 + logSaha32 + logSaha21 - logDenominator; //log ionization fraction in stage III
+            logIonFracV = logSaha54 + logSaha43 + logSaha32 + logSaha21 - logDenominator; //log ionization fraction in stage III
+
+            //if (id == 36) {
+            //    System.out.println("logSaha21 " + logE*logSaha21 + " logSaha32 " + logE*logSaha32);
+            //    System.out.println("IonFracII " + Math.exp(logIonFracII) + " IonFracI " + Math.exp(logIonFracI) + " logNe " + logE*logNe);
+            //}
+            //System.out.println("LevelPops: id, ionFracI, ionFracII: " + id + " " + Math.exp(logIonFracI) + " " + Math.exp(logIonFracII) );
+                //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
+
+                logNums[0][id] = logNum[id] + logIonFracI; // neutral stage pop 
+                //System.out.println("LevelPopsServer.stagePops id " + id + " logNum " + logNum + " logIonFracI " + logIonFracI 
+                 //      + " logNums[0][id] " + logNums[0][id]);
+                logNums[1][id] = logNum[id] + logIonFracII; // singly ionized stage pop 
+                //System.out.println("LevelPopsServer.stagePops id " + id + " logNum " + logNum + " logIonFracII " + logIonFracII 
+                 //      + " logNums[1][id] " + logNums[1][id]);
+                logNums[2][id] = logNum[id] + logIonFracIII; // doubly ionized stage pop                 
+                logNums[3][id] = logNum[id] + logIonFracIV; // triply ionized stage pop                 
+                logNums[4][id] = logNum[id] + logIonFracV; // triply ionized stage pop                 
+
+            // console.log("id, logIonFracI, logIonFracII, logIonFracIII, logIonFracIV, logIonFracV " + id + " " +
+             //       logIonFracI + " " + logIonFracII + " " + logIonFracIII + " " + logIonFracIV + " " + logIonFracV);
+           //  console.log("id, logNums[0][id], logNums[1][id], logNums[2][id], logNums[3][id], logNums[4][id]: " + id + " "
+            //          + Math.exp(logNums[0][id]) + " "
+             //        + Math.exp(logNums[1][id]) + " "
+              //        + Math.exp(logNums[2][id]) + " "
+               //     + Math.exp(logNums[3][id])  + " "
+                //    + Math.exp(logNums[4][id]));
+            //System.out.println("LevelPops: id, logNums[0][id], logNums[1][id], logNums[2][id], logNums[3][id], logNums[4][id]: " + id + " "
+            //        + logE * (logNums[0][id]) + " "
+            //        + logE * (logNums[1][id]) + " "
+            //        + logE * (logNums[2][id]) + " "
+            //        + logE * (logNums[3][id]) + " "
+            //        + logE * (logNums[4][id]) );
+            //System.out.println("LevelPops: id, logIonFracI, logIonFracII: " + id + " " + logE*logIonFracI + " " + logE*logIonFracII
+            //        + "logNum, logNumI, logNums[0][id], logNums[1][id] "
+            //        + logE*logNum + " " + logE*logNumI + " " + logE*logNums[0][id] + " " + logE*logNums[1][id]);
+            //System.out.println("LevelPops: id, logIonFracI: " + id + " " + logE*logIonFracI
+            //        + "logNums[0][id], boltzFacL/temp[0][id], logNums[2][id]: " 
+            //        + logNums[0][id] + " " + boltzFacL/temp[0][id] + " " + logNums[2][id]);
+        } //id loop
+
+        return logNums;
+    }; //end method levelPops    
+    

@@ -298,7 +298,7 @@ var phxSunPGas = function(grav, numDeps, tauRos) {
 
     return scalePGas;
 };
-var phxSunNe = function(grav, numDeps, tauRos, scaleTemp, kappaScale) {
+var phxSunNe = function(grav, numDeps, tauRos, scaleTemp, zScale) {
 
     var phxSunTeff = 5777.0;
     var phxSunLogEg = Math.log(10.0) * 4.44; //base e!    
@@ -308,7 +308,7 @@ var phxSunNe = function(grav, numDeps, tauRos, scaleTemp, kappaScale) {
 
     var logE = logTen(Math.E);
     var logEg = Math.log(grav); //base e!
-    var logEkappaScale = Math.log(kappaScale);
+    var logEzScale = Math.log(zScale);
     //Theoretical radiative/convective model from Phoenix V15:
     var phxSunPe64 = [
         1.53086468021591745e-07, 5.66518458165471424e-03, 6.72808433760886656e-03,
@@ -356,7 +356,7 @@ var phxSunNe = function(grav, numDeps, tauRos, scaleTemp, kappaScale) {
     scaleNe[1].length = numDeps;
     for (var i = 0; i < numDeps; i++) {
         logPhxSunPe[i] = interpol(logPhxSunTau64(), logPhxSunPe64, tauRos[1][i]);
-        logScalePe[i] = logEg + logPhxSunPe[i] - phxSunLogEg - logEkappaScale;
+        logScalePe[i] = logEg + logPhxSunPe[i] - phxSunLogEg - logEzScale;
         scaleNe[1][i] = logScalePe[i] - scaleTemp[1][i] - logK;
         scaleNe[0][i] = Math.exp(scaleNe[1][i]);
         //System.out.println("scaleNe[1][i] " + logE * scaleNe[1][i]);
@@ -365,11 +365,11 @@ var phxSunNe = function(grav, numDeps, tauRos, scaleTemp, kappaScale) {
     return scaleNe;
 };
 //Try to recover the opacity as lambda_0 = 1200 nm:
-var phxSunKappa = function(numDeps, tauRos, kappaScale) {
+var phxSunKappa = function(numDeps, tauRos, zScale) {
 
     var phxSunTau64 = phxSunTau64Fn();
 
-    var logEkappaScale = Math.log(kappaScale);
+    var logEzScale = Math.log(zScale);
     //Theoretical radiative/convective model from Phoenix V15:
     var phxSunRho64 = [
         4.13782346832222649e-16, 3.02095569469690462e-10, 3.54633225055968270e-10,
@@ -453,7 +453,7 @@ var phxSunKappa = function(numDeps, tauRos, kappaScale) {
         logDeltaRadius = Math.log(deltaRadius);
         logDeltaRho = Math.log(deltaRho);
         logDeltaTau = Math.log(deltaTau);
-        logPhxSunKappa64[i] = logDeltaTau - logDeltaRho - logDeltaRadius - logEkappaScale + logFudge;
+        logPhxSunKappa64[i] = logDeltaTau - logDeltaRho - logDeltaRadius - logEzScale + logFudge;
         phxSunKappa64[i] = Math.exp(logPhxSunKappa64[i]);
         //System.out.println("logPhxSunKappa64[i] " + logE*logPhxSunKappa64[i]);
 
@@ -476,350 +476,13 @@ var phxSunKappa = function(numDeps, tauRos, kappaScale) {
 
     return phxSunKappa;
 };
-//Castelli & Kurucz (ALMOST!)
-var phxVegaTeff = 9950.0; //actual INCORRECT Teff used in Phoenix model (should have been 9550 -sigh!)
-var phxVegaLogEg = Math.log(10.0) * 3.95; //base e
-var phxVegaLogEkappaScale = Math.log(10.0) * (-0.5); //base!
-
-//Corresponding Tau_500 grid (ie. lambda_0 = 500 nm):   
-var phxVegaTau64Fn = function() {
-    var phxVegaTau64 = [
-        0.00000000000000000e+00, 1.00000000000000004e-10, 1.57297315730079583e-10,
-        2.47424455358884461e-10, 3.89192026739294322e-10, 6.12188611096406130e-10,
-        9.62956252459902995e-10, 1.51470433677439602e-09, 2.38258926299323964e-09,
-        3.74774895556145216e-09, 5.89510850740025871e-09, 9.27284744151620558e-09,
-        1.45859401172503535e-08, 2.29432922784316770e-08, 3.60891828940797229e-08,
-        5.67673159613064525e-08, 8.92934642191482617e-08, 1.40456222339119575e-07,
-        2.20933867515307984e-07, 3.47523043140230439e-07, 5.46644418403068955e-07,
-        8.59856996736334509e-07, 1.35253197498353518e-06, 2.12749649104013246e-06,
-        3.34649487265776861e-06, 5.26394660573542543e-06, 8.28004671228647794e-06,
-        1.30242912196233633e-05, 2.04868604813359955e-05, 3.22252816145080504e-05,
-        5.06895029660801231e-05, 7.97332275225631174e-05, 1.25418226637949074e-04,
-        1.97279503937761955e-04, 3.10315364179716846e-04, 4.88117738152716565e-04,
-        7.67796099716601789e-04, 1.20772265513446235e-03, 1.89971531799055940e-03,
-        2.98820120171229553e-03, 4.70036027890743165e-03, 7.39354054836428853e-03,
-        1.16298408199920333e-02, 1.82934274335286202e-02, 2.87750703079705100e-02,
-        4.52624131938807600e-02, 7.11965609886321127e-02, 1.11990279327247338e-01,
-        1.76157703260379023e-01, 2.77091338680335086e-01, 4.35857237864710867e-01,
-        6.85591735576461137e-01, 1.00000000000000000e+00, 1.07841739692903849e+00,
-        1.69632161773558221e+00, 2.66826837084713286e+00, 4.19711452381726513e+00,
-        6.60194848408189738e+00, 1.03846877513435061e+01, 1.63348350798136970e+01,
-        2.56942571094824572e+01, 4.04163767300010406e+01, 6.35738757116481565e+01,
-        1.00000000000000000e+02
-    ];
-    return phxVegaTau64;
-};
-var logPhxVegaTau64 = function() {
-
-    var phxVegaTau64 = phxVegaTau64Fn();
-
-    var logE = logTen(Math.E);
-    var numPhxDep = phxVegaTau64.length;
-    var logPhxVegaTau64 = [];
-    logPhxVegaTau64.length = numPhxDep;
-    for (var i = 1; i < numPhxDep; i++) {
-        logPhxVegaTau64[i] = Math.log(phxVegaTau64[i]);
-    }
-    logPhxVegaTau64[0] = logPhxVegaTau64[1] - (logPhxVegaTau64[numPhxDep - 1] - logPhxVegaTau64[1]) / numPhxDep;
-    return logPhxVegaTau64;
-};
-var phxVegaTemp = function(teff, numDeps, tauRos) {
-
-    var phxVegaTeff = 9950.0; //actual INCORRECT Teff used in Phoenix model (should have been 9550 -sigh!)
-    var phxVegaLogEg = Math.log(10.0) * 3.95; //base e
-    var phxVegaLogEkappaScale = Math.log(10.0) * (-0.5); //base!    
-
-    var logE = logTen(Math.E);
-    //Theoretical radiative/convective model from Phoenix V15:
-    var phxVegaTemp64 = [
-        5.92666192154309101e+03, 5.92666192154309101e+03, 5.92669171597276090e+03,
-        5.92673998930622656e+03, 5.92681897305491384e+03, 5.92694950529302332e+03,
-        5.92716641457396599e+03, 5.92752552761684638e+03, 5.92810993487369979e+03,
-        5.92903227707427686e+03, 5.93043220345250484e+03, 5.93247494804068447e+03,
-        5.93535705326493917e+03, 5.93931461731802392e+03, 5.94462395405969710e+03,
-        5.95160056847340456e+03, 5.96062955115910609e+03, 5.97234442427941121e+03,
-        5.98799376822690192e+03, 6.00995395792729505e+03, 6.04217083863954394e+03,
-        6.08927266539518769e+03, 6.15482922005066484e+03, 6.24095845993735929e+03,
-        6.34702439197141939e+03, 6.46752230210132257e+03, 6.59445408379155560e+03,
-        6.72080130115506290e+03, 6.84109768032372904e+03, 6.95113817061313694e+03,
-        7.04860283942552360e+03, 7.13460514913545467e+03, 7.21354674932631588e+03,
-        7.28978629931232808e+03, 7.36559554177949485e+03, 7.44189226318755846e+03,
-        7.51906108650742408e+03, 7.59685046298776069e+03, 7.67490002230248228e+03,
-        7.75361847195948849e+03, 7.83483766810037559e+03, 7.92234631761687160e+03,
-        8.02067697937434696e+03, 8.13521360575207927e+03, 8.27574328647004768e+03,
-        8.45212850359107870e+03, 8.67381075095960477e+03, 8.95207036703875929e+03,
-        9.30689214747616825e+03, 9.74795486690789039e+03, 1.02809293652303932e+04,
-        1.09262232212095878e+04, 1.12593239932788256e+04, 1.15410572182275682e+04,
-        1.20102451746046791e+04, 1.31012465922441861e+04, 1.39755996506773790e+04,
-        1.49601225189046345e+04, 1.60017842217904235e+04, 1.71032050644639567e+04,
-        1.83299248272271325e+04, 1.96750591610957927e+04, 2.11303208351190988e+04,
-        2.28754881624451700e+04
-    ];
-    // interpolate onto gS3 tauRos grid and re-scale with Teff:
-    var phxVegaTemp = [];
-    phxVegaTemp.length = numDeps;
-    var scaleTemp = [];
-    scaleTemp.length = 2;
-    scaleTemp[0] = [];
-    scaleTemp[1] = [];
-    scaleTemp[0].length = numDeps;
-    scaleTemp[1].length = numDeps;
-    for (var i = 0; i < numDeps; i++) {
-        phxVegaTemp[i] = interpol(logPhxVegaTau64(), phxVegaTemp64, tauRos[1][i]);
-        scaleTemp[0][i] = teff * phxVegaTemp[i] / phxVegaTeff;
-        scaleTemp[1][i] = Math.log(scaleTemp[0][i]);
-        //System.out.println("tauRos[1][i] " + logE * tauRos[1][i] + " scaleTemp[1][i] " + logE * scaleTemp[1][i]);
-    }
-
-    return scaleTemp;
-};
-var phxVegaPGas = function(grav, numDeps, tauRos) {
-
-    var phxVegaTeff = 9950.0; //actual INCORRECT Teff used in Phoenix model (should have been 9550 -sigh!)
-    var phxVegaLogEg = Math.log(10.0) * 3.95; //base e
-    var phxVegaLogEkappaScale = Math.log(10.0) * (-0.5); //base!    
-
-    var logE = logTen(Math.E);
-    var logEg = Math.log(grav); //base e!
-
-    //Theoretical radiative/convective model from Phoenix V15:
-    var phxVegaPGas64 = [
-        1.00000000000000005e-04, 1.03180061021383636e-04, 1.05002968345422655e-04,
-        1.07871552081389134e-04, 1.12386725052260572e-04, 1.19496313343916537e-04,
-        1.30697666356185981e-04, 1.48361992972487070e-04, 1.76258386690715085e-04,
-        2.20411975250140330e-04, 2.90535998351765538e-04, 4.02482306184926818e-04,
-        5.82567140052077013e-04, 8.75483847795477193e-04, 1.35932010786618583e-03,
-        2.17504753883526704e-03, 3.58604002686978935e-03, 6.09998771718679896e-03,
-        1.07169005213047595e-02, 1.94122344665836263e-02, 3.59841794245942953e-02,
-        6.72855684478238375e-02, 1.24554375514099314e-01, 2.24101975995654207e-01,
-        3.86646959394992218e-01, 6.36529574106352247e-01, 1.00343700649801648e+00,
-        1.52697716962899532e+00, 2.26349996201742520e+00, 3.29629279099446704e+00,
-        4.75030546972967382e+00, 6.80809320973782395e+00, 9.71920175580820889e+00,
-        1.38039294970946660e+01, 1.94633310169022842e+01, 2.72009206319020187e+01,
-        3.76537976616197625e+01, 5.16414528869924041e+01, 7.02366160217307538e+01,
-        9.48405015720874474e+01, 1.27226394963505882e+02, 1.69478952948159872e+02,
-        2.23823762506721806e+02, 2.92345015096225097e+02, 3.76222048844978588e+02,
-        4.74870843243441925e+02, 5.85652914503416241e+02, 7.04296132837323171e+02,
-        8.25563282958302466e+02, 9.46928267959175855e+02, 1.07335181478674599e+03,
-        1.22086252441237139e+03, 1.38209820348047128e+03, 1.42038354608713939e+03,
-        1.70862293207878497e+03, 2.14866236364070392e+03, 2.81854335114876267e+03,
-        3.79724473416333012e+03, 5.19324230258075386e+03, 7.13948492727422672e+03,
-        9.83704209840320618e+03, 1.35943082419561761e+04, 1.88366045459964553e+04,
-        2.62524123256841995e+04
-    ];
-    var numPhxDeps = phxVegaPGas64.length; //yeah, I know, 64, but that could change!
-    var logPhxVegaPGas64 = [];
-    logPhxVegaPGas64.length = numPhxDeps;
-    for (var i = 0; i < phxVegaPGas64.length; i++) {
-        logPhxVegaPGas64[i] = Math.log(phxVegaPGas64[i]);
-    }
-
-// interpolate onto gS3 tauRos grid and re-scale with Teff:
-    var phxVegaPGas = [];
-    phxVegaPGas.length = numDeps;
-    var logPhxVegaPGas = [];
-    logPhxVegaPGas.length = numDeps;
-    var scalePGas = [];
-    scalePGas.length = 2;
-    scalePGas[0] = [];
-    scalePGas[1] = [];
-    scalePGas[0].length = numDeps;
-    scalePGas[1].length = numDeps;
-    for (var i = 0; i < numDeps; i++) {
-        logPhxVegaPGas[i] = interpol(logPhxVegaTau64(), logPhxVegaPGas64, tauRos[1][i]);
-        scalePGas[1][i] = logEg + logPhxVegaPGas[i] - phxVegaLogEg;
-        scalePGas[0][i] = Math.exp(scalePGas[1][i]);
-        //System.out.println("scalePGas[1][i] " + logE * scalePGas[1][i]);
-    }
-
-    return scalePGas;
-};
-var phxVegaNe = function(grav, numDeps, tauRos, scaleTemp, kappaScale) {
-
-    var phxVegaTeff = 9950.0; //actual INCORRECT Teff used in Phoenix model (should have been 9550 -sigh!)
-    var phxVegaLogEg = Math.log(10.0) * 3.95; //base e
-    var phxVegaLogEkappaScale = Math.log(10.0) * (-0.5); //base!    
-
-    var k = 1.3806488E-16; // Boltzmann constant in ergs/K
-    var logK = Math.log(k);
-
-    var logE = logTen(Math.E);
-    var logEg = Math.log(grav); //base e!
-    var logEkappaScale = Math.log(kappaScale);
-    //Theoretical radiative/convective model from Phoenix V15:
-    var phxVegaPe64 = [
-        4.72002072485995232e-05, 4.86860599791532979e-05, 4.95374579675847434e-05,
-        5.08766509824373813e-05, 5.29830852602723504e-05, 5.62962571928286436e-05,
-        6.15073327430559335e-05, 6.97031622460308396e-05, 8.25926107249302883e-05,
-        1.02862199286890015e-04, 1.34734927270846358e-04, 1.84848712459978671e-04,
-        2.63639186140655435e-04, 3.87523342400134094e-04, 5.82367141737887679e-04,
-        8.89037494764373859e-04, 1.37240124998838403e-03, 2.13631397713436293e-03,
-        3.34991041307789979e-03, 5.29691302460575959e-03, 8.47193682504659984e-03,
-        1.37503269072523880e-02, 2.26494500083962054e-02, 3.77313887778134710e-02,
-        6.30573524863389245e-02, 1.04294141537741802e-01, 1.68555447892395988e-01,
-        2.64385476659441288e-01, 4.01678991133522623e-01, 5.91536883461206586e-01,
-        8.46971246490695551e-01, 1.18620359311333967e+00, 1.63751721597473354e+00,
-        2.24004471648700143e+00, 3.04197315912985289e+00, 4.10229233843691699e+00,
-        5.49478489526292702e+00, 7.30946159460564449e+00, 9.65851834249412100e+00,
-        1.26929321198114806e+01, 1.66335694784246328e+01, 2.18272692034725146e+01,
-        2.87966183424124722e+01, 3.83435065340652415e+01, 5.18840423796927794e+01,
-        7.16147842418639584e+01, 1.00791921801285326e+02, 1.44113729824036938e+02,
-        2.08146410010596099e+02, 2.96078444680182940e+02, 4.02722746098501375e+02,
-        5.18794407567871303e+02, 6.06231844915437705e+02, 6.38241492986035837e+02,
-        7.83101211887763725e+02, 1.01011386935192570e+03, 1.33500379236050821e+03,
-        1.81044511775468641e+03, 2.49791613029077826e+03, 3.47361550203666138e+03,
-        4.84059855334337863e+03, 6.73990325606538136e+03, 9.37502940878883783e+03,
-        1.30918950254820193e+04
-    ];
-    var numPhxDeps = phxVegaPe64.length; //yeah, I know, 64, but that could change!
-    var logPhxVegaPe64 = [];
-    logPhxVegaPe64.length = numPhxDeps;
-    for (var i = 0; i < phxVegaPe64.length; i++) {
-        logPhxVegaPe64[i] = Math.log(phxVegaPe64[i]);
-    }
-
-// interpolate onto gS3 tauRos grid and re-scale with Teff:
-    var phxVegaPe = [];
-    phxVegaPe = numDeps;
-    var logPhxVegaPe = [];
-    logPhxVegaPe.length = numDeps;
-    var logScalePe = [];
-    logScalePe.length = numDeps;
-    var scaleNe = [];
-    scaleNe.length = 2;
-    scaleNe[0] = [];
-    scaleNe[1] = [];
-    scaleNe[0].length = numDeps;
-    scaleNe[1].length = numDeps;
-    for (var i = 0; i < numDeps; i++) {
-        logPhxVegaPe[i] = interpol(logPhxVegaTau64(), logPhxVegaPe64, tauRos[1][i]);
-        logScalePe[i] = logEg + phxVegaLogEkappaScale + logPhxVegaPe[i] - phxVegaLogEg - logEkappaScale;
-        scaleNe[1][i] = logScalePe[i] - scaleTemp[1][i] - logK;
-        scaleNe[0][i] = Math.exp(scaleNe[1][i]);
-        //System.out.println("scaleNe[1][i] " + logE * scaleNe[1][i]);
-    }
-
-    return scaleNe;
-};
-//Try to recover the opacity as lambda_0 = 1200 nm:
-var phxVegaKappa = function(numDeps, tauRos, kappaScale) {
-
-    var phxVegaTau64 = phxVegaTau64Fn();
-
-    var logEkappaScale = Math.log(kappaScale);
-    //Theoretical radiative/convective model from Phoenix V15:
-    var phxVegaRho64 = [
-        1.37223023525555033e-16, 1.41626154144729084e-16, 1.44150314678269172e-16,
-        1.48123868450381874e-16, 1.54381872696320795e-16, 1.64244615143250253e-16,
-        1.79805591659528720e-16, 2.04399072972825006e-16, 2.43371389381634857e-16,
-        3.05381535266035120e-16, 4.04658625218062506e-16, 5.65060079088544924e-16,
-        8.27656644735441331e-16, 1.26547228507548020e-15, 2.01314207075828015e-15,
-        3.32823827759883533e-15, 5.72029150223031827e-15, 1.02224805472660837e-14,
-        1.89501093450353969e-14, 3.61761582879661581e-14, 7.01351717400695016e-14,
-        1.35418361851359771e-13, 2.55025155983697073e-13, 4.59971412683176497e-13,
-        7.85290223156380020e-13, 1.26757212771981250e-12, 1.95008670419967345e-12,
-        2.89368402824842727e-12, 4.19202236851314695e-12, 5.99359837525162254e-12,
-        8.53008593628702862e-12, 1.21376785175710081e-11, 1.72572973426857710e-11,
-        2.44343113771720162e-11, 3.43400746676555601e-11, 4.78069147968408779e-11,
-        6.58740603564234330e-11, 8.98765392638669218e-11, 1.21560637642731269e-10,
-        1.63165474617735588e-10, 2.17382402795025265e-10, 2.87014403511926534e-10,
-        3.74453897536819904e-10, 4.80819443523762100e-10, 6.03543249187692372e-10,
-        7.34746346150234889e-10, 8.60873424351652219e-10, 9.63722272464669253e-10,
-        1.02170752697610886e-09, 1.02830142548489420e-09, 1.00463534341353045e-09,
-        9.89790772818917655e-10, 1.06177003365404541e-09, 1.04384077274744122e-09,
-        1.18730551703367904e-09, 1.33892557911181482e-09, 1.63509907922796515e-09,
-        2.04571150388433141e-09, 2.59448905764241340e-09, 3.30151864821760360e-09,
-        4.19852739489000737e-09, 5.36614157540176651e-09, 6.89691211725147016e-09,
-        8.86141299252599472e-09
-    ];
-    var phxVegaRadius64 = [
-        1.67000000000000000e+11, 1.66997434824341736e+11, 1.66996000021148224e+11,
-        1.66993792340530334e+11, 1.66990434901249573e+11, 1.66985415593276306e+11,
-        1.66978091504010590e+11, 1.66967747703703705e+11, 1.66953729005060303e+11,
-        1.66935618940256409e+11, 1.66913380644500641e+11, 1.66887368804995331e+11,
-        1.66858204504870911e+11, 1.66826596519038635e+11, 1.66793201315707397e+11,
-        1.66758557698015289e+11, 1.66723082439006622e+11, 1.66687100184744232e+11,
-        1.66650891192972473e+11, 1.66614752631880219e+11, 1.66579066154884308e+11,
-        1.66544321171909760e+11, 1.66511040302863800e+11, 1.66479661006683319e+11,
-        1.66450420200505585e+11, 1.66423258626350128e+11, 1.66397856575875244e+11,
-        1.66373783121292786e+11, 1.66350617201162903e+11, 1.66327999415688385e+11,
-        1.66305658414097168e+11, 1.66283448699324646e+11, 1.66261378401786652e+11,
-        1.66239566586469635e+11, 1.66218148050891907e+11, 1.66197208457392120e+11,
-        1.66176772400093903e+11, 1.66156811150862274e+11, 1.66137260364144562e+11,
-        1.66118049813053711e+11, 1.66099136305695648e+11, 1.66080531728826263e+11,
-        1.66062302365836456e+11, 1.66044553510948181e+11, 1.66027449353869537e+11,
-        1.66011174236419525e+11, 1.65995846949225647e+11, 1.65981457156168640e+11,
-        1.65967813697925201e+11, 1.65954317129624390e+11, 1.65939737291530853e+11,
-        1.65922026262855011e+11, 1.65903466968833923e+11, 1.65899161977920959e+11,
-        1.65868787846637787e+11, 1.65828275959904175e+11, 1.65776089155915100e+11,
-        1.65714855838088715e+11, 1.65645832748185791e+11, 1.65570171656197845e+11,
-        1.65487724367720032e+11, 1.65397726452453491e+11, 1.65299665551203156e+11,
-        1.65191869291644409e+11
-    ];
-    var numPhxDeps = phxVegaRadius64.length;
-    var phxVegaKappa64 = [];
-    phxVegaKappa64.length = numPhxDeps;
-    var logPhxVegaKappa64 = [];
-    logPhxVegaKappa64.length = numPhxDeps;
-    //double[] logPhxSunRho64 = new double[numPhxDeps];
-    //double[] logPhxSunRadius64 = new double[numPhxDeps];
-
-//Fix to get right depth scale and right line strengths:
-// Yeah - everywhere ya go - opacity fudge
-    var fudge = 0.02;
-    var logFudge = Math.log(fudge);
-    var deltaRho, deltaRadius, deltaTau, logDeltaRho, logDeltaRadius, logDeltaTau;
-    var logE = logTen(Math.E);
-    for (var i = 1; i < numPhxDeps; i++) {
-
-//Renormalize radii before taking difference
-//Caution: Radius *decreases* with increasing i (inward) and we'll be taking the log:
-        deltaRadius = (1.0e-12 * phxVegaRadius64[i - 1]) - (1.0e-12 * phxVegaRadius64[i]);
-        deltaRadius = Math.abs(deltaRadius);
-        //restore to cm:
-        deltaRadius = 1.0e12 * deltaRadius;
-        //Renormalize before taking rho difference
-        deltaRho = (1.0e12 * phxVegaRho64[i]) - (1.0e12 * phxVegaRho64[i - 1]);
-        deltaRho = Math.abs(deltaRho);
-        //Restore g/cm^3:
-        deltaRho = 1.0e-12 * deltaRho;
-        //Renormalize before taking rho difference
-        deltaTau = (1.0e2 * phxVegaTau64[i]) - (1.0e2 * phxVegaTau64[i - 1]);
-        deltaTau = Math.abs(deltaTau);
-        deltaTau = 1.0e-2 * deltaTau;
-        logDeltaRadius = Math.log(deltaRadius);
-        logDeltaRho = Math.log(deltaRho);
-        logDeltaTau = Math.log(deltaTau);
-        logPhxVegaKappa64[i] = logDeltaTau - logDeltaRho - logDeltaRadius - logEkappaScale + logFudge;
-        phxVegaKappa64[i] = Math.exp(logPhxVegaKappa64[i]);
-        //System.out.println("logPhxSunKappa64[i] " + logE*logPhxSunKappa64[i]);
-
-    }
-
-    logPhxVegaKappa64[0] = logPhxVegaKappa64[1];
-    phxVegaKappa64[0] = phxVegaKappa64[1];
-    // interpolate onto gS3 tauRos grid and re-scale with Teff:
-    var phxVegaKappa = [];
-    phxVegaKappa.length = 2;
-    phxVegaKappa[0] = [];
-    phxVegaKappa[1] = [];
-    phxVegaKappa[0].length = numDeps;
-    phxVegaKappa[1].length = numDeps;
-    for (var i = 0; i < numDeps; i++) {
-        phxVegaKappa[1][i] = interpol(logPhxVegaTau64(), logPhxVegaKappa64, tauRos[1][i]);
-        phxVegaKappa[0][i] = Math.exp(phxVegaKappa[1][i]);
-        //System.out.println("phxVegaKappa[1][i] " + logE * phxVegaKappa[1][i]);
-    }
-
-    return phxVegaKappa;
-};
 /**
  * Compute Rosseland mean extinction coefficient (cm^2/g) structure by scaling
  * from Sun
  *
  */
-//var kappas = function(numDeps, kappaScale, tauRos, temp, tempSun, logg, loggSun, teff) {
-var kappas = function(mode, numDeps, rho, rhoRef, kappaRef, kappaScale, logg, loggSun, teff, teffSun,
+//var kappas = function(numDeps, zScale, tauRos, temp, tempSun, logg, loggSun, teff) {
+var kappas = function(mode, numDeps, rho, rhoRef, kappaRef, zScale, logg, loggSun, teff, teffSun,
         radius, massX, massZ, tauRos, temp, tempRef, logNumsH3, logNumsH2) {
 
     var logE = logTen(Math.E); // for debug output
@@ -882,7 +545,7 @@ var kappas = function(mode, numDeps, rho, rhoRef, kappaRef, kappaScale, logg, lo
     var numerator;
     var denominator;
     var logHelp, help, reScale, logNH3, logNH2;
-    //reScale = 1.0 * kappaScale; 
+    //reScale = 1.0 * zScale; 
     reScale = 1.0;
     //console.log("kappas: reScale: " + reScale); 
     for (var i = 0; i < numDeps; i++) {
@@ -1002,9 +665,8 @@ var kappaFac = function(numDeps, hotT, logRho, logTemp, massX, massZ, logNH3, lo
  * Solve hydrostatic eq for P scale on the tau scale - need to pick a depth
  * dependent kappa value! - dP/dTau = g/kappa --> dP/dlogTau = Tau*g/kappa 
  * 
- * press is a 4 x numDeps array: rows 0 & 1 are linear and log *gas* pressure,
- * respectively rows 2 & 3 are linear and log *radiation* pressure Split
- * pressure into gas and radiation contributions as we calculate it:
+ * press is a 2 x numDeps array: rows 0 & 1 are linear and log *gas* pressure,
+ * Split * pressure into gas and radiation contributions as we calculate it:
  */
 var hydrostatic = function(numDeps, grav, tauRos, kappa, temp) {
 
@@ -1116,8 +778,7 @@ var hydrostatic = function(numDeps, grav, tauRos, kappa, temp) {
     }
 
     return press;
-}
-;
+};
 /**
  * Solves the equation of state (EOS) for the mass density (rho) given total
  * pressure from HSE solution, for a mixture of ideal gas particles and photons
@@ -1125,7 +786,7 @@ var hydrostatic = function(numDeps, grav, tauRos, kappa, temp) {
  * Need to assume a mean molecular weight structure, mu(Tau)
  *
  */
-var massDensity = function(numDeps, temp, press, mmw, kappaScale) {
+var massDensity = function(numDeps, temp, press, mmw, zScale) {
 
     //press is a 4 x numDeps array:
     // rows 0 & 1 are linear and log *gas* pressure, respectively
@@ -1161,7 +822,7 @@ var massDensity = function(numDeps, temp, press, mmw, kappaScale) {
 
     return rho;
 };
-var mmwFn = function(numDeps, temp, kappaScale) {
+var mmwFn = function(numDeps, temp, zScale) {
 
     //Row 0 is linear mean molecular weight, "mu", in amu
     //Row 1 is log_e electron density in cm^-3
@@ -1198,7 +859,7 @@ var mmwFn = function(numDeps, temp, kappaScale) {
 
     return mmw;
 };
-var NeFn = function(numDeps, temp, NeDfg2, kappaScale) {
+var NeFn = function(numDeps, temp, NeDfg2, zScale) {
 
     //Row 0 is linear mean molecular weight, "mu", in amu
     //Row 1 is log_e electron density in cm^-3
@@ -1219,12 +880,12 @@ var NeFn = function(numDeps, temp, NeDfg2, kappaScale) {
     for (var id = 0; id < numDeps; id++) {
 
         if (temp[0][id] < 7300.0) {
-            Ne[0][id] = NeDfg2[0][id] * kappaScale;
+            Ne[0][id] = NeDfg2[0][id] * zScale;
             Ne[1][id] = Math.log(Ne[0][id]);
         } else {
             // Expression for cgs logNe for *hot* *MS* stars from *MKS* logPe expression from D. Turner (private communication):
             // *** We need to do better than this...
-            Ne[1][id] = -4.5 - logK + 0.5 * temp[1][id] - 6.0 + Math.log(kappaScale); // last term converts m^-3 to cm^-3  
+            Ne[1][id] = -4.5 - logK + 0.5 * temp[1][id] - 6.0 + Math.log(zScale); // last term converts m^-3 to cm^-3  
             Ne[0][id] = Math.exp(Ne[1][id]);
             //System.out.format("%12.8f   %12.8f   %12.8f%n", temp[0][id], logE * mmwNe[1][id], mmwNe[0][id]);
 
@@ -1251,8 +912,8 @@ var depthScale = function(numDeps, tauRos, kappa, rho) {
     // log(z) cannot really correspond to zero 
     //double logZ1 = -10.0;  // log(cm)
     //depths[0] = Math.pow(10.0, logZ1);  //cm
-    var iStart = 10;
-    var z1 = 0; //cm
+    var iStart = 0;
+    var z1 = 1.0e-19; //cm
 
     for (var i = 0; i <= iStart; i++) {
         depths[i] = z1;
@@ -1946,7 +1607,7 @@ var grayLevEps = function(maxNumBins, minLambda, maxLambda, teff, isCool) {
 
     return grayLevelsEpsilons;
 };
-var convec = function(numDeps, tauRos, temp, press, rho, kappa, kappaSun, kappaScale, teff, logg) {
+var convec = function(numDeps, tauRos, temp, press, rho, kappa, kappaSun, zScale, teff, logg) {
 
     var logE = logTen(Math.E); // for debug output
     var ln10 = Math.log(10.0); //needed to convert logg from base 10 to base e
@@ -1990,7 +1651,7 @@ var convec = function(numDeps, tauRos, temp, press, rho, kappa, kappaSun, kappaS
 
     //System.out.println("Hp/HpSun " + Hp/HpSun);
 
-    var mmw = mmwFn(numDeps, temp, kappaScale);
+    var mmw = mmwFn(numDeps, temp, zScale);
     //Search outward for top of convection zone
     var isStable = false;
     var iBound = numDeps - 1; //initialize index of depth where convection begins to bottom of atmosphere
@@ -2153,10 +1814,1627 @@ var convec = function(numDeps, tauRos, temp, press, rho, kappa, kappaSun, kappaS
 };
 
 
+    var phx5kRefTeff = 5000.0;
+    var phx5kRefLogEg = Math.log(10.0) * 4.5;  //base e!
+//He abundance from  Grevesse Asplund et al 2010
+    var phx5kRefLogAHe = Math.log(10.0) * (10.93 - 12.0);  //base e "A_12" logarithmic abundance scale!
+
+    //Corresponding Tau_12000 grid (ie. lambda_0 = 1200 nm):    
+    var phx5kRefTau64 = [
+      0.00000000000000000e+00, 9.99999999999999955e-07, 1.34596032415536424e-06,
+      1.81160919420041334e-06, 2.43835409826882661e-06, 3.28192787251147086e-06,
+      4.41734470314007309e-06, 5.94557070854439435e-06, 8.00250227816105150e-06,
+      1.07710505603676914e-05, 1.44974067037263169e-05, 1.95129342263596216e-05,
+      2.62636352765333530e-05, 3.53498110503010939e-05, 4.75794431400941383e-05,
+      6.40400427119728238e-05, 8.61953566475303262e-05, 1.16015530173997159e-04,
+      1.56152300600049659e-04, 2.10174801133248699e-04, 2.82886943462596935e-04,
+      3.80754602122237182e-04, 5.12480587696093125e-04, 6.89778537938765847e-04,
+      9.28414544519474451e-04, 1.24960914129198684e-03, 1.68192432488086874e-03,
+      2.26380340952144670e-03, 3.04698957090350801e-03, 4.10112707055130046e-03,
+      5.51995432128156785e-03, 7.42963950759494875e-03, 1.00000000000000002e-02,
+      1.34596032415536422e-02, 1.81160919420041318e-02, 2.43835409826882663e-02,
+      3.28192787251147047e-02, 4.41734470314006436e-02, 5.94557070854439401e-02,
+      8.00250227816105275e-02, 1.07710505603676912e-01, 1.44974067037263149e-01,
+      1.95129342263596212e-01, 2.62636352765332981e-01, 3.53498110503010221e-01,
+      4.75794431400941464e-01, 6.40400427119728333e-01, 8.61953566475303190e-01,
+      1.16015530173997150e+00, 1.56152300600049654e+00, 2.10174801133248712e+00,
+      2.82886943462596641e+00, 3.80754602122236818e+00, 5.12480587696092638e+00,
+      6.89778537938765801e+00, 9.28414544519474383e+00, 1.24960914129198670e+01,
+      1.68192432488086894e+01, 2.26380340952144650e+01, 3.04698957090350540e+01,
+      4.10112707055129562e+01, 5.51995432128157333e+01, 7.42963950759495049e+01,
+      1.00000000000000000e+02
+    ];
+
+    var logPhxRefTau64 = function() {
+
+        var logE = logTen(Math.E);
+
+        var numPhxDep = phx5kRefTau64.length;
+        var logPhxRefTau64 = []; 
+        logPhxRefTau64.length = numPhxDep;
+        for (var i = 1; i < numPhxDep; i++) {
+            logPhxRefTau64[i] = Math.log(phx5kRefTau64[i]);
+        }
+        logPhxRefTau64[0] = logPhxRefTau64[1] - (logPhxRefTau64[numPhxDep - 1] - logPhxRefTau64[1]) / numPhxDep;
+        return logPhxRefTau64;
+    };
+
+    var phx5kRefTemp = function(teff, numDeps, tauRos) {
+
+        var logE = Math.log10(Math.E);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx5kRefTemp64 = [
+          3.15213572679982190e+03, 3.15213572679982190e+03, 3.17988621810632685e+03,
+          3.21012887128011243e+03, 3.24126626267038500e+03, 3.27276078893546673e+03,
+          3.30435725697820226e+03, 3.33589185632140106e+03, 3.36724151725549154e+03,
+          3.39831714195318273e+03, 3.42906935013664861e+03, 3.45949368388945595e+03,
+          3.48962758169505923e+03, 3.51953742647688796e+03, 3.54929791042697934e+03,
+          3.57896962155466872e+03, 3.60858205550851335e+03, 3.63812646699481775e+03,
+          3.66755983657917068e+03, 3.69681905522719444e+03, 3.72583932497757132e+03,
+          3.75457006928661031e+03, 3.78298372918123914e+03, 3.81109104721021231e+03,
+          3.83893072914395862e+03, 3.86656355962043835e+03, 3.89408059675027425e+03,
+          3.92160316230741546e+03, 3.94927225929978204e+03, 3.97726284805320847e+03,
+          4.00584847611869327e+03, 4.03531360317989993e+03, 4.06591896438200047e+03,
+          4.09802860937899732e+03, 4.13221207874272022e+03, 4.16915227717330799e+03,
+          4.20937593060261861e+03, 4.25369220113429128e+03, 4.30330739566306784e+03,
+          4.36035870964639616e+03, 4.42601579216115442e+03, 4.50281614584142153e+03,
+          4.59386420090837146e+03, 4.70448179136501403e+03, 4.83727710376560208e+03,
+          4.99516189027659129e+03, 5.19102132587796405e+03, 5.40505223548941285e+03,
+          5.67247302987449984e+03, 5.95695843497286933e+03, 6.27957483223234703e+03,
+          6.71365960956718118e+03, 7.06828382342861460e+03, 7.34157936910693206e+03,
+          7.56939938735570740e+03, 7.77138428264261165e+03, 7.95656000812699585e+03,
+          8.13006721530056711e+03, 8.29523535580475982e+03, 8.45429779465689171e+03,
+          8.60879260449185131e+03, 8.75981713693203528e+03, 8.90838141718757288e+03,
+          9.05361290415211806e+03
+        ];
+
+        // interpolate onto gS3 tauRos grid and re-scale with Teff:
+        var phx5kRefTemp = []; 
+        phx5kRefTemp.length = numDeps;
+        var scaleTemp = [];
+        scaleTemp.length = 2;
+        scaleTemp[0] = [];
+        scaleTemp[1] = [];
+        scaleTemp[0].length = numDeps;
+        scaleTemp[1].length = numDeps;
+        for (var i = 0; i < numDeps; i++) {
+            phx5kRefTemp[i] = interpol(logPhxRefTau64(), phx5kRefTemp64, tauRos[1][i]);
+            scaleTemp[0][i] = teff * phx5kRefTemp[i] / phx5kRefTeff;
+            scaleTemp[1][i] = Math.log(scaleTemp[0][i]);
+            //System.out.println("tauRos[1][i] " + logE * tauRos[1][i] + " scaleTemp[1][i] " + logE * scaleTemp[1][i]);
+        }
+
+        return scaleTemp;
+
+    };
+
+    var phx5kRefPGas = function(grav, zScale, logAHe, numDeps, tauRos) {
+
+        //System.out.println("ScaleT5000.phx5kRefPGas called");
+
+        var logE = Math.log10(Math.E);
+        var logEg = Math.log(grav); //base e!
+        var AHe = Math.exp(logAHe);
+        var refAHe = Math.exp(phx5kRefLogAHe);
+        var logZScale = Math.log(zScale);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx5kRefPGas64 = [
+         1.00000000000000005e-04, 1.03770217591881035e+02, 1.24242770084417913e+02,
+         1.47686628640383276e+02, 1.74578854906314291e+02, 2.05506972274478784e+02,
+         2.41168221287605292e+02, 2.82385081738383917e+02, 3.30127686150304896e+02,
+         3.85540773715381306e+02, 4.49974446823229414e+02, 5.25018679681323647e+02,
+         6.12542265074691159e+02, 7.14737800095933608e+02, 8.34175243666085407e+02,
+         9.73867213356324669e+02, 1.13734973870022168e+03, 1.32878148706864113e+03,
+         1.55306409432270971e+03, 1.81598529465124716e+03, 2.12438618583220841e+03,
+         2.48635477283421324e+03, 2.91145034581766595e+03, 3.41095942605562823e+03,
+         3.99819276314161607e+03, 4.68883438023894087e+03, 5.50134310662684311e+03,
+         6.45741052408807354e+03, 7.58249196327514983e+03, 8.90641248566333525e+03,
+         1.04639741154490002e+04, 1.22956502717452295e+04, 1.44484787849992390e+04,
+         1.69769301182948657e+04, 1.99435621814443475e+04, 2.34195796692420117e+04,
+         2.74860930366683497e+04, 3.22351125605895031e+04, 3.77699103578024442e+04,
+         4.42033085085744533e+04, 5.16616495136288213e+04, 6.02879692077906366e+04,
+         7.02475218656768702e+04, 8.17365047611011832e+04, 9.50146489805318997e+04,
+         1.10441316485543124e+05, 1.28451318144638804e+05, 1.49415613553191157e+05,
+         1.72877372164747008e+05, 1.96852852539717947e+05, 2.18808320050485723e+05,
+         2.35794833242603316e+05, 2.48716041541587241e+05, 2.59902150512206339e+05,
+         2.70560370352023339e+05, 2.81251297069544089e+05, 2.92310802132537181e+05,
+         3.03988239352240635e+05, 3.16495216131040419e+05, 3.30029076402488339e+05,
+         3.44786943994771456e+05, 3.60975297786138486e+05, 3.78815092131546407e+05,
+         3.98560549755298765e+05
+        ];
+
+        var numPhxDeps = phx5kRefPGas64.length;  //yeah, I know, 64, but that could change!
+        var logPhxRefPGas64 = []; 
+        logPhxRefPGas64.length = numPhxDeps;
+        for (var i = 0; i < numPhxDeps; i++) {
+            logPhxRefPGas64[i] = Math.log(phx5kRefPGas64[i]);
+        }
+
+        // interpolate onto gS3 tauRos grid and re-scale with grav, metallicity and He abundance
+        // From Gray 3rd Ed. Ch.9, esp p. 189, 196:
+        var phx5kRefPGas = []; 
+        phx5kRefPGas.length = numDeps;
+        var logPhxRefPGas = []; 
+        logPhxRefPGas.length = numDeps;
+        var scalePGas = [];
+        scalePGas.length = 2;
+        scalePGas[0] = [];
+        scalePGas[1] = [];
+        scalePGas[0].length = numDeps;
+        scalePGas[1].length = numDeps;
+//exponents in scaling with g:
+        var gexpTop = 0.54; //top of model
+        var gexpBottom = 0.64; //bottom of model
+        var gexpRange = (gexpBottom - gexpTop);
+        var tauLogRange =  tauRos[1][numDeps-1] -  tauRos[1][0]; 
+        var thisGexp;
+// factor for scaling with A_He:
+        var logHeDenom = 0.666667 * Math.log(1.0 + 4.0*refAHe);
+        for (var i = 0; i < numDeps; i++) {
+            logPhxRefPGas[i] = interpol(logPhxRefTau64(), logPhxRefPGas64, tauRos[1][i]);
+            //System.out.println("After tau interpolation: pGas " + logPhxRefPGas[i]);
+            thisGexp = gexpTop + gexpRange * (tauRos[1][i] - tauRos[1][0]) / tauLogRange;
+            //scaling with g 
+            //System.out.println("thisGexp " + thisGexp);
+            scalePGas[1][i] = thisGexp*logEg + logPhxRefPGas[i] - thisGexp*phx5kRefLogEg;
+            //System.out.println("After scaling with g: pGas " + scalePGas[1][i]);
+            //scaling with zscl:
+            //System.out.println("logZScale " + logZScale);
+            scalePGas[1][i] = -0.333333*logZScale + scalePGas[1][i];
+            //System.out.println("After scaling with z: pGas " + scalePGas[1][i]);
+            //scaling with A_He:
+            //System.out.println("Math.log(1.0 + 4.0*AHe) - logHeDenom " + (0.666667*Math.log(1.0 + 4.0*AHe) - logHeDenom));
+            scalePGas[1][i] = 0.666667 * Math.log(1.0 + 4.0*AHe) + scalePGas[1][i] - logHeDenom;
+            //System.out.println("After scaling with AHe: pGas " + scalePGas[1][i]);
+            scalePGas[0][i] = Math.exp(scalePGas[1][i]);
+            //System.out.println("scalePGas[1][i] " + logE * scalePGas[1][i]);
+        }
+
+        return scalePGas;
+
+    };
+
+    var phx5kRefPe = function(teff, grav, numDeps, tauRos, zScale, logAHe) {
+
+        var logE = Math.log10(Math.E);
+        var logEg = Math.log(grav); //base e!
+        var AHe = Math.exp(logAHe);
+        var refAHe = Math.exp(phx5kRefLogAHe);
+        var logZScale = Math.log(zScale);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx5kRefPe64 = [
+            1.17858427569630401e-08, 1.73073837795169436e-03, 2.13762360059438538e-03,
+            2.64586145846806451e-03, 3.26749020460433354e-03, 4.02219945676032288e-03,
+            4.93454747856481805e-03, 6.03357965110110344e-03, 7.35319802933484621e-03,
+            8.93306098318919460e-03, 1.08200092390451780e-02, 1.30700158082515377e-02,
+            1.57505131367194594e-02, 1.89428593874781982e-02, 2.27446519479000651e-02,
+            2.72716961646799864e-02, 3.26596927620770305e-02, 3.90659173672675136e-02,
+            4.66713907010225318e-02, 5.56843086932707065e-02, 6.63452384304821230e-02,
+            7.89341909634427297e-02, 9.37792909747245523e-02, 1.11270186635302790e-01,
+            1.31870014183696899e-01, 1.56130489360824298e-01, 1.84715397349025645e-01,
+            2.18428766543559472e-01, 2.58245610307223983e-01, 3.05363622257444900e-01,
+            3.61311333509324040e-01, 4.27990544717643029e-01, 5.07743853690445168e-01,
+            6.03604039632526179e-01, 7.19674246257567152e-01, 8.61422066803848585e-01,
+            1.03568172049434559e+00, 1.25187412720684454e+00, 1.52336996895144261e+00,
+            1.87078029858400652e+00, 2.31893413667797388e+00, 2.90597658045488094e+00,
+            3.68566481623166187e+00, 4.74110273402785865e+00, 6.16546324347510222e+00,
+            8.08486709272609971e+00, 1.07959796585076546e+01, 1.46390000057528482e+01,
+            2.17273927465764913e+01, 3.56194058574816239e+01, 6.57361652682183575e+01,
+            1.48468954779851543e+02, 2.80489497081349555e+02, 4.46587250419467807e+02,
+            6.46784311972032128e+02, 8.86744838282462069e+02, 1.17244960918767083e+03,
+            1.51089748714632174e+03, 1.91050957850908458e+03, 2.38115682377229541e+03,
+            2.93426662234414562e+03, 3.58305801646245618e+03, 4.34379670059742239e+03,
+            5.22642525609140284e+03
+        ];
+
+        var numPhxDeps = phx5kRefPe64.length;  //yeah, I know, 64, but that could change!
+        var logPhxRefPe64 = []; 
+        logPhxRefPe64.length = numPhxDeps;
+        for (var i = 0; i < phx5kRefPe64.length; i++) {
+            logPhxRefPe64[i] = Math.log(phx5kRefPe64[i]);
+        }
+
+        // interpolate onto gS3 tauRos grid and re-scale with Teff:
+        var phx5kRefPe = []; 
+        phx5kRefPe.length = numDeps;
+        var logPhxRefPe = []; 
+        logPhxRefPe.length = numDeps;
+        var scalePe = [];
+        scalePe.length = 2;
+        scalePe[0] = [];
+        scalePe[1] = [];
+        scalePe[0].length = numDeps;
+        scalePe[1].length = numDeps;
+//exponents in scaling with Teff ONLY VALID FOR Teff < 10000K:
+        var omegaTaum1 = 0.0012; //log_10(tau) < 0.1
+        var omegaTaup1 = 0.0015; //log_10(tau) > 1.0
+        var omegaRange = (omegaTaup1-omegaTaum1);
+        var lonOfM1 = Math.log(0.1);
+//exponents in scaling with g:
+        var gexpTop = 0.48; //top of model
+        var gexpBottom = 0.33; //bottom of model
+        var gexpRange = (gexpBottom - gexpTop);
+        var tauLogRange =  tauRos[1][numDeps-1] -  tauRos[1][0]; 
+        var thisGexp;
+        var thisOmega = omegaTaum1; //default initialization
+// factor for scaling with A_He:
+        var logHeDenom = 0.333333 * Math.log(1.0 + 4.0*refAHe);
+
+        for (var i = 0; i < numDeps; i++) {
+            logPhxRefPe[i] = interpol(logPhxRefTau64(), logPhxRefPe64, tauRos[1][i]);
+            thisGexp = gexpTop + gexpRange * (tauRos[1][i] - tauRos[1][0]) / tauLogRange;
+            if (tauRos[0][i] < 0.1){
+              thisOmega =  omegaTaum1;
+            }
+            if (tauRos[0][i] > 10.0){
+              thisOmega =  omegaTaup1;
+            }
+            if ( (tauRos[0][i] >= 0.1) && (tauRos[0][i] <= 10.0) ){
+                thisOmega = omegaTaum1 + omegaRange * (tauRos[1][i] - lonOfM1) / tauLogRange;
+            }
+            //System.out.println("thisGexp " + thisGexp + " thisOmega " + thisOmega);
+            //scaling with g 
+            scalePe[1][i] = thisGexp*logEg + logPhxRefPe[i] - thisGexp*phx5kRefLogEg;
+            //System.out.println("After g scaling: pe " + logE*scalePe[1][i]);
+            //scale with Teff:
+            scalePe[1][i] = thisOmega*teff + scalePe[1][i] - thisOmega*phx5kRefTeff;
+            //System.out.println("After Teff scaling: pe " + logE*scalePe[1][i]);
+            //scaling with zscl:
+            scalePe[1][i] = 0.333333*logZScale + scalePe[1][i];
+            //System.out.println("After z scaling: pe " + logE*scalePe[1][i]);
+            //scaling with A_He:
+            scalePe[1][i] = 0.333333 * Math.log(1.0 + 4.0*AHe) + scalePe[1][i] - logHeDenom;
+            //System.out.println("After A_He scaling: pe " + logE*scalePe[1][i]);
+//
+            scalePe[0][i] = Math.exp(scalePe[1][i]);
+        }
+
+        return scalePe;
+
+    };
+
+    var phx5kRefNe = function(numDeps, scaleTemp, scalePe) {
+
+        var logE = logTen(Math.E);
+        var scaleNe = [];
+        scaleNe.length = 2;
+        scaleNe[0] = [];
+        scaleNe[1] = [];
+        scaleNe[0].length = numDeps;
+        scaleNe[1].length = numDeps;
+
+        for (var i = 0; i < numDeps; i++){
+            scaleNe[1][i] = scalePe[1][i] - scaleTemp[1][i] - logK;
+            scaleNe[0][i] = Math.exp(scaleNe[1][i]);
+        }
+
+        return scaleNe;
+    };
+
+    var phx10kRefTeff = 10000.0;
+    var phx10kRefLogEg = Math.log(10.0) * 4.0;  //base e!
+//He abundance from  Grevesse Asplund et al 2010
+    var phx10kRefLogAHe = Math.log(10.0) * (10.93 - 12.0);  //base e "A_12" logarithmic abundance scale!
+    
+
+    //Corresponding Tau_12000 grid (ie. lambda_0 = 1200 nm):    
+    var phx10kRefTau64 = [
+ 0.00000000000000000E+00, 9.99999999999999955E-07, 1.34596032415536424E-06,
+ 1.81160919420041334E-06, 2.43835409826882661E-06, 3.28192787251147086E-06,
+ 4.41734470314007309E-06, 5.94557070854439435E-06, 8.00250227816105150E-06,
+ 1.07710505603676914E-05, 1.44974067037263169E-05, 1.95129342263596216E-05,
+ 2.62636352765333530E-05, 3.53498110503010939E-05, 4.75794431400941383E-05,
+ 6.40400427119728238E-05, 8.61953566475303262E-05, 1.16015530173997159E-04,
+ 1.56152300600049659E-04, 2.10174801133248699E-04, 2.82886943462596935E-04,
+ 3.80754602122237182E-04, 5.12480587696093125E-04, 6.89778537938765847E-04,
+ 9.28414544519474451E-04, 1.24960914129198684E-03, 1.68192432488086874E-03,
+ 2.26380340952144670E-03, 3.04698957090350801E-03, 4.10112707055130046E-03,
+ 5.51995432128156785E-03, 7.42963950759494875E-03, 1.00000000000000002E-02,
+ 1.34596032415536422E-02, 1.81160919420041318E-02, 2.43835409826882663E-02,
+ 3.28192787251147047E-02, 4.41734470314006436E-02, 5.94557070854439401E-02,
+ 8.00250227816105275E-02, 1.07710505603676912E-01, 1.44974067037263149E-01,
+ 1.95129342263596212E-01, 2.62636352765332981E-01, 3.53498110503010221E-01,
+ 4.75794431400941464E-01, 6.40400427119728333E-01, 8.61953566475303190E-01,
+ 1.16015530173997150E+00, 1.56152300600049654E+00, 2.10174801133248712E+00,
+ 2.82886943462596641E+00, 3.80754602122236818E+00, 5.12480587696092638E+00,
+ 6.89778537938765801E+00, 9.28414544519474383E+00, 1.24960914129198670E+01,
+ 1.68192432488086894E+01, 2.26380340952144650E+01, 3.04698957090350540E+01,
+ 4.10112707055129562E+01, 5.51995432128157333E+01, 7.42963950759495049E+01,
+ 1.00000000000000000E+02
+    ];
+
+    var logPhxRefTau64 = function() {
+
+        var logE = logTen(Math.E);
+
+        var numPhxDep = phx10kRefTau64.length;
+        var logPhxRefTau64 = []; 
+        logPhxRefTau64.length = numPhxDep;
+        for (var i = 1; i < numPhxDep; i++) {
+            logPhxRefTau64[i] = Math.log(phx10kRefTau64[i]);
+        }
+        logPhxRefTau64[0] = logPhxRefTau64[1] - (logPhxRefTau64[numPhxDep - 1] - logPhxRefTau64[1]) / numPhxDep;
+        return logPhxRefTau64;
+    };
+
+   var phx10kRefTemp = function(teff, numDeps, tauRos) {
+
+        var logE = logTen(Math.E);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx10kRefTemp64 = [
+ 6.07574016685149309E+03, 6.07574016685149309E+03, 6.13264671606194861E+03,
+ 6.20030362747541585E+03, 6.27534705504544127E+03, 6.35396254937768026E+03,
+ 6.43299900128272293E+03, 6.51018808525609893E+03, 6.58411555606889124E+03,
+ 6.65406717610081068E+03, 6.71983498258185136E+03, 6.78154367852633823E+03,
+ 6.83954193198123903E+03, 6.89437231818902364E+03, 6.94676889243451842E+03,
+ 6.99759489202792247E+03, 7.04769490055547158E+03, 7.09773520027041195E+03,
+ 7.14812062339764907E+03, 7.19901426577775601E+03, 7.25041827414427917E+03,
+ 7.30225171801659872E+03, 7.35440093819652611E+03, 7.40675066225539558E+03,
+ 7.45920456139609178E+03, 7.51166464185182758E+03, 7.56404228766520191E+03,
+ 7.61627005664532771E+03, 7.66833575187113820E+03, 7.72034173334201841E+03,
+ 7.77258785750414881E+03, 7.82555139374063583E+03, 7.87986936059489017E+03,
+ 7.93639246968124371E+03, 7.99620846303960116E+03, 8.06052820253916161E+03,
+ 8.13047124123426238E+03, 8.20741189262034641E+03, 8.29307358429898159E+03,
+ 8.38980788216330802E+03, 8.49906053657168923E+03, 8.62314483632361771E+03,
+ 8.76456384216990409E+03, 8.92693370905029224E+03, 9.11177170396923248E+03,
+ 9.32167977041711492E+03, 9.56236981551314602E+03, 9.82432656703466455E+03,
+ 1.01311427939962559E+04, 1.04299661074183350E+04, 1.08355089220389909E+04,
+ 1.12094886773674716E+04, 1.16360710406256258E+04, 1.20991237739366334E+04,
+ 1.25891111265208237E+04, 1.31070008299570563E+04, 1.36522498965801387E+04,
+ 1.42233473670298790E+04, 1.48188302103200131E+04, 1.54423659243804523E+04,
+ 1.60892587452310745E+04, 1.67828517694842230E+04, 1.74930217234773954E+04,
+ 1.82922661949382236E+04
+        ];
+
+        // interpolate onto gS3 tauRos grid and re-scale with Teff:
+        var phx10kRefTemp = []; 
+        phx10kRefTemp.length = numDeps;
+        var scaleTemp = [];
+        scaleTemp.length = 2;
+        scaleTemp[0] = [];
+        scaleTemp[1] = [];
+        scaleTemp[0].length = numDeps;
+        scaleTemp[1].length = numDeps;
+        for (var i = 0; i < numDeps; i++) {
+            phx10kRefTemp[i] = interpol(logPhxRefTau64(), phx10kRefTemp64, tauRos[1][i]);
+            scaleTemp[0][i] = teff * phx10kRefTemp[i] / phx10kRefTeff;
+            scaleTemp[1][i] = Math.log(scaleTemp[0][i]);
+            //System.out.println("tauRos[1][i] " + logE * tauRos[1][i] + " scaleTemp[1][i] " + logE * scaleTemp[1][i]);
+        }
+
+        return scaleTemp;
+
+    };
+
+    var phx10kRefPGas = function(grav, zScale, logAHe, numDeps, tauRos) {
+
+        var logE = logTen(Math.E);
+        var logEg = Math.log(grav); //base e!
+        var AHe = Math.exp(logAHe);
+        var refAHe = Math.exp(phx10kRefLogAHe);
+        var logZScale = Math.log(zScale);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx10kRefPGas64 = [
+ 1.00000000000000005E-04, 8.32127743125684882E-02, 1.29584527404206007E-01,
+ 1.94435381478779895E-01, 2.81524759872055830E-01, 3.94850766488002047E-01,
+ 5.39098197994885120E-01, 7.20109114447812781E-01, 9.45331395103965466E-01,
+ 1.22424260721948497E+00, 1.56877812718506826E+00, 1.99379948180689048E+00,
+ 2.51761637911653136E+00, 3.16251087800302599E+00, 3.95513966878889667E+00,
+ 4.92671520309637767E+00, 6.11303768406991388E+00, 7.55464145673977505E+00,
+ 9.29736005428628154E+00, 1.13934670418806956E+01, 1.39033471883101818E+01,
+ 1.68975909460311797E+01, 2.04594801623940121E+01, 2.46878880919212804E+01,
+ 2.97005964646718432E+01, 3.56383534114781142E+01, 4.26698208468708984E+01,
+ 5.09974403334007107E+01, 6.08640463074419387E+01, 7.25594340179816726E+01,
+ 8.64248329112294158E+01, 1.02854593091977520E+02, 1.22294652156180661E+02,
+ 1.45234045163109670E+02, 1.72184927273123520E+02, 2.03652334583264832E+02,
+ 2.40105656346438934E+02, 2.81936164286554344E+02, 3.29393094590693863E+02,
+ 3.82482413201705356E+02, 4.40963324580460835E+02, 5.04333229685725428E+02,
+ 5.71827998329611432E+02, 6.42424030136117835E+02, 7.15115448265608620E+02,
+ 7.89188190751975185E+02, 8.64179477829598227E+02, 9.41037808653716070E+02,
+ 1.02093026109089942E+03, 1.10808816566702853E+03, 1.20591338801728261E+03,
+ 1.32157321934523725E+03, 1.46400967396971282E+03, 1.64395527893530380E+03,
+ 1.87431044562489683E+03, 2.16986659968736876E+03, 2.54753164223200429E+03,
+ 3.02667796755900645E+03, 3.62964225373483487E+03, 4.38288420138537458E+03,
+ 5.31730879832813844E+03, 6.47251190142057658E+03, 7.89413608165941059E+03,
+ 9.64747840003540659E+03
+        ];
+
+        var numPhxDeps = phx10kRefPGas64.length;  //yeah, I know, 64, but that could change!
+        var logPhxRefPGas64 = []; 
+        logPhxRefPGas64.length = numPhxDeps;
+        for (var i = 0; i < phx10kRefPGas64.length; i++) {
+            logPhxRefPGas64[i] = Math.log(phx10kRefPGas64[i]);
+        }
+
+        // interpolate onto gS3 tauRos grid and re-scale with Teff:
+        var phx10kRefPGas = [];
+        phx10kRefPGas.length = numDeps;
+        var logPhxRefPGas = [];
+        logPhxRefPGas.length = numDeps;
+        var scalePGas = [];
+        scalePGas.length = 2;
+        scalePGas[0] = [];
+        scalePGas[1] = [];
+        scalePGas[0].length = numDeps;
+        scalePGas[1].length = numDeps;
+//exponents in scaling with g:
+        var gexpTop = 0.53; //top of model
+        var gexpBottom = 0.85; //bottom of model
+        var gexpRange = (gexpBottom - gexpTop);
+        var tauLogRange =  tauRos[1][numDeps-1] -  tauRos[1][0];
+        var thisGexp;
+// factor for scaling with A_He:
+        var logHeDenom = 0.666667 * Math.log(1.0 + 4.0*refAHe);
+        for (var i = 0; i < numDeps; i++) {
+            logPhxRefPGas[i] = interpol(logPhxRefTau64(), logPhxRefPGas64, tauRos[1][i]);
+            thisGexp = gexpTop + gexpRange * (tauRos[1][i] - tauRos[1][0]) / tauLogRange;
+            //scaling with g
+            scalePGas[1][i] = thisGexp*logEg + logPhxRefPGas[i] - thisGexp*phx10kRefLogEg;
+            //scaling with zscl:
+            scalePGas[1][i] = -0.5*logZScale + scalePGas[1][i];
+            //scaling with A_He:
+            scalePGas[1][i] = 0.666667 * Math.log(1.0 + 4.0*AHe) + scalePGas[1][i] - logHeDenom; 
+            scalePGas[0][i] = Math.exp(scalePGas[1][i]);
+            //System.out.println("scalePGas[1][i] " + logE * scalePGas[1][i]);
+        }
+
+        return scalePGas;
+
+    };
+
+    var phx10kRefPe = function(teff, grav, numDeps, tauRos, zScale, logAHe) {
+
+        var logE = logTen(Math.E);
+        var logEg = Math.log(grav); //base e!
+        var AHe = Math.exp(logAHe);
+        var refAHe = Math.exp(phx10kRefLogAHe);
+        var logZScale = Math.log(zScale);
+
+        //Theoretical radiative/convective model from Phoenix V15:
+        var phx10kRefPe64 = [
+ 4.77258390479251340E-05, 1.54333794509103339E-02, 2.24384775218179552E-02,
+ 3.24056217848841463E-02, 4.62639509784656192E-02, 6.49897301016105072E-02,
+ 8.96001972148401798E-02, 1.21161157265374353E-01, 1.60825358340301261E-01,
+ 2.09891146620685975E-01, 2.69867426146356171E-01, 3.42538888354808724E-01,
+ 4.30045384007358256E-01, 5.35006986797593842E-01, 6.60704782988379868E-01,
+ 8.11262305821688567E-01, 9.91741961224463009E-01, 1.20813527252446407E+00,
+ 1.46731521914247520E+00, 1.77705126262480850E+00, 2.14614122290851617E+00,
+ 2.58462667298359561E+00, 3.10405210627260297E+00, 3.71777653138435804E+00,
+ 4.44135288803457673E+00, 5.29279499891786465E+00, 6.29303772366266312E+00,
+ 7.46652989782078702E+00, 8.84221515332682451E+00, 1.04552216626003140E+01,
+ 1.23496848557054300E+01, 1.45813048229500843E+01, 1.72206436663779385E+01,
+ 2.03589457441922157E+01, 2.41156208954111868E+01, 2.86442876094033458E+01,
+ 3.41355927487861948E+01, 4.08398462152914732E+01, 4.90908766488638761E+01,
+ 5.93486059459067832E+01, 7.21405304518226842E+01, 8.81824952094146681E+01,
+ 1.08367129768339950E+02, 1.33856171619767082E+02, 1.65693080738235807E+02,
+ 2.04943252558813072E+02, 2.52705001145053956E+02, 3.07224623951268654E+02,
+ 3.70334137141753217E+02, 4.33722318385145741E+02, 5.08910395587106336E+02,
+ 5.82220694357564639E+02, 6.65278728107771599E+02, 7.62124991657425880E+02,
+ 8.79654481582760809E+02, 1.02622262715821921E+03, 1.21099204341081804E+03,
+ 1.44432886438589208E+03, 1.73838904022049860E+03, 2.10808802008476914E+03,
+ 2.57102379769462232E+03, 3.14976025581092108E+03, 3.86645770963505538E+03,
+ 4.75493678618616923E+03
+        ];
+
+        var numPhxDeps = phx10kRefPe64.length;  //yeah, I know, 64, but that could change!
+        var logPhxRefPe64 = []; 
+        logPhxRefPe64.length = numPhxDeps;
+        for (var i = 0; i < phx10kRefPe64.length; i++) {
+            logPhxRefPe64[i] = Math.log(phx10kRefPe64[i]);
+        }
+
+        // interpolate onto gS3 tauRos grid and re-scale with Teff:
+        var phx10kRefPe = []; 
+        phx10kRefPe.length = numDeps;
+        var logPhxRefPe = []; 
+        logPhxRefPe.length = numDeps;
+        var scalePe = [];
+        scalePe.length = 2;
+        scalePe[0] = [];
+        scalePe[1] = [];
+        scalePe[0].length = numDeps;
+        scalePe[1].length = numDeps;
+//exponents in scaling with Teff ONLY VALID FOR Teff < 10000K:
+        var omegaTaum1 = 0.0012; //log_10(tau) < 0.1
+        var omegaTaup1 = 0.0015; //log_10(tau) > 1.0
+        var omegaRange = (omegaTaup1-omegaTaum1);
+        var lonOfM1 = Math.log(0.1);
+//exponents in scaling with g:
+        var gexpTop = 0.53; //top of model
+        var gexpBottom = 0.82; //bottom of model
+        var gexpRange = (gexpBottom - gexpTop);
+        var tauLogRange =  tauRos[1][numDeps-1] -  tauRos[1][0];
+        var thisGexp;
+        var thisOmega = omegaTaum1; //default initialization
+// factor for scaling with A_He:
+        var logHeDenom = 0.333333 * Math.log(1.0 + 4.0*refAHe);
+        for (var i = 0; i < numDeps; i++) {
+            logPhxRefPe[i] = interpol(logPhxRefTau64(), logPhxRefPe64, tauRos[1][i]);
+            thisGexp = gexpTop + gexpRange * (tauRos[1][i] - tauRos[1][0]) / tauLogRange;
+            //scaling with g
+            scalePe[1][i] = thisGexp*logEg + logPhxRefPe[i] - thisGexp*phx10kRefLogEg;
+            //scale with Teff:
+            if (teff < 10000.0){
+               if (tauRos[0][i] < 0.1){
+                 thisOmega =  omegaTaum1;
+               }
+               if (tauRos[0][i] > 10.0){
+                 thisOmega =  omegaTaup1;
+               }
+               if ( (tauRos[0][i] >= 0.1) && (tauRos[0][i] <= 10.0) ){
+                   thisOmega = omegaTaum1 + omegaRange * (tauRos[1][i] - lonOfM1) / tauLogRange;
+               }
+               scalePe[1][i] = thisOmega*teff + scalePe[1][i] - thisOmega*phx10kRefTeff;
+            }
+            //scaling with zscl:
+            scalePe[1][i] = 0.5*logZScale + scalePe[1][i];
+            //scaling with A_He:
+            scalePe[1][i] = 0.333333 * Math.log(1.0 + 4.0*AHe) + scalePe[1][i] - logHeDenom;
+            scalePe[1][i] = logEg + logPhxRefPe[i] - phx10kRefLogEg;
+            scalePe[0][i] = Math.exp(scalePe[1][i]);
+            //System.out.println("scaleNe[1][i] " + logE * scaleNe[1][i]);
+        }
+
+        return scalePe;
+
+    };
+
+    var phx10kRefNe = function(numDeps, scaleTemp,  scalePe) {
+
+        var logE = logTen(Math.E);
+        var scaleNe = [];
+        scaleNe.length = 2;
+        scaleNe[0] = [];
+        scaleNe[1] = [];
+        scaleNe[0].length = numDeps;
+        scaleNe[1].length = numDeps;
+        for (var i = 0; i < numDeps; i++){
+            scaleNe[1][i] = scalePe[1][i] - scaleTemp[1][i] - logK;
+            scaleNe[0][i] = Math.exp(scaleNe[1][i]);
+        }
+
+        return scaleNe;
+    };
+
+  var kappas2 = function(numDeps, pe, zScale, temp, rho,
+                                   numLams, lambdas, logAHe,
+                                   logNH1, logNH2, logNHe1, logNHe2, Ne, teff,
+                                   logKapFudge){
 
 
+//
+//  *** CAUTION:
+//
+//  This return's "kappa" as defined by Gray 3rd Ed. - cm^2 per *relelvant particle* where the "releveant particle"
+//  depends on *which* kappa
+
+     var log10E = logTen(Math.E); //needed for g_ff
+     var logLog10E = Math.log(log10E);
+     var logE10 = Math.log(10.0);
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var logK = Math.log(k);
+     var logNH = []; 
+     logNH.length = numDeps; //Total H particle number density cm^-3
+     var logPH1, logPH2, logPHe1, logPHe2;
+     for (var i=0; i<numDeps; i++){
+         logNH[i] = Math.exp(logNH1[i]) + Math.exp(logNH2[i]);
+         logNH[i] = Math.log(logNH[i]);
+
+  //      console.log("i " + i + " logNH1 " + log10E*logNH1[i] + " logNH2 " + log10E*logNH2[i] 
+  //  + " logNHe1 " + log10E*logNHe1[i] + " logNHe2 " + log10E*logNHe2[i] + " logPe " + log10E*pe[1][i]);
+        logPH1 = logNH1[i] + temp[1][i] + logK;
+        logPH2 = logNH2[i] + temp[1][i] + logK;
+        logPHe1 = logNHe1[i] + temp[1][i] + logK;
+        logPHe2 = logNHe2[i] + temp[1][i] + logK;
+        //console.log("i " + i + " logPH1 " + log10E*logPH1 + " logPH2 " + log10E*logPH2 
+ //   + " logPHe1 " + log10E*logPHe1 + " logPHe2 " + log10E*logPHe2 + " logPe " + log10E*pe[1][i]);
+     }
+
+     var logKappa = [];
+     logKappa.length = numLams;
+     for (var i = 0; i < numLams; i++){
+        logKappa[i] = [];
+        logKappa[i].length = numDeps;
+     }
+     
+     var kappa; //helper
+     var stimEm; //temperature- and wavelength-dependent stimulated emission correction  
+     var stimHelp, logStimEm;
+ 
+     var ii; //useful for converting integer loop counter, i, to float
+//
+//
+//Input data and variable declarations:
+//
+//
+// H I b-f & f-f
+     var chiIH = 13.598433;  //eV
+     var Rydberg = 1.0968e-2;  // "R" in nm^-1
+     //Generate threshold wavelengths and b-f Gaunt (g_bf) helper factors up to n=10:
+     var n; //principle quantum number of Bohr atom E-level
+     var numHlevs = 30;
+     var invThresh = [];
+     invThresh.length = numHlevs; //also serves as g_bf helper factor
+     var threshLambs = [];
+     threshLambs.length = numHlevs;
+     var chiHlev = [];
+     chiHlev.length = numHlevs;
+     var logChiHlev;
+     for (var i = 0; i < numHlevs; i++){
+        n = 1.0 + 1.0*i;
+        invThresh[i] = Rydberg / n / n; //nm^-1; also serves as g_bf helper factor 
+        threshLambs[i] = 1.0 / invThresh[i]; //nm
+        logChiHlev = logH + logC + Math.log(invThresh[i]) + 7.0*logE10; // ergs
+        chiHlev[i] = Math.exp(logChiHlev - logEv); //eV
+        chiHlev[i] = chiIH - chiHlev[i];
+//        System.out.println("i " + i + " n " + n + " invThresh " + invThresh[i] + " threshLambs[i] " + threshLambs[i] + " chiHlev " + chiHlev[i]);
+     } 
+
+     var logGauntPrefac = Math.log(0.3456) - 0.333333*Math.log(Rydberg);
+
+     // ****  Caution: this will require lamba in A!:
+     var a0 = 1.0449e-26;  //if lambda in A 
+     var logA0 = Math.log(a0);
+// Boltzmann const "k" in eV/K - needed for "theta"
+     var logKeV = logK - logEv; 
+
+     //g_bf Gaunt factor - depends on lower E-level, n:
+     var loggbf = [];
+     loggbf.length = numHlevs;
+
+     //initialize quantities that depend on lowest E-level contributing to opacity at current wavelength:
+     for (var iThresh = 0; iThresh < numHlevs; iThresh++){
+        loggbf[iThresh] = 0.0;
+     }
+     var logGauntHelp, gauntHelp; 
+     var gbf, gbfHelp, loggbfHelp;
+     var gff, gffHelp, loggffHelp, logffHelp, loggff;
+     var help, logHelp3;
+     var chiLambda, logChiLambda;
+     var bfTerm, logbfTerm, bfSum, logKapH1bf, logKapH1ff;
+ 
+//initial defaults:
+   gbf = 1.0;
+   gff = 1.0;
+   loggff = 0.0;
+ 
+     var logChiFac = Math.log(1.2398e3); // eV per lambda, for lambda in nm
+
+// Needed for kappa_ff: 
+  var ffBracket; 
+     logffHelp = logLog10E - Math.log(chiIH) - Math.log(2.0);
+     //logHelp = logffHelp - Math.log(2.0);
+
+//
+//Hminus:
+//
+// H^- b-f
+//This is for the sixth order polynomial fit to the cross-section's wavelength dependence
+  var numHmTerms = 7;
+  var logAHm = []; 
+  logAHm.length = numHmTerms;
+  var signAHm = [];
+  signAHm.length = numHmTerms;
+ 
+  var aHmbf = 4.158e-10;
+  //double logAHmbf = Math.log(aHmbf);
+  //Is the factor of 10^-18cm^2 from the polynomial fit to alpha_Hmbf missing in Eq. 8.12 on p. 156 of Gray 3rd Ed??
+  var logAHmbf = Math.log(aHmbf) - 18.0*logE10;
+  var alphaHmbf, logAlphaHmbf, logTermHmbf, logKapHmbf; 
+
+  //Computing each polynomial term logarithmically
+     logAHm[0] = Math.log(1.99654);
+     signAHm[0] = 1.0;
+     logAHm[1] = Math.log(1.18267e-5);
+     signAHm[1] = -1.0;
+     logAHm[2] = Math.log(2.64243e-6);
+     signAHm[2] = 1.0;
+     logAHm[3] = Math.log(4.40524e-10);
+     signAHm[3] = -1.0;
+     logAHm[4] = Math.log(3.23992e-14);
+     signAHm[4] = 1.0;
+     logAHm[5] = Math.log(1.39568e-18);
+     signAHm[5] = -1.0;
+     logAHm[6] = Math.log(2.78701e-23);
+     signAHm[6] = 1.0;
+     alphaHmbf = Math.exp(logAHm[0]); //initialize accumulator
+
+// H^- f-f:
+
+  var logAHmff = -26.0*logE10;
+  var numHmffTerms = 5;
+  var fPoly, logKapHmff, logLambdaAFac; 
+    var fHmTerms = [];
+    fHmTerms.length = 3;
+    fHmTerms[0] = [];
+    fHmTerms[1] = [];
+    fHmTerms[2] = [];
+    fHmTerms[0].length = numHmffTerms; 
+    fHmTerms[1].length = numHmffTerms; 
+    fHmTerms[2].length = numHmffTerms; 
+    var fHm = []; 
+    fHm.length = 3;
+    fHmTerms[0][0] = -2.2763;
+    fHmTerms[0][1] = -1.6850;
+    fHmTerms[0][2] = 0.76661;
+    fHmTerms[0][3] = -0.053346;
+    fHmTerms[0][4] = 0.0;
+    fHmTerms[1][0] = 15.2827;
+    fHmTerms[1][1] = -9.2846;
+    fHmTerms[1][2] = 1.99381;
+    fHmTerms[1][3] = -0.142631;
+    fHmTerms[1][4] = 0.0;
+    fHmTerms[2][0] = -197.789;
+    fHmTerms[2][1] = 190.266;
+    fHmTerms[2][2] = -67.9775;
+    fHmTerms[2][3] = 10.6913;
+    fHmTerms[2][4] = -0.625151;
+
+//
+//H_2^+ molecular opacity - cool stars
+// scasles with proton density (H^+)
+//This is for the third order polynomial fit to the "sigma_l(lambda)" and "U_l(lambda)"
+//terms in the cross-section
+     var numH2pTerms = 4;
+     var sigmaH2pTerm = [];
+     sigmaH2pTerm.length = numH2pTerms;
+     var UH2pTerm = []; 
+     UH2pTerm.length = numH2pTerms;
+     var logSigmaH2p, sigmaH2p, UH2p, logKapH2p;  
+     var aH2p = 2.51e-42;
+     var logAH2p = Math.log(aH2p);
+       sigmaH2pTerm[0] = -1040.54;
+       sigmaH2pTerm[1] = 1345.71;
+       sigmaH2pTerm[2] = -547.628;
+       sigmaH2pTerm[3] = 71.9684;
+       //UH2pTerm[0] = 54.0532;
+       //UH2pTerm[1] = -32.713;
+       //UH2pTerm[2] = 6.6699;
+       //UH2pTerm[3] = -0.4574;
+      //Reverse signs on U_1 polynomial expansion co-efficients - Dave Gray private communcation 
+      //based on Bates (1952)
+       UH2pTerm[0] = -54.0532;
+       UH2pTerm[1] = 32.713;
+       UH2pTerm[2] = -6.6699;
+       UH2pTerm[3] = 0.4574;
+ 
+
+// He I b-f & ff: 
+       var totalH1Kap, logTotalH1Kap, helpHe, logKapHe;
+
+//
+//He^- f-f
+  
+  var AHe = Math.exp(logAHe); 
+     var logKapHemff, nHe, logNHe, thisTerm, thisLogTerm, alphaHemff, log10AlphaHemff;
+
+// Gray does not have this pre-factor, but PHOENIX seems to and without it
+// the He opacity is about 10^26 too high!:
+  var logAHemff = -26.0*logE10;
+
+     var numHemffTerms = 5;
+     var logC0HemffTerm = []; logC0HemffTerm.length = numHemffTerms;
+     var logC1HemffTerm = []; logC1HemffTerm.length = numHemffTerms;
+     var logC2HemffTerm = []; logC2HemffTerm.length = numHemffTerms;
+     var logC3HemffTerm = []; logC3HemffTerm.length = numHemffTerms;
+     var signC0HemffTerm = []; signC0HemffTerm.length = numHemffTerms;
+     var signC1HemffTerm = []; signC1HemffTerm.length = numHemffTerms;
+     var signC2HemffTerm = []; signC2HemffTerm.length = numHemffTerms;
+     var signC3HemffTerm = []; signC3HemffTerm.length = numHemffTerms;
+
+//we'll be evaluating the polynominal in theta logarithmically by adding logarithmic terms - 
+     logC0HemffTerm[0] = Math.log(9.66736); 
+     signC0HemffTerm[0] = 1.0;
+     logC0HemffTerm[1] = Math.log(71.76242); 
+     signC0HemffTerm[1] = -1.0;
+     logC0HemffTerm[2] = Math.log(105.29576); 
+     signC0HemffTerm[2] = 1.0;
+     logC0HemffTerm[3] = Math.log(56.49259); 
+     signC0HemffTerm[3] = -1.0;
+     logC0HemffTerm[4] = Math.log(10.69206); 
+     signC0HemffTerm[4] = 1.0;
+     logC1HemffTerm[0] = Math.log(10.50614); 
+     signC1HemffTerm[0] = -1.0;
+     logC1HemffTerm[1] = Math.log(48.28802); 
+     signC1HemffTerm[1] = 1.0;
+     logC1HemffTerm[2] = Math.log(70.43363); 
+     signC1HemffTerm[2] = -1.0;
+     logC1HemffTerm[3] = Math.log(37.80099); 
+     signC1HemffTerm[3] = 1.0;
+     logC1HemffTerm[4] = Math.log(7.15445);
+     signC1HemffTerm[4] = -1.0;
+     logC2HemffTerm[0] = Math.log(2.74020); 
+     signC2HemffTerm[0] = 1.0;
+     logC2HemffTerm[1] = Math.log(10.62144); 
+     signC2HemffTerm[1] = -1.0;
+     logC2HemffTerm[2] = Math.log(15.50518); 
+     signC2HemffTerm[2] = 1.0;
+     logC2HemffTerm[3] = Math.log(8.33845); 
+     signC2HemffTerm[3] = -1.0;
+     logC2HemffTerm[4] = Math.log(1.57960);
+     signC2HemffTerm[4] = 1.0;
+     logC3HemffTerm[0] = Math.log(0.19923); 
+     signC3HemffTerm[0] = -1.0;
+     logC3HemffTerm[1] = Math.log(0.77485); 
+     signC3HemffTerm[1] = 1.0;
+     logC3HemffTerm[2] = Math.log(1.13200); 
+     signC3HemffTerm[2] = -1.0;
+     logC3HemffTerm[3] = Math.log(0.60994); 
+     signC3HemffTerm[3] = 1.0;
+     logC3HemffTerm[4] = Math.log(0.11564);
+     signC3HemffTerm[4] = -1.0;
+     //initialize accumulators:
+     var cHemff = [];
+     cHemff.length = 4;
+     cHemff[0] = signC0HemffTerm[0] * Math.exp(logC0HemffTerm[0]);   
+     cHemff[1] = signC1HemffTerm[0] * Math.exp(logC1HemffTerm[0]);   
+     cHemff[2] = signC2HemffTerm[0] * Math.exp(logC2HemffTerm[0]);   
+     cHemff[3] = signC3HemffTerm[0] * Math.exp(logC3HemffTerm[0]);   
+//
+// electron (e^-1) scattering (Thomson scattering)
+
+    var kapE, logKapE;
+    var alphaE = 0.6648e-24; //cm^2/e^-1
+    var logAlphaE = Math.log(0.6648e-24);
+  
+
+//Universal:
+//
+     var theta, logTheta, log10Theta, log10ThetaFac;
+     var logLambda, lambdaA, logLambdaA, log10LambdaA, lambdanm, logLambdanm;
+//Okay - here we go:
+//Make the wavelength loop the outer loop - lots of depth-independnet lambda-dependent quantities:
+//
+//
+//
+//  **** START WAVELENGTH LOOP iLam
+//
+//
+//
+     for (var iLam = 0; iLam < numLams; iLam++){
+ //
+ //Re-initialize all accumulators to be on safe side:
+           kappa = 0.0;
+           logKapH1bf = -99.0; 
+           logKapH1ff = -99.0;
+           logKapHmbf = -99.0; 
+           logKapHmff = -99.0;
+           logKapH2p = -99.0;
+           logKapHe = -99.0;
+           logKapHemff = -99.0;
+           logKapE = -99.0;
+ //
+//*** CAUTION: lambda MUST be in nm here for consistency with Rydbeg 
+        logLambda = Math.log(lambdas[iLam]);  //log cm
+        lambdanm = 1.0e7 * lambdas[iLam];
+        logLambdanm = Math.log(lambdanm);
+        lambdaA = 1.0e8 * lambdas[iLam]; //Angstroms
+        logLambdaA = Math.log(lambdaA);
+        log10LambdaA = log10E * logLambdaA;
+
+        logChiLambda = logChiFac - logLambdanm;
+        chiLambda = Math.exp(logChiLambda);   //eV
+
+// Needed for both g_bf AND g_ff: 
+        logGauntHelp = logGauntPrefac - 0.333333*logLambdanm; //lambda in nm here
+        gauntHelp = Math.exp(logGauntHelp);
+
+              //if (iLam == 142){
+      //        if (iLam == 70){
+    //console.log("lambdaA " + lambdaA);
+       //     }
+
+//HI b-f depth independent factors:
+//Start at largest threshold wavelength and break out of loop when next threshold lambda is less than current lambda:
+        for (var iThresh = numHlevs-1; iThresh >= 0; iThresh--){
+           if (threshLambs[iThresh] < lambdanm){
+              break;
+           }
+           if (lambdanm <= threshLambs[iThresh]){
+           //this E-level contributes
+              loggbfHelp = logLambdanm + Math.log(invThresh[iThresh]); //lambda in nm here; invThresh here as R/n^2
+              gbfHelp = Math.exp(loggbfHelp);
+              gbf = 1.0 - (gauntHelp * (gbfHelp - 0.5));
+//              if (iLam == 1){
+//    System.out.println("iThresh " + iThresh + " threshLambs " + threshLambs[iThresh] +  " gbf " + gbf);
+//              }
+              loggbf[iThresh] = Math.log(gbf);
+           }
+        }  //end iThresh loop 
+
+//HI f-f depth independent factors:
+        //logChi = logLog10E + logLambdanm - logChiFac; //lambda in nm here
+        //chi = Math.exp(logChi);
+        loggffHelp = logLog10E - logChiLambda;
+
+//
+//
+//
+//  ******  Start depth loop iTau ******
+//
+//
+//
+//
+        for (var iTau = 0; iTau < numDeps; iTau++){
+//
+ //Re-initialize all accumulators to be on safe side:
+           kappa = 0.0;
+           logKapH1bf = -99.0; 
+           logKapH1ff = -99.0;
+           logKapHmbf = -99.0; 
+           logKapHmff = -99.0;
+           logKapH2p = -99.0;
+           logKapHe = -99.0;
+           logKapHemff = -99.0;
+           logKapE = -99.0;
+//
+//
+//if (iTau == 36 && iLam == 142){
+//    System.out.println("lambdanm[142] " + lambdanm + " temp[0][iTau=36] " + temp[0][iTau=36]);
+// }
+//This is "theta" ~ 5040/T:
+           logTheta = logLog10E - logKeV - temp[1][iTau];
+           log10Theta = log10E * logTheta;
+           theta = Math.exp(logTheta);
+           //System.out.println("theta " + theta + " logTheta " + logTheta);
+
+// temperature- and wavelength-dependent stimulated emission coefficient:
+           stimHelp = -1.0 * theta * chiLambda * logE10;
+           stimEm = 1.0 - Math.exp(stimHelp); 
+           logStimEm = Math.log(stimEm);
+    //       if (iTau == 36 && iLam == 70){
+   // console.log("stimEm " + stimEm);
+ //}
 
 
+           ffBracket = Math.exp(loggffHelp - logTheta) + 0.5; 
+           gff = 1.0 + (gauntHelp*ffBracket);
 
 
+//if (iTau == 36 && iLam == 1){
+//    System.out.println("gff " + gff);
+// }
+           loggff = Math.log(gff);
 
+//H I b-f:
+//Start at largest threshold wavelength and break out of loop when next threshold lambda is less than current lambda:
+           bfSum = 0.0; //initialize accumulator
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix" 
+           //logA0 = logA0 - logE10*1.0;  // **** Debug artificial "fix" 
+// *** DEBUG!  ***
+           logHelp3 = logA0 + 3.0*logLambdaA; //lambda in A here
+           for (var iThresh = numHlevs-1; iThresh >= 0; iThresh--){
+              if (threshLambs[iThresh] < lambdanm){
+                 break;
+              }
+              n = 1.0 + 1.0*iThresh; 
+              if (lambdanm <= threshLambs[iThresh]){
+                //this E-level contributes
+                logbfTerm = loggbf[iThresh] - 3.0*Math.log(n); 
+                logbfTerm = logbfTerm - (theta*chiHlev[iThresh])*logE10; 
+                bfSum = bfSum + Math.exp(logbfTerm);
+//if (iTau == 36 && iLam == 142){
+  //System.out.println("lambdanm " + lambdanm + " iThresh " + iThresh + " threshLambs[iThresh] " + threshLambs[iThresh]);
+  //System.out.println("loggbf " + loggbf[iThresh] + " theta " + theta + " chiHlev " + chiHlev[iThresh]);
+  //System.out.println("bfSum " + bfSum + " logbfTerm " + logbfTerm);
+//  }
+              }
+           }  //end iThresh loop 
+
+// cm^2 per *neutral* H atom
+           logKapH1bf = logHelp3 + Math.log(bfSum); 
+
+//Stimulated emission correction
+           logKapH1bf = logKapH1bf + logStimEm;
+
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapH1bf = logKapH1bf + logNH1[iTau];
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix"
+     //    // Nasty fix to make Balmer lines show up in A0 stars!!
+     //   if (teff > 8000.0){ 
+      //   logKapH1bf = logKapH1bf - logE10*1.5;
+       //                   }
+                     kappa = Math.exp(logKapH1bf); 
+  //System.out.println("HIbf " + log10E*logKapH1bf);
+//if (iTau == 36 && iLam == 70){
+//           console.log("logKapH1bf " + log10E*(logKapH1bf)); //-rho[1][iTau]));
+//}
+//H I f-f:
+// cm^2 per *neutral* H atom
+           logKapH1ff = logHelp3 + loggff + logffHelp - logTheta - (theta*chiIH)*logE10;
+
+//Stimulated emission correction
+           logKapH1ff = logKapH1ff + logStimEm;
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapH1ff = logKapH1ff + logNH1[iTau];
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix" 
+        // // Nasty fix to make Balmer lines show up in A0 stars!!
+       // if (teff > 8000.0){ 
+        // logKapH1ff = logKapH1ff - logE10*1.5;
+        //   }
+                  kappa = kappa + Math.exp(logKapH1ff); 
+       //System.out.println("HIff " + log10E*logKapH1ff);
+
+//if (iTau == 36 && iLam == 70){
+           //console.log("logKapH1ff " + log10E*(logKapH1ff)); //-rho[1][iTau]));
+//}
+
+//
+//Hminus:
+//
+// H^- b-f:
+//if (iTau == 36 && iLam == 142){
+ // System.out.println("temp " + temp[0][iTau] + " lambdanm " + lambdanm);
+ // }
+          logKapHmbf =  -99.0; //initialize default
+          //if ( (temp[0][iTau] > 2500.0) && (temp[0][iTau] < 10000.0) ){
+          if ( (temp[0][iTau] > 2500.0) && (temp[0][iTau] < 10000.0) ){
+          //if ( (temp[0][iTau] > 2500.0) && (temp[0][iTau] < 7000.0) ){
+             if ((lambdanm > 225.0) && (lambdanm < 1500.0) ){ //nm 
+//if (iTau == 36 && iLam == 142){
+ //              System.out.println("In KapHmbf condition...");
+//}
+                ii = 0.0;
+                alphaHmbf = signAHm[0]*Math.exp(logAHm[0]); //initialize accumulator
+                for (var i = 1; i < numHmTerms; i++){
+                   ii = 1.0*i;
+//if (iTau == 36 && iLam == 142){
+//                   System.out.println("ii " + ii);
+//}
+                   logTermHmbf = logAHm[i] + ii*logLambdaA; 
+                   alphaHmbf = alphaHmbf + signAHm[i]*Math.exp(logTermHmbf);  
+//if (iTau == 36 && iLam == 142){
+//                  System.out.println("logTermHmbf " + log10E*logTermHmbf + " i " + i + " logAHm " + log10E*logAHm[i]); 
+//}
+                }
+                logAlphaHmbf = Math.log(alphaHmbf);
+// cm^2 per neutral H atom
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix" 
+         //  logAHmbf = logAHmbf - logE10*1.0;  // **** Debug artificial "fix" 
+// *** DEBUG!  ***
+                logKapHmbf = logAHmbf + logAlphaHmbf + pe[1][iTau] + 2.5*logTheta + (0.754*theta)*logE10; 
+//Stimulated emission correction
+           logKapHmbf = logKapHmbf + logStimEm;
+//if (iTau == 36 && iLam == 142){
+//  System.out.println("alphaHmbf " + alphaHmbf);
+//  System.out.println("logKapHmbf " + log10E*logKapHmbf + " logAHmbf " + log10E*logAHmbf + " logAlphaHmbf " + log10E*logAlphaHmbf);
+//  }
+
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapHmbf = logKapHmbf + logNH1[iTau];
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix" 
+         //logKapHmbf = logKapHmbf - logE10*1.0;
+                  kappa = kappa + Math.exp(logKapHmbf); 
+       //System.out.println("Hmbf " + log10E*logKapHmbf);
+//if (iTau == 36 && iLam == 70){
+         //console.log("logE10*1.0 " + (logE10*1.0));
+           //console.log("logKapHmbf " + log10E*(logKapHmbf)); //-rho[1][iTau]));
+//}
+             } //wavelength condition
+          } // temperature condition
+
+// H^- f-f:
+          logKapHmff = -99.0; //initialize default
+          //if ( (temp[0][iTau] > 2500.0) && (temp[0][iTau] < 10000.0) ){
+          if ( (temp[0][iTau] > 2500.0) && (temp[0][iTau] < 10000.0) ){
+             if ((lambdanm > 260.0) && (lambdanm < 11390.0) ){ //nm 
+                 //construct "f_n" polynomials in log(lambda)
+                 for (var j = 0; j < 3; j++){
+                     fHm[j] = fHmTerms[j][0];  //initialize accumulators
+                 }    
+                 ii = 0.0;               
+                 for (var i = 1; i < numHmffTerms; i++){
+                     ii = 1.0*i;
+                     logLambdaAFac = Math.pow(log10LambdaA, ii);
+                     for (var j = 0; j < 3; j++){
+                        fHm[j] = fHm[j] + (fHmTerms[j][i]*logLambdaAFac);    
+                     } // i
+                  } // j
+// 
+     fPoly = fHm[0] + fHm[1]*log10Theta + fHm[2]*log10Theta*log10Theta;
+// In cm^2 per neutral H atom:
+// Stimulated emission alreadya ccounted for
+          logKapHmff = logAHmff + pe[1][iTau] + fPoly*logE10;
+
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapHmff = logKapHmff + logNH1[iTau];
+                  kappa = kappa + Math.exp(logKapHmff); 
+       //System.out.println("Hmff " + log10E*logKapHmff);
+//if (iTau == 36 && iLam == 70){
+           //console.log("logKapHmff " + log10E*(logKapHmff)); //-rho[1][iTau]));
+//}
+             } //wavelength condition
+          } // temperature condition
+
+
+// H^+_2:
+//
+       logKapH2p = -99.0; //initialize default 
+       if ( temp[0][iTau] < 4000.0 ){
+          if ((lambdanm > 380.0) && (lambdanm < 2500.0) ){ //nm 
+             sigmaH2p = sigmaH2pTerm[0]; //initialize accumulator
+             UH2p = UH2pTerm[0]; //initialize accumulator
+             ii = 0.0;
+             for (var i = 1; i < numH2pTerms; i++){
+                ii = 1.0*i; 
+                logLambdaAFac = Math.pow(log10LambdaA, ii);
+                // kapH2p way too large with lambda in A - try cm:  No! - leads to negative logs
+                //logLambdaAFac = Math.pow(logLambda, ii);
+                sigmaH2p = sigmaH2p +  sigmaH2pTerm[i] * logLambdaAFac; 
+                UH2p = UH2p +  UH2pTerm[i] * logLambdaAFac; 
+             }
+             logSigmaH2p = Math.log(sigmaH2p);
+             logKapH2p = logAH2p + logSigmaH2p - (UH2p*theta)*logE10 + logNH2[iTau]; 
+//Stimulated emission correction
+           logKapH2p = logKapH2p + logStimEm;
+
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapH2p = logKapH2p + logNH1[iTau];
+           kappa = kappa + Math.exp(logKapH2p); 
+  //System.out.println("H2p " + log10E*logKapH2p);
+//if (iTau == 36 && iLam == 70){
+//           console.log("logKapH2p " + log10E*(logKapH2p)); //-rho[1][iTau]) + " logAH2p " + log10E*logAH2p
+// + " logSigmaH2p " + log10E*logSigmaH2p + " (UH2p*theta)*logE10 " + log10E*((UH2p*theta)*logE10) + " logNH2[iTau] " + log10E*logNH2[iTau]);
+//}
+          } //wavelength condition
+       } // temperature condition
+
+
+//He I 
+//
+//  HeI b-f + f-f
+  //Scale sum of He b-f and f-f with sum of HI b-f and f-f 
+
+//wavelength condition comes from requirement that lower E level be greater than n=2 (edge at 22.78 nm)
+       logKapHe = -99.0; //default intialization
+       if ( temp[0][iTau] > 10000.0 ){
+          if (lambdanm > 22.8){ //nm  
+             totalH1Kap = Math.exp(logKapH1bf) + Math.exp(logKapH1ff);
+             logTotalH1Kap = Math.log(totalH1Kap); 
+             helpHe = k * temp[0][iTau];
+// cm^2 per neutral H atom (after all, it's scaled wrt kappHI
+// Stimulated emission already accounted for
+//
+//  *** CAUTION: Is this *really* the right thing to do???
+//    - we're re-scaling the final H I kappa in cm^2/g corrected for stim em, NOT the raw cross section
+             logKapHe = Math.log(4.0) - (10.92 / helpHe) + logTotalH1Kap;
+
+//Add it in to total - opacity per neutral HI atom, so multiply by logNH1 
+// This is now linear opacity in cm^-1
+           logKapHe = logKapHe + logNH1[iTau];
+                kappa = kappa + Math.exp(logKapHe); 
+       //System.out.println("He " + log10E*logKapHe);
+//if (iTau == 36 && iLam == 70){
+//           console.log("logKapHe " + log10E*(logKapHe)); //-rho[1][iTau]));
+//}
+          } //wavelength condition
+       } // temperature condition
+
+
+//
+//He^- f-f:
+       logKapHemff = -99.0; //default initialization
+       if ( (theta > 0.5) && (theta < 2.0) ){
+          if ((lambdanm > 500.0) && (lambdanm < 15000.0) ){ //nm 
+
+// initialize accumulators:
+     cHemff[0] = signC0HemffTerm[0]*Math.exp(logC0HemffTerm[0]);   
+     //System.out.println("C0HemffTerm " + signC0HemffTerm[0]*Math.exp(logC0HemffTerm[0]));
+     cHemff[1] = signC1HemffTerm[0]*Math.exp(logC1HemffTerm[0]);   
+     //System.out.println("C1HemffTerm " + signC1HemffTerm[0]*Math.exp(logC1HemffTerm[0]));
+     cHemff[2] = signC2HemffTerm[0]*Math.exp(logC2HemffTerm[0]);   
+     //System.out.println("C2HemffTerm " + signC2HemffTerm[0]*Math.exp(logC2HemffTerm[0]));
+     cHemff[3] = signC3HemffTerm[0]*Math.exp(logC3HemffTerm[0]);   
+     //System.out.println("C3HemffTerm " + signC3HemffTerm[0]*Math.exp(logC3HemffTerm[0]));
+//build the theta polynomial coefficients
+     ii = 0.0;
+     for (var i = 1; i < numHemffTerms; i++){
+        ii = 1.0*i;
+        thisLogTerm = ii*logTheta + logC0HemffTerm[i]; 
+        cHemff[0] = cHemff[0] + signC0HemffTerm[i]*Math.exp(thisLogTerm); 
+        //System.out.println("i " + i + " ii " + ii + " C0HemffTerm " + signC0HemffTerm[i]*Math.exp(logC0HemffTerm[i]));
+        thisLogTerm = ii*logTheta + logC1HemffTerm[i]; 
+        cHemff[1] = cHemff[1] + signC1HemffTerm[i]*Math.exp(thisLogTerm); 
+        //System.out.println("i " + i + " ii " + ii + " C1HemffTerm " + signC1HemffTerm[i]*Math.exp(logC1HemffTerm[i]));
+        thisLogTerm = ii*logTheta + logC2HemffTerm[i]; 
+        cHemff[2] = cHemff[2] + signC2HemffTerm[i]*Math.exp(thisLogTerm); 
+        //System.out.println("i " + i + " ii " + ii + " C2HemffTerm " + signC2HemffTerm[i]*Math.exp(logC2HemffTerm[i]));
+        thisLogTerm = ii*logTheta + logC3HemffTerm[i]; 
+        cHemff[3] = cHemff[3] + signC3HemffTerm[i]*Math.exp(thisLogTerm); 
+        //System.out.println("i " + i + " ii " + ii + " C3HemffTerm " + signC3HemffTerm[i]*Math.exp(logC3HemffTerm[i]));
+     }
+     
+//Build polynomial in logLambda for alpha(He^1_ff):
+       log10AlphaHemff = cHemff[0]; //initialize accumulation
+       //System.out.println("cHemff[0] " + cHemff[0]);
+       ii = 0.0;
+       for (var i = 1; i <= 3; i++){
+          //System.out.println("i " + i + " cHemff[i] " + cHemff[i]);
+          ii = 1.0*i;
+          thisTerm = cHemff[i] * Math.pow(log10LambdaA, ii);
+          log10AlphaHemff = log10AlphaHemff + thisTerm; 
+       } 
+       //System.out.println("log10AlphaHemff " + log10AlphaHemff);
+       alphaHemff = Math.pow(10.0, log10AlphaHemff); //gives infinite alphas!
+       // alphaHemff = log10AlphaHemff; // ?????!!!!!
+       //System.out.println("alphaHemff " + alphaHemff);
+
+// Note: this is the extinction coefficient per *Hydrogen* particle (NOT He- particle!)
+       //nHe = Math.exp(logNHe1[iTau]) + Math.exp(logNHe2[iTau]);
+       //logNHe = Math.log(nHe);
+       //logKapHemff = Math.log(alphaHemff) + Math.log(AHe) + pe[1][iTau] + logNHe1[iTau] - logNHe;
+       logKapHemff = logAHemff + Math.log(alphaHemff) + pe[1][iTau] + logNHe1[iTau] - logNH[iTau];
+
+//Stimulated emission already accounted for
+//Add it in to total - opacity per H particle, so multiply by logNH 
+// This is now linear opacity in cm^-1
+           logKapHemff = logKapHemff + logNH[iTau];
+                   kappa = kappa + Math.exp(logKapHemff); 
+       //System.out.println("Hemff " + log10E*logKapHemff);
+//if (iTau == 36 && iLam == 70){
+//if (iLam == 155){
+//           console.log("logKapHemff " + log10E*(logKapHemff)); //-rho[1][iTau]));
+//}
+ 
+             } //wavelength condition
+          } // temperature condition
+
+//
+// electron (e^-1) scattering (Thomson scattering)
+
+//coefficient per *"hydrogen atom"* (NOT per e^-!!) (neutral or total H??):
+    logKapE = logAlphaE + Ne[1][iTau] - logNH[iTau];
+
+//Stimulated emission not relevent 
+//Add it in to total - opacity per H particle, so multiply by logNH 
+// This is now linear opacity in cm^-1
+    //I know, we're adding logNH right back in after subtracting it off, but this is for dlarity and consistency for now... :
+           logKapE = logKapE + logNH[iTau];   
+               kappa = kappa + Math.exp(logKapE); 
+       //System.out.println("E " + log10E*logKapE);
+//if (iTau == 36 && iLam == 70){
+//           console.log("logKapE " + log10E*(logKapE)); //-rho[1][iTau]));
+//}
+
+//Metal b-f
+//Fig. 8.6 Gray 3rd Ed.
+//
+
+//
+// This is now linear opacity in cm^-1
+// Divide by mass density
+// This is now mass extinction in cm^2/g
+//
+// *** DEBUG!  ***
+         // ****  Following line is Debug artificial "fix"
+         //kappa = kappa / 100.0; 
+// *** DEBUG!  ***
+   logKappa[iLam][iTau] = Math.log(kappa) - rho[1][iTau];
+// Fudge is in cm^2/g:  Converto to natural log:
+ //console.log("base10 logKapFudge " + logKapFudge);
+   var logEKapFudge = logE10 * logKapFudge;
+ //console.log("baseE logKapFudge " + logKapFudge);
+   logKappa[iLam][iTau] = logKappa[iLam][iTau] + logEKapFudge;
+//if (iTau == 36 && iLam == 142){
+      //System.out.println(" " + log10E*(logKappa[iLam][iTau]+rho[1][iTau]));
+//}
+
+//
+
+        } // close iTau depth loop
+//
+     } //close iLam wavelength loop 
+
+      return logKappa;
+
+  }; //end method kappas2
+
+   var kapRos = function(numDeps, numLams, lambdas, logKappa, temp){
+
+     var kappaRos = [];
+     kappaRos.length = 2;
+     kappaRos[0] = [];
+     kappaRos[1] = [];
+     kappaRos[0].length = numDeps;
+     kappaRos[1].length = numDeps;
+
+     var numerator, denominator, deltaLam, logdBdTau, logNumerator, logDenominator;
+     var logTerm, logDeltaLam, logInvKap, logInvKapRos;
+
+     for (var iTau = 0; iTau < numDeps; iTau++){
+
+        numerator = 0.0; //initialize accumulator
+        denominator = 0.0;
+
+        for (var iLam = 1; iLam < numLams; iLam++){
+          
+           deltaLam = lambdas[iLam] - lambdas[iLam-1];  //lambda in cm
+           logDeltaLam = Math.log(deltaLam);
+
+           logInvKap = -1.0 * logKappa[iLam][iTau];
+           logdBdTau = dBdT(temp[0][iTau], lambdas[iLam]);
+           logTerm = logdBdTau + logDeltaLam;
+           denominator = denominator + Math.exp(logTerm); 
+           logTerm = logTerm + logInvKap;
+           numerator = numerator + Math.exp(logTerm);
+
+        }
+
+        logNumerator = Math.log(numerator);
+        logDenominator = Math.log(denominator);
+        logInvKapRos = logNumerator - logDenominator; 
+        kappaRos[1][iTau] = -1.0 * logInvKapRos; //logarithmic
+        kappaRos[0][iTau] = Math.exp(kappaRos[1][iTau]);
+
+     }
+
+     return kappaRos;
+
+  }; //end method kapRos  
+    
+
+   var getNz = function(numDeps, temp, pGas, pe, 
+                            ATot, nelemAbnd, logAz){
+
+   var logNz = [];
+   logNz.length = nelemAbnd;
+   for (var i = 0; i < nelemAbnd; i++){
+      logNz[i] = [];
+      logNz[i].length = numDeps;
+   }
+   
+   var logATot = Math.log(ATot);
+
+   var help, logHelp, logNumerator;
+
+   for (var i = 0 ; i < numDeps; i++){
+
+ // Initial safety check to avoid negative logNz as Pg and Pe each converge:
+ // maximum physical Pe is about 0.5*PGas (complete ionization of pure H): 
+      if (pe[0][i] > 0.5 * pGas[0][i]){
+          pe[0][i] = 0.5 * pGas[0][i];
+          pe[1][i] = Math.log(pe[0][i]);
+      }
+ // H (Z=1) is a special case: N_H(tau) = (Pg(tau)-Pe(tau))/{kTk(tau)A_Tot}
+      logHelp = pe[1][i] - pGas[1][i];
+      help = 1.0 - Math.exp(logHelp);
+      logHelp = Math.log(help);
+      logNumerator = pGas[1][i] + logHelp; 
+      logNz[0][i] = logNumerator - logK - temp[1][i] - logATot;
+
+// Remaining elements:
+      for (var j = 0; j < nelemAbnd; j++){
+         // N_z = A_z * N_H:
+         logNz[j][i] = logAz[j] + logNz[0][i];
+      } 
+ 
+    } 
+
+   return logNz; 
+
+  };
+
+   var massDensity2 = function(numDeps, nelemAbnd, logNz, cname){
+   
+     var rho = [];
+     rho.length = 2;
+     rho[0] = [];
+     rho[1] = [];
+     rho[0].length = numDeps;
+     rho[1].length = numDeps;
+
+     var logAddend, addend;
+     var lAmu = logAmu;
+
+//Prepare log atomic masses once for each element:
+     var logAMass = [];
+     logAMass.length = nelemAbnd;
+     for (var j = 0; j < nelemAbnd; j++){
+       logAMass[j] = Math.log(getMass(cname[j]));
+       //System.out.println("j " + j + " logAMass " + logAMass[j]);
+     }
+     for (var i = 0; i < numDeps; i++){
+
+       rho[0][i] = 0.0;
+       for (var j = 0; j < nelemAbnd; j++){
+          logAddend = logNz[j][i] + lAmu + logAMass[j];
+          rho[0][i] = rho[0][i] + Math.exp(logAddend); 
+          rho[1][i] = Math.log(rho[0][i]);
+       }
+
+     }
+      return rho;  
+      
+   };
+ 
+    
+// This approach is based on integrating the formal solution of the hydrostaitc equilibrium equation
+// on the otical depth (Tau) scale.  Advantage is that it makes better use of the itial guess at
+// pgas    
+//
+//  Takes in *Gas* pressure, converts tot *total pressure*, then returns *Gas* pressure
+//
+    var hydroFormalSoln = function(numDeps, grav, tauRos, kappa, temp, guessPGas) {
+
+var c = 2.9979249E+10; // light speed in vaccuum in cm/s
+var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var h = 6.62606957E-27; //Planck's constant in ergs sec
+var ee = 4.80320425E-10; //fundamental charge unit in statcoulombs (cgs)
+var mE = 9.10938291E-28; //electron mass (g)
+var GConst = 6.674e-8; //Newton's gravitational constant (cgs)
+//Conversion factors
+var amu = 1.66053892E-24; // atomic mass unit in g
+var eV = 1.602176565E-12; // eV in ergs
+var rSun = 6.955e10; // solar radii to cm
+var mSun = 1.9891e33; // solar masses to g
+var lSun = 3.846e33; // solar bolometric luminosities to ergs/s
+
+//Methods:
+//Natural logs more useful than base 10 logs - Eg. Formal soln module: 
+// Fundamental constants
+var logC = Math.log(c);
+var logSigma = Math.log(sigma);
+var logK = Math.log(k);
+var logH = Math.log(h);
+var logEe = Math.log(ee); //Named so won't clash with log_10(e)
+var logMe = Math.log(mE);
+var logGConst = Math.log(GConst);
+//Conversion factors
+var logAmu = Math.log(amu);
+var logEv = Math.log(eV);
+   
+        var press = [];
+        press.length = 2;
+        press[0] = [];
+        press[1] = [];
+        press[0].length = numDeps;
+        press[1].length = numDeps;
+
+        var radFac = Math.log(4.0) + logSigma - Math.log(3.0) - logC;
+
+        var logEg = Math.log(grav); //Natural log g!! 
+        // no needed if integrating in natural log?? //double logLogE = Math.log(Math.log10(Math.E));
+        var log1p5 = Math.log(1.5);
+
+//Compute radiation pressure for this temperature structure and add it to Pgas 
+//
+       var pT, pRad;
+       var logPRad = []; 
+       logPRad.length = numDeps;
+       var logPTot = []; 
+       logPTot.length = numDeps;
+       for (var i = 0; i < numDeps; i++){
+           logPRad[i] = radFac + 4.0 * temp[1][i];
+           pRad = Math.exp(logPRad[i]);
+      //System.out.println("i " + i + " pRad " + pRad);
+           pT = guessPGas[0][i] + pRad;
+           logPTot[i] = Math.log(pT);
+       }
+
+  var help, logHelp, logPress;
+  var term, logSum, integ, logInteg, lastInteg;
+  var deltaLogT; 
+  var sum = []; 
+  sum.length = numDeps;
+
+//Upper boundary - inherit from intiial guess:
+//Carefull here - P at upper boundary can be an underestimate, but it must not be greater than value at next depth in!
+//  press[1][0] = logPTot[0];
+//  press[1][0] = guessPGas[1][0];
+   press[1][0] = Math.log(1.0e-4); //try same upper boundary as Phoenix
+//
+   press[0][0] = Math.exp(press[1][0]);
+//Corresponding value of basic integrated quantity at top of atmosphere:
+  logSum = 1.5 * press[1][0] + Math.log(0.666667) - logEg;
+  sum[0] = Math.exp(logSum); 
+  
+// Integrate inward on logTau scale
+
+// CAUTION; This is not an integral for Delta P, but for P once integral at each tau is exponentiated by 2/3!
+// Accumulate basic integral to be exponentiated, then construct pressure values later:
+
+//Jump start integration with an Euler step:
+    deltaLogT = tauRos[1][1] - tauRos[1][0];
+// log of integrand
+    logInteg = tauRos[1][1] + 0.5*logPTot[1] - kappa[1][1];
+    lastInteg = Math.exp(logInteg);  
+    sum[1] = sum[0] + lastInteg * deltaLogT; 
+
+// Continue with extended trapezoid rule:
+   
+    for (var i = 2; i < numDeps; i++){
+
+      deltaLogT = tauRos[1][i] - tauRos[1][i-1];
+      logInteg = tauRos[1][i] + 0.5*logPTot[i] - kappa[1][i];
+      integ = Math.exp(logInteg);
+      term = 0.5 * (integ + lastInteg) * deltaLogT;
+      sum[i] = sum[i-1] + term; //accumulate basic integrated quantity
+      lastInteg = integ;  
+
+    } 
+
+    for (var i = 1; i < numDeps; i++){
+//Evaluate total pressures from basic integrated quantity at edach depth 
+// our integration variable is the natural log, so I don't think we need the 1/log(e) factor
+       logPress = 0.666667 * (log1p5 + logEg + Math.log(sum[i]));
+//Subtract radiation pressure:
+       logHelp = logPRad[i] - logPress;
+       help = Math.exp(logHelp);
+// FOr hot and low g stars: limit Prad to 50% Ptot so we doen't get netaive Pgas and rho values:
+       if (help > 0.5){
+          help = 0.5;
+       }
+       press[1][i] = logPress + Math.log(1.0 - help);
+       press[0][i] = Math.exp(press[1][i]);
+    }
+
+     return press;   //*Gas* pressure
+
+ }; //end method hydroFormalSoln()
+ 
+
+// Compute radiation pressure
+    var radPress = function(numDeps, temp) {
+
+var c = 2.9979249E+10; // light speed in vaccuum in cm/s
+var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var h = 6.62606957E-27; //Planck's constant in ergs sec
+var ee = 4.80320425E-10; //fundamental charge unit in statcoulombs (cgs)
+var mE = 9.10938291E-28; //electron mass (g)
+var GConst = 6.674e-8; //Newton's gravitational constant (cgs)
+//Conversion factors
+var amu = 1.66053892E-24; // atomic mass unit in g
+var eV = 1.602176565E-12; // eV in ergs
+var rSun = 6.955e10; // solar radii to cm
+var mSun = 1.9891e33; // solar masses to g
+var lSun = 3.846e33; // solar bolometric luminosities to ergs/s
+
+//Methods:
+//Natural logs more useful than base 10 logs - Eg. Formal soln module: 
+// Fundamental constants
+var logC = Math.log(c);
+var logSigma = Math.log(sigma);
+var logK = Math.log(k);
+var logH = Math.log(h);
+var logEe = Math.log(ee); //Named so won't clash with log_10(e)
+var logMe = Math.log(mE);
+var logGConst = Math.log(GConst);
+//Conversion factors
+var logAmu = Math.log(amu);
+var logEv = Math.log(eV);
+
+        var pRad = [];
+        pRad.length = 2;
+        pRad[0] = [];
+        pRad[1] = [];
+        pRad[0].length = numDeps;
+        pRad[1].length = numDeps;
+
+        var logC = logC;
+        var logSigma = logSigma;
+        var radFac = Math.log(4.0) + logSigma - Math.log(3.0) - logC;
+       for (var i = 0; i < numDeps; i++){
+           pRad[1][i] = radFac + 4.0 * temp[1][i];
+           pRad[0][i] = Math.exp( pRad[1][i]);
+      } 
+
+      return pRad;
+
+    }; //end method radPress
