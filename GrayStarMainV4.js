@@ -2509,6 +2509,8 @@ ifConvec = false;
     //var numLines = 2;  //debug
     var listName = [];
     listName.length = numLines;
+    var listLamLbl = [];
+    listLamLbl.length = numLines;
     var listElement = [];
     listElement.length = numLines;
     var listLam0 = []; // nm
@@ -2564,8 +2566,9 @@ ifConvec = false;
     //    
         
     //CaII K
-    listName[0] = "Ca II K";
+    listName[0] = "Ca II HK";
     listElement[0] = "Ca";
+    listLamLbl[0] = " ";
     listLam0[0] = 393.366;
     listA12[0] = eheu[19];
     listLogf[0] = -0.166;
@@ -2579,8 +2582,10 @@ ifConvec = false;
     listStage[0] = 1;
     
      //CaII H
-     listName[1] = "Ca II H";
+     //listName[1] = "Ca II H";
+     listName[1] = " ";
      listElement[1] = "Ca";
+     listLamLbl[1] = " ";
      listLam0[1] = 396.847;
      listA12[1] = eheu[19];
      listLogf[1] = -0.482;
@@ -2594,8 +2599,10 @@ ifConvec = false;
      listStage[1] = 1;
      
      //Hepsilon
-     listName[2] = "H I <em>&#949</em>";
+     //listName[2] = "H I <em>&#949</em>";
+     listName[2] = " ";
      listElement[2] = "H";
+     listLamLbl[2] = " ";
      listLam0[2] = 397.1198;
      listA12[2] = 12.0; //By definition - it's Hydrogen
      listLogf[2] = logE*Math.log(1.2711e-02);
@@ -2609,8 +2616,10 @@ ifConvec = false;
      listStage[2] = 0;
 
      //Fe I 4045
-     listName[3] = "Fe I";
+     //listName[3] = "Fe I";
+     listName[3] = " ";
      listElement[3] = "Fe";
+     listLamLbl[3] = " ";
      listLam0[3] = 404.581;
      listA12[3] = eheu[25]; 
      listLogf[3] = -0.674;
@@ -2626,6 +2635,7 @@ ifConvec = false;
      //Hdelta
      listName[4] = "H I <em>&#948</em>";
      listElement[4] = "H";
+     listLamLbl[4] = " ";
      listLam0[4] = 410.174;
      listA12[4] = 12.0; //By definition - it's Hydrogen
      listLogf[4] = -1.655;
@@ -2641,6 +2651,7 @@ ifConvec = false;
      //CaI 4227
      listName[5] = "Ca I";
      listElement[5] = "Ca";
+     listLamLbl[5] = "4227";
      listLam0[5] = 422.673;
      listA12[5] = eheu[19];
      listLogf[5] = 0.243;
@@ -2654,8 +2665,10 @@ ifConvec = false;
      listStage[5] = 0;
 
      //Fe I 4271
-     listName[6] = "Fe I";
+     //listName[6] = "Fe I";
+     listName[6] = " ";
      listElement[6] = "Fe";
+     listLamLbl[6] = " ";
      listLam0[6] = 427.176;
      listA12[6] = eheu[25]; 
      listLogf[6] = -1.118;
@@ -2671,6 +2684,7 @@ ifConvec = false;
      //Hgamma
      listName[7] = "H I <em>&#947</em>";
      listElement[7] = "H";
+     listLamLbl[7] = " ";
      listLam0[7] = 434.047;
      listA12[7] = 12.0; //By definition - it's Hydrogen
      listLogf[7] = -1.350;
@@ -2685,8 +2699,10 @@ ifConvec = false;
 
 
      //Fe I 4384 
-     listName[8] = "Fe I";
+     //listName[8] = "Fe I";
+     listName[8] = " ";
      listElement[8] = "Fe";
+     listLamLbl[8] = " ";
      listLam0[8] = 438.47763;
      listA12[8] = eheu[25]; 
      listLogf[8] = logE*Math.log( 1.76e-01);
@@ -2702,6 +2718,7 @@ ifConvec = false;
      //He I 4387
      listName[9] = "He I";
      listElement[9] = "He";
+     listLamLbl[9] = "4388";
      listLam0[9] = 438.793;
      listA12[9] = eheu[1];
      listLogf[9] = -1.364;
@@ -2717,6 +2734,7 @@ ifConvec = false;
      //He I 4471
      listName[10] = "He I";
      listElement[10] = "He";
+     listLamLbl[10] = "4471";
      listLam0[10] = 447.147;
      listA12[10] = eheu[1];
      listLogf[10] = -0.986;
@@ -2730,8 +2748,10 @@ ifConvec = false;
      listStage[10] = 0;
 
      //Mg II 4482.2387
-     listName[11] = "Mg II 4482.387";
+     //listName[11] = "4482.387";
+     listName[11] = " ";
      listElement[11] = "Mg";
+     listLamLbl[11] = " ";
      listLam0[11] = 448.2387; //nm
      listA12[11] = eheu[11]; // Grevesse & Sauval 98
      listLogf[11] = logE*Math.log(9.35e-01);
@@ -2745,8 +2765,9 @@ ifConvec = false;
      listStage[11] = 1;
 
      //Mg II 4482.2387
-     listName[12] = "Mg II 4482.584";
+     listName[12] = "Mg II";
      listElement[12] = "Mg";
+     listLamLbl[12] = "4482";
      listLam0[12] = 448.2584; //nm
      listA12[12] = eheu[11]; // Grevesse & Sauval 98
      listLogf[12] = logE*Math.log(9.81e-01);
@@ -2762,6 +2783,7 @@ ifConvec = false;
      //Hbeta
      listName[13] = "H I <em>&#946</em>";
      listElement[13] = "H";
+     listLamLbl[13] = " ";
      listLam0[13] = 486.128;
      listA12[13] = 12.0; //By definition - it's Hydrogen
      listLogf[13] = -0.914;
@@ -2777,6 +2799,7 @@ ifConvec = false;
      //MgIb1
      listName[14] = "Mg I <em>b</em><sub>1</sub>";
      listElement[14] = "Mg";
+     listLamLbl[14] = " ";
      listLam0[14] = 518.360; //nm
      listA12[14] = eheu[11]; // Grevesse & Sauval 98
      listLogf[14] = -0.867;
@@ -2790,8 +2813,10 @@ ifConvec = false;
      listStage[14] = 0;
 
      //NaID2
-     listName[15] = "Na I <em>D</em><sub>2</sub>";
+     //listName[15] = "Na I <em>D</em><sub>2</sub>";
+     listName[15] = " ";
      listElement[15] = "Na";
+     listLamLbl[15] = " ";
      listLam0[15] = 588.995;
      listA12[15] = eheu[10]; // Grevesse & Sauval 98
      listLogf[15] = -0.193;
@@ -2805,8 +2830,9 @@ ifConvec = false;
      listStage[15] = 0;
      
      //NaID1
-     listName[16] = "Na I <em>D</em><sub>1</sub>";
+     listName[16] = "Na I <em>D</em><sub>1, 2</sub>";
      listElement[16] = "Na";
+     listLamLbl[16] = " ";
      listLam0[16] = 589.592; //nm
      listA12[16] = eheu[10]; // Grevesse & Sauval 98    
      listLogf[16] = -0.495;
@@ -2822,6 +2848,7 @@ ifConvec = false;
      //Halpha
      listName[17] = "H I <em>&#945</em>";
      listElement[17] = "H";
+     listLamLbl[17] = " ";
      listLam0[17] = 656.282;
      listA12[17] = 12.0; //By definition - it's Hydrogen
      listLogf[17] = -0.193;
@@ -4815,8 +4842,9 @@ Spectral line \n\
 
             nameLbl = "<span style='font-size: xx-small'>" + listName[i] + "</span>";
             lamLblNum = listLam0[i].toPrecision(4);
-            lamLblStr = lamLblNum.toString(10);
-            lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
+            //lamLblStr = lamLblNum.toString(10);
+            //lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
+            lamLbl = "<span style='font-size: xx-small'>" + listLamLbl[i] + "</span>";
             txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
             txtPrint(lamLbl, xPos, yPos + 10, RGBHex, plotTenId);
             //Make the tick label, Teff:
@@ -7076,7 +7104,7 @@ Spectral line \n\
 
     // Plot sixteen: ionization equlibrium: logNums vs tau 
     // 
-    if ( (ifLineOnly === false) && (ifShowAtmos === true) && (ionEqElement != "None") ) {
+    if ( (ifLineOnly === false) && ((ifShowAtmos === true) && (ionEqElement != "None")) ) {
 //
         var plotRow = 4;
         var plotCol = 0;

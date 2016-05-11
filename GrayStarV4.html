@@ -746,13 +746,7 @@
                 <span title="Turn atmospheric structure plots on/off">
                     <input id="showAtmos" type="checkbox" name="showAtmos" />Atmosphere
                 </span>
-                <span title="Turn radiation field plots on/off">
-                    <input id="showRad" type="checkbox" name="showRad" />Radiation field
-                </span>       
-                <span title="Turn high resolution spectral line plots on/off">
-                    <input id="showLine" type="checkbox" name="showLine" />High resolution spectral line
-                </span>   
-               <span title="Turn ionization equilibrium plot on/off">
+               <span title="Turn ionization equilibrium plot on/off - requires that 'Atmospheric plots' are selected">
                     <!-- <input id="showLogNums" type="checkbox" name="showLogNums" /a>Ion equilibrium -->
                     <select id="showLogNums" name = "showLogNums">
                        <option value = "None">None</option>
@@ -773,7 +767,13 @@
                        <option value = "Fe">Fe</option>
                        <option value = "Co">Co</option>
                        <option value = "Ni">Ni</option>
-                    </select>Ionization Eq
+                    </select>Ionization Eq (<em>if</em> Atmos plots <strong>ON</strong>)
+                <span title="Turn radiation field plots on/off">
+                    <input id="showRad" type="checkbox" name="showRad" />Radiation field
+                </span>       
+                <span title="Turn high resolution spectral line plots on/off">
+                    <input id="showLine" type="checkbox" name="showLine" />High resolution spectral line
+                </span>   
                 </span>
             </fieldset>
             <fieldset>
