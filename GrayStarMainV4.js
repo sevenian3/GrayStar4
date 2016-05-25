@@ -2991,7 +2991,7 @@ ifConvec = false;
     //    
         
     //CaII K
-    listName[0] = "Ca II HK";
+    listName[0] = "CaIIHK";
     listElement[0] = "Ca";
     listLamLbl[0] = " ";
     listLam0[0] = 393.366;
@@ -3058,7 +3058,7 @@ ifConvec = false;
      listStage[3] = 0;
      
      //Hdelta
-     listName[4] = "H I <em>&#948</em>";
+     listName[4] = "HI<em>&#948</em>";
      listElement[4] = "H";
      listLamLbl[4] = " ";
      listLam0[4] = 410.174;
@@ -3074,7 +3074,7 @@ ifConvec = false;
      listStage[4] = 0;
      
      //CaI 4227
-     listName[5] = "Ca I";
+     listName[5] = "CaI";
      listElement[5] = "Ca";
      listLamLbl[5] = "4227";
      listLam0[5] = 422.673;
@@ -3107,7 +3107,7 @@ ifConvec = false;
      listStage[6] = 0;
     
      //Hgamma
-     listName[7] = "H I <em>&#947</em>";
+     listName[7] = "HI<em>&#947</em>";
      listElement[7] = "H";
      listLamLbl[7] = " ";
      listLam0[7] = 434.047;
@@ -3141,7 +3141,7 @@ ifConvec = false;
      listStage[8] = 0;
 
      //He I 4387
-     listName[9] = "He I";
+     listName[9] = "HeI";
      listElement[9] = "He";
      listLamLbl[9] = "4388";
      listLam0[9] = 438.793;
@@ -3157,7 +3157,7 @@ ifConvec = false;
      listStage[9] = 0;
 
      //He I 4471
-     listName[10] = "He I";
+     listName[10] = "HeI";
      listElement[10] = "He";
      listLamLbl[10] = "4471";
      listLam0[10] = 447.147;
@@ -3190,7 +3190,7 @@ ifConvec = false;
      listStage[11] = 1;
 
      //Mg II 4482.2387
-     listName[12] = "Mg II";
+     listName[12] = "MgII";
      listElement[12] = "Mg";
      listLamLbl[12] = "4482";
      listLam0[12] = 448.2584; //nm
@@ -3206,7 +3206,7 @@ ifConvec = false;
      listStage[12] = 1;
 
      //Hbeta
-     listName[13] = "H I <em>&#946</em>";
+     listName[13] = "HI<em>&#946</em>";
      listElement[13] = "H";
      listLamLbl[13] = " ";
      listLam0[13] = 486.128;
@@ -3222,7 +3222,8 @@ ifConvec = false;
      listStage[13] = 0;
 
      //MgIb1
-     listName[14] = "Mg I <em>b</em><sub>1</sub>";
+     //listName[14] = "Mg I <em>b</em><sub>1</sub>";
+     listName[14] = "MgI<em>b</em>";
      listElement[14] = "Mg";
      listLamLbl[14] = " ";
      listLam0[14] = 518.360; //nm
@@ -3255,7 +3256,8 @@ ifConvec = false;
      listStage[15] = 0;
      
      //NaID1
-     listName[16] = "Na I <em>D</em><sub>1, 2</sub>";
+     //listName[16] = "NaI<em>D</em><sub>1, 2</sub>";
+     listName[16] = "NaI<em>D</em>";
      listElement[16] = "Na";
      listLamLbl[16] = " ";
      listLam0[16] = 589.592; //nm
@@ -3271,7 +3273,7 @@ ifConvec = false;
      listStage[16] = 0;
  
      //Halpha
-     listName[17] = "H I <em>&#945</em>";
+     listName[17] = "HI<em>&#945</em>";
      listElement[17] = "H";
      listLamLbl[17] = " ";
      listLam0[17] = 656.282;
@@ -5182,6 +5184,7 @@ Spectral line \n\
         }
         var rangeZData = maxZData - minZData;
         //var yAxisName = "<span title='Monochromatic surface flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'>Log<sub>10</sub> <em>F</em><sub>&#955</sub> <br /> ergs s<sup>-1</sup> cm<sup>-3</sup></a></span>";
+        var xAxisName = "<em>&#955</em> (nm)";
 
         
         var fineness = "normal";
@@ -5286,15 +5289,16 @@ Spectral line \n\
         barHeight = 20; //initialize
         RGBHex = "#000000"; //black
         //
+        var iCount = 0;
         for (var i = 0; i < numLines; i++) {
 
-            if ((i % 4) === 0) {
+            if ((iCount % 4) === 0) {
                 yPos = thisYPos - 25;
                 barHeight = 20;
-            } else if ((i % 4) === 1) {
+            } else if ((iCount % 4) === 1) {
                 yPos = thisYPos + 85;
                 barHeight = 20;
-            } else if ((i % 4) === 2) {
+            } else if ((iCount % 4) === 2) {
                 yPos = thisYPos - 45;
                 barHeight = 50;
             } else {
@@ -5320,8 +5324,12 @@ Spectral line \n\
             //cnvsTenCtx.fillText(listName[i], xPos, yPos);
             //cnvsTenCtx.fillText(lamLblStr, xPos, yPos+10);
 
+            if (listName[i] != " "){
+               iCount++;
+            }
+
         }
-    }
+    } //end PLOT TEN
 
 //
 //
