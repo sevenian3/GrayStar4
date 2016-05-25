@@ -1008,7 +1008,7 @@ var minMax2 = function(x) {
 
 
 
-// Graound state ionization energies in eV 
+// Ground state ionization energies in eV 
 //From NIST Atomic Spectra Database
 //Ionization Energies Data
 //Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2014). NIST Atomic Spectra Database (ver. 5.2), [Online]. Available: http://physics.nist.gov/asd [2015, November 23]. National Institute of Standards and Technology, Gaithersburg, MD.
@@ -1508,13 +1508,78 @@ return ionE;
 
 };  //end of method getIonE    
 
+// Molecular dissociation energies in eV 
+//From NIST Allen's Astrophysical Quantities, 4th Ed.
 
-// Ground state ionization energies in eV 
-//From NIST Atomic Spectra Database
-//Ionization Energies Data
-//Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2014). NIST Atomic Spectra Database (ver. 5.2), [Online]. Available: http://physics.nist.gov/asd [2015, November 23]. National Institute of Standards and Technology, Gaithersburg, MD.
-//Heaviest element treatable: La
 
+
+   var getDissE = function(species){
+
+   var dissE = 8.0; //default initialization
+
+      if (species == "H2"){
+         dissE = 4.4781;
+       }
+      if (species == "H2+"){
+         dissE = 2.6507;
+       }
+      if (species == "C2"){
+         dissE = 6.296;
+       }
+      if (species == "CH"){
+         dissE = 3.465;
+       }
+      if (species == "CO"){
+         dissE = 11.092;
+       }
+      if (species == "CN"){
+         dissE = 7.76;
+       }
+      if (species == "N2"){
+         dissE = 9.759;
+       }
+      if (species == "NH"){
+         dissE = 3.47;
+       }
+      if (species == "NO"){
+         dissE = 6.497;
+       }
+      if (species == "O2"){
+         dissE = 5.116;
+       }
+      if (species == "OH"){
+         dissE = 4.392;
+       }
+      if (species == "MgH"){
+         dissE = 1.34;
+       }
+      if (species == "SiO"){
+         dissE = 8.26;
+       }
+      if (species == "CaH"){
+         dissE = 1.70;
+       }
+      if (species == "CaO"){
+         dissE = 4.8;
+       }
+      if (species == "TiO"){
+         dissE = 6.87;
+       }
+      if (species == "VO"){
+         dissE = 6.4;
+       }
+      if (species == "FeO"){
+         dissE = 4.20;
+       }
+
+//
+return dissE;
+
+};  //end of method getDissE    
+
+
+//Partition functions at two representative temperatures,
+//from Allen's Astrophysical quantities
 // CAUTION: Return Base 10 log_10 of partition fn
 //Ionization stages that don't exist (eg. "HIII") are given dummy values of 0.0;
 

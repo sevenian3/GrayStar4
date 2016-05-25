@@ -275,6 +275,7 @@ function main() {
     var ifPrintIntens = false;
     var ifPrintLDC = false;
     var ifPrintLine = false;
+    var ifPrintChem = false;
     //
     //
 
@@ -363,6 +364,9 @@ function main() {
     }
     if ($("#printLine").is(":checked")) {
         ifPrintLine = true; // checkbox
+    }
+    if ($("#printChem").is(":checked")) {
+        ifPrintChem = true; // checkbox
     }
 
     //       
@@ -640,8 +644,8 @@ function main() {
 
     var numDeps = 48;
   var nelemAbnd = 40;
-  var nome = [];
-  nome.length = nelemAbnd;
+//  var nome = [];
+//  nome.length = nelemAbnd;
   var eheu = []; 
   eheu.length = nelemAbnd; //log_10 "A_12" values
   var logAz = []; 
@@ -654,6 +658,7 @@ function main() {
   }
   var cname = [];
   cname.length = nelemAbnd;
+/*
 //nome is the Kurucz code - in case it's ever useful
   nome[0]=   100;
   nome[1]=   200;
@@ -695,6 +700,7 @@ function main() {
   nome[37]=  5600;
   nome[38]=  5700;
   nome[39]=  5500;
+*/
 //log_10 "A_12" values:
  eheu[0]= 12.00;
  eheu[1]= 10.93;
@@ -736,32 +742,69 @@ function main() {
  eheu[37]=  2.18;
  eheu[38]=  1.10;
  eheu[39]=  1.12;
+//Associate diatomic molecules with each element that forms significant molecules:
+//Initialize arrays:
+  var numAssocMols = 4; //max number of associated molecules
+  var cnameMols = [];
+  cnameMols.length = nelemAbnd;
+  for (var iElem = 0; iElem < nelemAbnd; iElem++){
+     cnameMols[iElem] = [];
+     cnameMols[iElem].length = numAssocMols;
+     for (var iMol = 0; iMol < numAssocMols; iMol++){
+         cnameMols[iElem][iMol] = "None";
+     }  //iMol loop
+  } //iElem loop
+//CAUTION: cnameMols names should match mnames names in general list of molecules blow
+//List the four molecular species most likely to deplete the atomic species A
   cname[0]="H";
+  cnameMols[0][0] = "H2";
+  cnameMols[0][1] = "H2+";
+  cnameMols[0][2] = "CH";
+  cnameMols[0][3] = "OH";
   cname[1]="He";
   cname[2]="Li";
   cname[3]="Be";
   cname[4]="B";
   cname[5]="C";
+  cnameMols[5][0] = "CH";
+  cnameMols[5][1] = "CO";
+  cnameMols[5][2] = "CN";
+  cnameMols[5][3] = "C2";
   cname[6]="N";
+  cnameMols[6][0] = "NH";
+  cnameMols[6][1] = "NO";
+  cnameMols[6][2] = "CN";
+  cnameMols[6][3] = "N2";
   cname[7]="O";
+  cnameMols[7][0] = "OH";
+  cnameMols[7][1] = "CO";
+  cnameMols[7][2] = "NO";
+  cnameMols[7][3] = "O2";
   cname[8]="F";
   cname[9]="Ne";
   cname[10]="Na";
   cname[11]="Mg";
+  cnameMols[11][0] = "MgH";
   cname[12]="Al";
   cname[13]="Si";
+  cnameMols[13][0] = "SiO";
   cname[14]="P";
   cname[15]="S";
   cname[16]="Cl";
   cname[17]="Ar";
   cname[18]="K";
   cname[19]="Ca";
+  cnameMols[19][0] = "CaH";
+  cnameMols[19][1] = "CaO";
   cname[20]="Sc";
   cname[21]="Ti";
+  cnameMols[21][0] = "TiO";
   cname[22]="V";
+  cnameMols[22][0] = "VO";
   cname[23]="Cr";
   cname[24]="Mn";
   cname[25]="Fe";
+  cnameMols[25][0] = "FeO";
   cname[26]="Co";
   cname[27]="Ni";
   cname[28]="Cu";
@@ -776,6 +819,79 @@ function main() {
   cname[37]="Ba";
   cname[38]="La";
   cname[39]="Cs";
+
+//Diatomic molecules:
+  var nMols = 18;
+//  var nMols = 1;
+  var mname = [];
+  var mnameA = [];
+  var mnameB = [];
+  mname.length = nMols;
+  mnameA.length = nMols;
+  mnameB.length = nMols;
+
+//CAUTION: The molecular number densities, N_AB, will be computed, and will deplete the atomic species, in this order!
+// Put anything where A or B is Hydrogen FIRST - HI is an inexhaustable reservoir at low T
+// Then rank molecules according to largest of A and B abundance, "weighted" by dissociation energy - ??
+//
+// For constituent atomic species, A and B, always designate as 'A' whichever element participates in the 
+//  *fewest other* molecuels - we'll put A on the LHS of the molecular Saha equation
+
+  mname[0] = "H2";
+  mnameA[0] = "H"; 
+  mnameB[0] = "H"; 
+  mname[1] = "H2+";
+  mnameA[1] = "H"; 
+  mnameB[1] = "H"; 
+  mname[2] = "OH";
+  mnameA[2] = "O"; 
+  mnameB[2] = "H"; 
+  mname[3] = "CH";
+  mnameA[3] = "C"; 
+  mnameB[3] = "H"; 
+  mname[4] = "NH";
+  mnameA[4] = "N"; 
+  mnameB[4] = "H"; 
+  mname[5] = "MgH";
+  mnameA[5] = "Mg"; 
+  mnameB[5] = "H"; 
+  mname[6] = "CaH";
+  mnameA[6] = "Ca"; 
+  mnameB[6] = "H"; 
+  mname[7] = "O2";
+  mnameA[7] = "O"; 
+  mnameB[7] = "O"; 
+  mname[8] = "CO";
+  mnameA[8] = "C"; 
+  mnameB[8] = "O"; 
+  mname[9] = "C2";
+  mnameA[9] = "C"; 
+  mnameB[9] = "C"; 
+  mname[10] = "NO";
+  mnameA[10] = "N"; 
+  mnameB[10] = "O"; 
+  mname[11] = "CN";
+  mnameA[11] = "C"; 
+  mnameB[11] = "N"; 
+  mname[12] = "N2";
+  mnameA[12] = "N"; 
+  mnameB[12] = "N"; 
+  mname[13] = "FeO";
+  mnameA[13] = "Fe"; 
+  mnameB[13] = "O"; 
+  mname[14] = "SiO";
+  mnameA[14] = "Si"; 
+  mnameB[14] = "O"; 
+  mname[15] = "CaO";
+  mnameA[15] = "Ca"; 
+  mnameB[15] = "O"; 
+  mname[16] = "TiO";
+  mnameA[16] = "Ti"; 
+  mnameB[16] = "O"; 
+  mname[17] = "VO";
+  mnameA[17] = "V"; 
+  mnameB[17] = "O"; 
+
 
   var logE = logTen(Math.E); // for debug output
   var logE10 = Math.log(10.0);
@@ -1083,7 +1199,7 @@ function main() {
          chiI1 = getIonE(species);
          settingsId[10].value = chiI1;
          $("#chi_I1").val(chiI1);
-         console.log("thisCname " + thisCname + " species " + species + " chiI1 " + chiI1);
+         //console.log("thisCname " + thisCname + " species " + species + " chiI1 " + chiI1);
       //THe following is a 2-element vector of temperature-dependent partitio fns, U,
       // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
          log10Gw1V = getPartFn(species); //base 10 log_10 U
@@ -1120,7 +1236,7 @@ function main() {
 //
     flagArr[0] = false;
     var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
-    var minTeff = 500.0;
+    var minTeff = 2500.0;
     var maxTeff = 50000.0;
     if (teff === null || teff == "") {
         alert("Teff must be filled out");
@@ -1771,6 +1887,7 @@ function main() {
             (ifPrintSED === true) ||
             (ifPrintIntens === true) ||
             (ifPrintLDC === true) ||
+            (ifPrintChem === true) ||
             (ifPrintLine === true)) {
         printModelId.style.display = "block";
     } else if (ifPrintNone === true) {
@@ -2139,7 +2256,8 @@ function main() {
   //   console.log("i " + i + " " + logE*guessPGas[1][i] + " " + logE*guessPe[1][i] + " " + logE*guessNe[1][i]);
  // }
 
-  var numStages = 5;
+//One more than stage than actual number populated:
+  var numStages = 4;
   var species = " "; //default initialization
   var logNH = []; 
   logNH.length = numDeps;
@@ -2153,6 +2271,15 @@ function main() {
         masterStagePops[i][j].length = numDeps;
      }
   }
+//Default initialization of  masterStagePops - now necessary for iterative coupling of ionization
+// and molecular equilibria
+  for (var i = 0; i < nelemAbnd; i++){
+     for (var j = 0; j < numStages; j++){
+        for (var k = 0; k < numDeps; k++){
+           masterStagePops[i][j][k] = -49.0; //logarithmic!
+        }
+     }
+  }
   var tauOneStagePops = [];
   tauOneStagePops.length = nelemAbnd;
   for (var i = 0; i < nelemAbnd; i++){
@@ -2161,20 +2288,56 @@ function main() {
   }
   var unity = 1.0;
   var zScaleList = 1.0; //initialization
-  var thisUw1V = []; 
-  thisUw1V.length = 2;
-  var thisUw2V = []; 
-  thisUw2V.length = 2;
-  var thisUw3V = []; 
-  thisUw3V.length = 2;
-  var thisUw4V = []; 
-  thisUw4V.length = 2;
- //Ground state ionization E - Stage I (eV)
-  var thisChiI1;
- //Ground state ionization E - Stage II (eV)
-  var thisChiI2;
-  var thisChiI3;
-  var thisChiI4;
+  var log10UwAArr = [];
+  log10UwAArr.length = numStages;
+  for (var i = 0; i < numStages; i++){
+    log10UwAArr[i] = [];
+    log10UwAArr[i].length = 2;
+    log10UwAArr[i][0] = 0.0; //default initialization - logarithmic
+    log10UwAArr[i][1] = 0.0; //default initialization - logarithmic
+  }
+//  var thisUw1V = []; 
+//  thisUw1V.length = 2;
+//  var thisUw2V = []; 
+//  thisUw2V.length = 2;
+//  var thisUw3V = []; 
+//  thisUw3V.length = 2;
+//  var thisUw4V = [];*/ 
+//  thisUw4V.length = 2;
+//
+  var chiIArr = [];
+  chiIArr.length = numStages;
+// //Ground state ionization E - Stage I (eV)
+//  var thisChiI1;
+// //Ground state ionization E - Stage II (eV)
+//  var thisChiI2;
+//  var thisChiI3;
+//  var thisChiI4;
+//
+//For diatomic molecules:
+ var speciesAB = " ";
+ var speciesA = " ";
+ var speciesB = " ";
+ var massA, massB, logMuAB;
+ var masterMolPops = [];
+ masterMolPops.length = nMols; 
+ for (var i = 0; i < nMols; i++){
+    masterMolPops[i] = [];
+    masterMolPops[i].length = numDeps;
+ }
+//initialize masterMolPops for mass density (rho) calculation:
+  for (var i = 0; i < nMols; i++){
+    for (var j = 0; j < numDeps; j++){
+       masterMolPops[i][j] = -49.0;  //these are logarithmic
+    }
+  }
+  var thisUwAV = [];
+  thisUwAV.length = 2;
+  var thisUwBV = [];
+  thisUwBV.length = 2;
+  var thisQwAB;
+  var thisDissE;
+//
   var newNe = [];
   newNe.length = 2;
   newNe[0] = [];
@@ -2187,12 +2350,21 @@ function main() {
   newPe[1] = [];
   newPe[0].length = numDeps;
   newPe[1].length = numDeps;
+//For atomic and ionic species:
   var logNums = [];
   logNums.length = numStages;
   for (var i = 0; i < numStages; i++){
     logNums[i] = [];
     logNums[i].length = numDeps;
   }
+// For diatomic molecules:
+  var logNumA = [];
+  logNumA.length = numDeps;
+  var logNumB = [];
+  logNumB.length = numDeps;
+  var logNumFracAB = [];
+  logNumFracAB.length = numDeps;
+//
   var Ng = []; 
   Ng.length = numDeps;
   //var mmw = []; 
@@ -2229,6 +2401,7 @@ function main() {
 //
 //
 //Begin Pgas/Pe iteration
+    var maxZDonor = 28; //Nickel
     for (var pIter = 0; pIter < 1; pIter++){
 //
 //
@@ -2240,9 +2413,10 @@ function main() {
      }
 
 //Get mass density from chemical composition:
-     rho = massDensity2(numDeps, nelemAbnd, logNz, cname);
+     rho = massDensity2(numDeps, nelemAbnd, logNz, cname,
+                                 nMols, masterMolPops, mname, mnameA, mnameB);
      //for (var i = 0 ; i < numDeps; i++){
-       //System.out.println("i " + i + " rho " + logE*rho[1][i]);
+     //  console.log("i " + i + " rho " + logE*rho[1][i]);
     // }
 
 
@@ -2255,15 +2429,75 @@ function main() {
 //
 //  Default inializations:
        zScaleList = 1.0; //initialization
-       //these 2-element temperature-dependent partition fns are logarithmic
-       thisUw1V[0] = 0.0;
-       thisUw1V[1] = 0.0;
-       thisUw2V[0] = 0.0;
-       thisUw2V[1] = 0.0;
-       thisUw3V[0] = 0.0;
-       thisUw3V[1] = 0.0;
-       thisUw4V[0] = 0.0;
-       thisUw4V[1] = 0.0;
+
+var amu = 1.66053892E-24; // atomic mass unit in g
+var logAmu = Math.log(amu);
+
+//for diatomic molecules
+       var logNumBArr = [];
+       logNumBArr.length = numAssocMols;
+       var log10UwBArr = [];
+       log10UwBArr.length = numAssocMols;
+
+       for (var i = 0; i < numAssocMols; i++){
+          logNumBArr[i] = [];
+          logNumBArr[i].length = numDeps;
+          log10UwBArr[i] = [];
+          log10UwBArr[i].length = 2;
+       }
+       var dissEArr = [];
+       dissEArr.length = numAssocMols;
+       var log10QwABArr = [];
+       log10QwABArr.length = numAssocMols;
+       var logMuABArr = [];
+       logMuABArr.length = numAssocMols;
+
+// Arrays ofpointers into master molecule and element lists:
+   var mname_ptr = [];
+   mname_ptr.length = numAssocMols;
+   var specB_ptr = [];
+   specB_ptr.length = numAssocMols;
+   var specA_ptr = 0;
+   var specB2_ptr = 0;
+   var mnameBtemplate = " ";
+
+//Default initialization:
+       for (var i = 0; i < numAssocMols; i++){ 
+           for (var j = 0; j < numDeps; j++){
+               logNumBArr[i][j] = -49.0; 
+           }
+           log10UwBArr[i][0] = 0.0;
+           log10UwBArr[i][1] = 0.0;
+           dissEArr[i] = 29.0;  //eV
+           log10QwABArr[i] = 0.0;
+           logMuABArr[i] = Math.log(2.0) + logAmu;  //g
+           mname_ptr[i] = 0;
+           specB_ptr[i] = 0;
+       }
+        
+       var defaultQwAB = 0.0; //for now
+    //default that applies to most cases - neutral stage (I) forms molecules
+       var specBStage = 0; //default that applies to most cases
+      
+   //For element A of main molecule being treated in *molecular* equilibrium:
+   //For safety, assign default values where possible
+       var nmrtrDissE = 15.0; //prohitively high by default
+       var nmrtrLog10UwB = [];
+       nmrtrLog10UwB.length = 2;
+       nmrtrLog10UwB[0] = 0.0;
+       nmrtrLog10UwB[1] = 0.0;
+       var nmrtrLog10UwA = 0.0;
+       var nmrtrLog10QwAB = 0.0;
+       var nmrtrLogMuAB = logAmu;
+       var nmrtrLogNumB = [];
+       nmrtrLogNumB.length = numDeps;
+       for (var i = 0; i < numDeps; i++){
+          nmrtrLogNumB[i] = 0.0;
+       }
+
+     var totalIonic;
+     var logGroundRatio = [];
+     logGroundRatio.length = numDeps;
 
 // Iteration *within* the outer Pe-Pgas iteration:
 //Iterate the electron densities and ionization fractions:
@@ -2272,39 +2506,89 @@ function main() {
 
    //console.log(" iTau " + " logNums[iStage][iTau]");
    //console.log(" species " + " thisChiI " + " thisUwV");
-   for (var iElem = 0; iElem < nelemAbnd; iElem++){
+   for (var iElem = 0; iElem < maxZDonor; iElem++){
        //console.log("iElem " + iElem);
        species = cname[iElem] + "I";
-       thisChiI1 = getIonE(species);
+       chiIArr[0] = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
     // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-       thisUw1V = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[0] = getPartFn(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
        species = cname[iElem] + "II";
-       thisChiI2 = getIonE(species);
-       thisUw2V = getPartFn(species); //base 10 log_10 U
+       chiIArr[1] = getIonE(species);
+       log10UwAArr[1] = getPartFn(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
        species = cname[iElem] + "III";
-       thisChiI3 = getIonE(species);
-       thisUw3V = getPartFn(species); //base 10 log_10 U
+       chiIArr[2] = getIonE(species);
+       log10UwAArr[2] = getPartFn(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
        species = cname[iElem] + "IV";
-       thisChiI4 = getIonE(species);
-       thisUw4V = getPartFn(species); //base 10 log_10 U
+       chiIArr[3] = getIonE(species);
+       log10UwAArr[3] = getPartFn(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
-            //if H or He, make sure zScale is unity:
-            if ((cname[iElem] == "H")
-                    || (cname[iElem] == "He")) {
-                zScaleList = 1.0;
-                //fakeGw1 = 2.0;  //fix for Balmer lines
-            } else {
-                zScaleList = zScale;
-                //fakeGw1 = 1.0;  //fix for Balmer lines
-            }
-       logNums = stagePops(logNz[iElem], guessNe, thisChiI1,
-             thisChiI2, thisChiI3, thisChiI4, thisUw1V, thisUw2V, thisUw3V, thisUw4V,
-             numDeps, zScaleList, tauRos, temp);
+       //logNums = stagePops(logNz[iElem], guessNe, thisChiI1,
+       //      thisChiI2, thisChiI3, thisChiI4, thisUw1V, thisUw2V, thisUw3V, thisUw4V,
+       //      numDeps, temp);
+       //Find any associated moleculear species in which element A can participate:
+       //console.log("iElem " + iElem + " cname " + cname[iElem]);
+       //console.log("numAssocMols " + numAssocMols);
+       var thisNumMols = 0; //default initialization
+       for (var iMol = 0; iMol < numAssocMols; iMol++){
+          //console.log("iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
+          if (cnameMols[iElem][iMol] == "None"){
+            break;
+          }
+          thisNumMols++;
+       }
+     //console.log("thisNumMols " + thisNumMols);
+     if (thisNumMols > 0){
+       //Find pointer to molecule in master mname list for each associated molecule:
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+          for (var jj = 0; jj < nMols; jj++){
+             if (cnameMols[iElem][iMol] == mname[jj]){
+                mname_ptr[iMol] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master mnames list
+       } //iMol loop in associated molecules
+//Now find pointer to atomic species B in master cname list for each associated molecule found in master mname list!
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+          for (var jj = 0; jj < nelemAbnd; jj++){
+             if (mnameB[mname_ptr[iMol]] == cname[jj]){
+                specB_ptr[iMol] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master cnames list
+       } //iMol loop in associated molecules
+
+//Now load arrays with molecular species AB and atomic species B data for method stagePops2()  
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+  //special fix for H^+_2:
+         if (mnameB[mname_ptr[iMol]] == "H2+"){
+            specBStage = 1;
+         } else {
+            specBStage = 0;
+         }
+          for (var iTau = 0; iTau < numDeps; iTau++){
+             //console.log("iMol " + iMol + " iTau " + iTau + " specB_ptr[iMol] " + specB_ptr[iMol]);
+//Note: Here's one place where ionization equilibrium iteratively couples to molecular equilibrium!
+             logNumBArr[iMol][iTau] = masterStagePops[specB_ptr[iMol]][specBStage][iTau];
+          }
+          dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
+          species = cname[specB_ptr[iMol]] + "I"; //neutral stage
+          log10UwBArr[iMol] = getPartFn(species); //base 10 log_10 U 
+          log10QwABArr[iMol] = defaultQwAB;
+          //Compute the reduced mass, muAB, in g:
+          massA = getMass(cname[iElem]);
+          massB = getMass(cname[specB_ptr[iMol]]);
+          logMuABArr[iMol] = Math.log(massA) + Math.log(massB) - Math.log(massA + massB) + logAmu;
+       }
+   } //if thisNumMols > 0 condition
+       logNums = stagePops2(logNz[iElem], guessNe, chiIArr, log10UwAArr, 
+                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+                     numDeps, temp)
+
      for (var iStage = 0; iStage < numStages; iStage++){
        //console.log("iStage " + iStage);
           for (var iTau = 0; iTau < numDeps; iTau++){
@@ -2321,19 +2605,157 @@ function main() {
             //  }
             // }
   } //iElem loop
+//
 
+// Compute all molecular populations:
+//
+// *** CAUTION: specB2_ptr refers to element B of main molecule being treated
+// specB_ptr[] is an array of pointers to element B of all molecules associated with
+// element A 
+// mname_ptr[] is an array of pointers pointing to the molecules themselves that are 
+// associated with element A
+   for (var iMol = 0; iMol < nMols; iMol++){
+
+ //Find elements A and B in master atomic element list:  
+ //console.log("iMol " + iMol + " mname[iMol] " + mname[iMol] + " mnameA[iMol] " + mnameA[iMol] + " mnameB[iMol] " + mnameB[iMol]);
+    specA_ptr = 0;
+    specB2_ptr = 0;  
+    for (var jj = 0; jj < nelemAbnd; jj++){
+       if (mnameA[iMol] == cname[jj]){
+         specA_ptr = jj;
+         break;  //found it!
+       }
+    }
+  //console.log("specA_ptr " + specA_ptr + " cname[specA_ptr] " + cname[specA_ptr]); 
+// Get its partition fn:
+    species = cname[specA_ptr] + "I"; //neutral stage
+    var log10UwA = getPartFn(species); //base 10 log_10 U
+    for (var jj = 0; jj < nelemAbnd; jj++){
+       if (mnameB[iMol] == cname[jj]){
+         specB2_ptr = jj;
+         break;  //found it!
+       }
+    } 
+  //console.log("specB2_ptr " + specB2_ptr + " cname[specB2_ptr] " + cname[specB2_ptr]); 
+  
+//We will solve for N_AB/N_A - neutral stage of species A (AI) will be kept on LHS of molecular Saha equations -
+// Therefore, we need ALL the molecules species A participates in - including the current molecule itself  
+// - at this point, it's just like setting up the ionization equilibrium to account for molecules as above...    
+       var thisNumMols = 0; //default initialization
+       for (var im = 0; im < numAssocMols; im++){
+          //console.log("iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
+          if (cnameMols[specA_ptr][im] == "None"){
+            break;
+          }
+          thisNumMols++;
+       }
+     //console.log("thisNumMols " + thisNumMols);
+     if (thisNumMols > 0){
+       //Find pointer to molecule in master mname list for each associated molecule:
+       for (var im = 0; im < thisNumMols; im++){
+          for (var jj = 0; jj < nMols; jj++){
+             if (cnameMols[specA_ptr][im] == mname[jj]){
+                mname_ptr[im] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master mnames list
+   //console.log("im " + im + " mname_ptr[im] " + mname_ptr[im] + " mname[mname_ptr[im]] " + mname[mname_ptr[im]]);
+       } //im loop in associated molecules
+
+//Now find pointer to atomic species B in master cname list for each associated molecule found in master mname list!
+       for (var im = 0; im < thisNumMols; im++){
+          mnameBtemplate = " "; //initialization
+// "Species B" is whichever element is NOT species "A" in master molecule
+          if (mnameB[mname_ptr[im]] == mnameA[iMol]){
+             //get the *other* atom
+             mnameBtemplate = mnameA[mname_ptr[im]];
+          } else {
+             mnameBtemplate = mnameB[mname_ptr[im]];
+          }
+          //console.log("mnameA[mname_ptr[im]] " + mnameA[mname_ptr[im]] + " mnameB[mname_ptr[im]] " + mnameB[mname_ptr[im]] + " mnameBtemplate " + mnameBtemplate); 
+          for (var jj = 0; jj < nelemAbnd; jj++){
+             if (mnameBtemplate == cname[jj]){
+                //console.log("If condition met: jj " + jj + " cname[jj] " + cname[jj]);
+                specB_ptr[im] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master cnames list
+   //console.log("im " + im + " specB_ptr[im] " + specB_ptr[im] + " cname[specB_ptr[im]] " + cname[specB_ptr[im]]);
+       } //iMol loop in associated molecules
+   
+//Now load arrays with molecular species AB and atomic species B data for method molPops()  
+       for (var im = 0; im < thisNumMols; im++){
+      //special fix for H^+_2:
+         if (mname[mname_ptr[im]] == "H2+"){
+           specBStage = 1;
+         } else {
+           specBStage = 0;
+         }
+          for (var iTau = 0; iTau < numDeps; iTau++){
+             //console.log("iMol " + iMol + " iTau " + iTau + " specB_ptr[iMol] " + specB_ptr[iMol]);
+//Note: Here's one place where ionization equilibrium iteratively couples to molecular equilibrium!
+             logNumBArr[im][iTau] = masterStagePops[specB_ptr[im]][specBStage][iTau];
+          }
+          dissEArr[im] = getDissE(mname[mname_ptr[im]]);
+          species = cname[specB_ptr[im]] + "I";
+          log10UwBArr[im] = getPartFn(species); //base 10 log_10 U 
+          log10QwABArr[im] = defaultQwAB;
+          //Compute the reduced mass, muAB, in g:
+          massA = getMass(cname[specA_ptr]);
+          massB = getMass(cname[specB_ptr[im]]);
+          logMuABArr[im] = Math.log(massA) + Math.log(massB) - Math.log(massA + massB) + logAmu;
+ // One of the species A-associated molecules will be the actual molecule, AB, for which we want
+ // the population - pick this out for the numerator in the master fraction:
+          if (mname[mname_ptr[im]] == mname[iMol]){
+              nmrtrDissE = dissEArr[im];
+ //console.log("Main: log10UwBArr[im][0] " + log10UwBArr[im][0] + " log10UwBArr[im][1] " + log10UwBArr[im][1]);
+              nmrtrLog10UwB[0] = log10UwBArr[im][0];
+              nmrtrLog10UwB[1] = log10UwBArr[im][1];
+              nmrtrLog10QwAB = log10QwABArr[im]; 
+              nmrtrLogMuAB = logMuABArr[im];
+ //console.log("Main: nmrtrDissE " + nmrtrDissE + " nmrtrLogMuAB " + nmrtrLogMuAB);
+              for (var iTau = 0; iTau < numDeps; iTau++){
+                 nmrtrLogNumB[iTau] = logNumBArr[im][iTau];
+              }
+          }
+       } //im loop
+ //console.log("Main: nmrtrLog10UwB[0] " + nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + nmrtrLog10UwB[1]);
+//
+   } //if thisNumMols > 0 condition
+   //
+   //Compute total population of particle in atomic ionic stages over number in ground ionization stage
+   //for master denominator so we don't have to re-compue it:
+         for (var iTau = 0; iTau < numDeps; iTau++){
+           //initialization: 
+           totalIonic = 0.0;  
+           for (var iStage = 0; iStage < numStages; iStage++){
+              totalIonic = totalIonic + Math.exp(masterStagePops[specA_ptr][iStage][iTau]);
+           }
+           logGroundRatio[iTau] = Math.log(totalIonic) - masterStagePops[specA_ptr][0][iTau];    
+         }
+       logNumFracAB = molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB, 
+                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+                     logGroundRatio, numDeps, temp)
+
+//Load molecules into master molecular population array:
+      for (var iTau = 0; iTau < numDeps; iTau++){
+         masterMolPops[iMol][iTau] = logNz[specA_ptr][iTau] + logNumFracAB[iTau];
+         //console.log(" " + iTau + " masterMolPops " + logE*masterMolPops[iMol][iTau]);
+      }
+  } //master iMol loop
+//
 //Compute updated Ne & Pe:
      //initialize accumulation of electrons at all depths
      for (var iTau = 0; iTau < numDeps; iTau++){
        newNe[0][iTau] = 0.0;
      }
      for (var iTau = 0; iTau < numDeps; iTau++){
-        for (var iElem = 0; iElem < nelemAbnd; iElem++){
+        for (var iElem = 0; iElem < maxZDonor; iElem++){
           newNe[0][iTau] = newNe[0][iTau]
                    + Math.exp(masterStagePops[iElem][1][iTau])   //1 e^- per ion
-                   + 2.0 * Math.exp(masterStagePops[iElem][2][iTau])   //2 e^- per ion
-                   + 3.0 * Math.exp(masterStagePops[iElem][3][iTau])   //3 e^- per ion
-                   + 4.0 * Math.exp(masterStagePops[iElem][4][iTau]);   //4 e^- per ion
+                   + 2.0 * Math.exp(masterStagePops[iElem][2][iTau]);   //2 e^- per ion
+                   //+ 3.0 * Math.exp(masterStagePops[iElem][3][iTau]);   //3 e^- per ion
+                   //+ 4.0 * Math.exp(masterStagePops[iElem][4][iTau]);   //4 e^- per ion
         }
         newNe[1][iTau] = Math.log(newNe[0][iTau]);
 // Update guess for iteration:
@@ -2346,8 +2768,6 @@ function main() {
 
   } //end Ne - ionzation fraction iteration
 
-
-
 //Total number density of gas particles: nuclear species + free electrons:
 //AND
  //Compute mean molecular weight, mmw ("mu"):
@@ -2355,12 +2775,17 @@ function main() {
       Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
     }
     for (var i = 0; i < numDeps; i++){
+      //atomic & ionic sepies:
       for (var j = 0; j < nelemAbnd; j++){
-         Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); //initialize accumulation
+         Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); 
       }
+//      //molecular species:
+//      for (var j = 0; j < nMols; j++){
+//         Ng[i] =  Ng[i] + Math.exp(masterMolPops[j][i]); 
+//      }
      logMmw = rho[1][i] - Math.log(Ng[i]);  // in g
      mmw[i] = Math.exp(logMmw);
-       //System.out.println("i " + i + " Ng " + Math.log10(Ng[i]) + " mmw " + (mmw[i]/Useful.amu));
+     //console.log("i " + i + " Ng " + logE*Math.log(Ng[i]) + " rho " + logE*rho[1][i] + " mmw " + (mmw[i]/amu));
     }
 
 
@@ -2506,7 +2931,7 @@ ifConvec = false;
 //
 //Line list:
     var numLines = 18;
-    //var numLines = 2;  //debug
+    //var numLines = 1;  //debug
     var listName = [];
     listName.length = numLines;
     var listLamLbl = [];
@@ -3069,7 +3494,7 @@ ifConvec = false;
                listLogNums[1][iTau] = masterStagePops[iAbnd][1][iTau];
                listLogNums[4][iTau] = masterStagePops[iAbnd][2][iTau];
                listLogNums[5][iTau] = masterStagePops[iAbnd][3][iTau];
-               listLogNums[6][iTau] = masterStagePops[iAbnd][4][iTau];
+               //listLogNums[6][iTau] = masterStagePops[iAbnd][4][iTau];
   //             console.log("iLine " + iLine + " iTau " + iTau + " listLogNums[] " + logE*listLogNums[0][iTau] + 
    //       " " + logE*listLogNums[1][iTau] + " " + logE*listLogNums[4][iTau] + " " + logE*listLogNums[5][iTau]);
             }
@@ -3080,11 +3505,11 @@ ifConvec = false;
 //console.log("iLine " + iLine + " listLam0nm " + listLam0nm + " listChiL " + listChiL[iLine] +
 // " thisUwV[] " + thisUwV[0] + " " + thisUwV[1] + " listGwL " + listGwL[iLine]);  
             var numHelp = levelPops(listLam0nm, listLogNums[logNums_ptr], listChiL[iLine], thisUwV,
-                     listGwL[iLine], numDeps, tauRos, temp);
+                     listGwL[iLine], numDeps, temp);
 
            for (var iTau = 0; iTau < numDeps; iTau++){
                listLogNums[2][iTau] = numHelp[iTau];
-               listLogNums[3][iTau] = -19.0; //upper E-level - not used - fake for testing with gS3 line treatment
+               listLogNums[3][iTau] = -49.0; //upper E-level - not used - fake for testing with gS3 line treatment
                if (species == "HI" && iTau == 36){
                  //console.log("iLine " + iLine + " listChiL " + listChiL[iLine] + " listLogNums[2]/NH " + logE*(listLogNums[2][iTau]-logNH[36]));  
                }
@@ -3478,15 +3903,56 @@ var logEv = Math.log(eV);
    //console.log("User: chiI1 " + chiI1 + " chiI2 " + chiI2 + " chiI3 " + chiI3 + " chiI4 " + chiI4 +
     // " log10Gw1V " + log10Gw1V[0] + " " + log10Gw1V[1] + " log10Gw2V " + log10Gw2V[0] + " " + log10Gw2V[1] +
      //" log10Gw3V " + log10Gw3V[0] + " " + log10Gw3V[1] + " log10Gw4V " + log10Gw4V[0] + " " + log10Gw4V[1]);
-   var logN = stagePops(thisLogN, newNe, chiI1,
-         chiI2, chiI3, chiI4, log10Gw1V, log10Gw2V, log10Gw3V, log10Gw4V,
-         numDeps, zScale, tauRos, temp);
+//load arrays for stagePops2():
+       chiIArr[0] = chiI1;
+       chiIArr[1] = chiI2;
+       chiIArr[2] = chiI3;
+       chiIArr[3] = chiI4;
+       log10UwAArr[0][0] = log10Gw1V[0]; 
+       log10UwAArr[0][1] = log10Gw1V[1]; 
+       log10UwAArr[1][0] = log10Gw2V[0]; 
+       log10UwAArr[1][1] = log10Gw2V[1]; 
+       log10UwAArr[2][0] = log10Gw3V[0]; 
+       log10UwAArr[2][1] = log10Gw3V[1]; 
+       log10UwAArr[3][0] = log10Gw4V[0]; 
+       log10UwAArr[3][1] = log10Gw4V[1]; 
+
+//One phantom molecule:
+    var fakeNumMols = 1;
+    var fakeLogNumB = [];
+    fakeLogNumB.length = 1;
+    fakeLogNumB[0] = [];
+    fakeLogNumB[0].length = numDeps;
+    for (var i = 0; i < numDeps; i++){
+      fakeLogNumB[0][i] = -49.0;
+    }
+    var fakeDissEArr = [];
+    fakeDissEArr.length = 1;
+    fakeDissEArr[0] = 29.0; //eV
+    var fakeLog10UwBArr = [];
+    fakeLog10UwBArr.length = 1;
+    fakeLog10UwBArr[0] = [];
+    fakeLog10UwBArr[0].length = 2;
+    fakeLog10UwBArr[0][0] = 0.0;
+    fakeLog10UwBArr[0][1] = 0.0;
+    var fakeLog10QwABArr = [];
+    fakeLog10QwABArr.length = 1;
+    fakeLog10QwABArr[0] = 0.0;
+    var fakeLogMuABArr = [];
+    fakeLogMuABArr.length = 1;
+    fakeLogMuABArr[0] = Math.log(2.0) + logAmu; //g 
+  // var logN = stagePops(thisLogN, newNe, chiI1,
+  //       chiI2, chiI3, chiI4, log10Gw1V, log10Gw2V, log10Gw3V, log10Gw4V,
+  //       numDeps, temp);
+    var logN = stagePops2(thisLogN, newNe, chiIArr, log10UwAArr, 
+                fakeNumMols, fakeLogNumB, fakeDissEArr, fakeLog10UwBArr, fakeLog10QwABArr, fakeLogMuABArr, 
+                numDeps, temp);
     for (var iTau = 0; iTau < numDeps; iTau++){
          logNums[0][iTau] = logN[0][iTau];
          logNums[1][iTau] = logN[1][iTau];
          logNums[4][iTau] = logN[2][iTau];
          logNums[5][iTau] = logN[3][iTau];
-         logNums[6][iTau] = logN[4][iTau];
+         //logNums[6][iTau] = logN[4][iTau];
       //   console.log("User: iTau " + iTau + " logNums[] " + logE*logNums[0][iTau] + 
        //  " " + logE*logNums[1][iTau] + " " + logE*logNums[4][iTau] + " " + logE*logNums[5][iTau]);
        }
@@ -3507,7 +3973,7 @@ var logEv = Math.log(eV);
     //console.log("User: lam0 " + lam0 + " chiL " + chiL + " thisUwV " + thisUwV[0] + " " + thisUwV[1] +
     //   " gwL " + gwL);
     numHelp = levelPops(lam0, logN[stage_ptr], chiL, thisUwV, gwL,
-         numDeps, tauRos, temp);
+         numDeps, temp);
     for (var iTau = 0; iTau < numDeps; iTau++){
         logNums[2][iTau] = numHelp[iTau];
      //   console.log("User: iTau " + iTau + " logNums[2] " + logE*logNums[2][iTau]);  
@@ -3520,7 +3986,7 @@ var logEv = Math.log(eV);
     var chiU = chiL + Math.exp(logTransE);
     //console.log("chiL " + chiL + " chiU " + chiU);
     numHelp = levelPops(lam0, logN[stage_ptr], chiU, thisUwV, gwL,
-         numDeps, tauRos, temp);
+         numDeps, temp);
     for (var iTau = 0; iTau < numDeps; iTau++){
         logNums[3][iTau] = numHelp[iTau]; //upper E-level - not used - fake for testing with gS3 line treatment
         //console.log("iTau " + iTau + " logNums[2] " + logE*logNums[2][iTau] + " logNums[3] " + logE*logNums[3][iTau]);  
@@ -6715,8 +7181,8 @@ Spectral line \n\
 
         //var minYData = logE * kappaRos[1][1] - 1.0; // Avoid upper boundary condition [i]=0
         //var maxYData = logE * kappaRos[1][numDeps - 1];
-        var minYData = logKappa[numLams-10][4];
-        var maxYData = logKappa[10][numDeps-2];
+        var minYData = logE*logKappa[numLams-10][4];
+        var maxYData = logE*logKappa[10][numDeps-2];
         var yAxisName = "Log<sub>10</sub> <em>&#954<sub>&#955</sub></em> <br />(cm<sup>2</sup> g<sup>-1</sup>)";
 
         var fineness = "normal";
@@ -6922,8 +7388,8 @@ Spectral line \n\
         //var xAxisName = "Log<sub>10</sub> &#955 (nm)";
         //var numYTicks = 4;
         //now done above var norm = 1.0e15; // y-axis normalization
-        var minYData = logKappa[numLams-10][4];
-        var maxYData = logKappa[10][numDeps-2];
+        var minYData = logE*logKappa[numLams-10][4];
+        var maxYData = logE*logKappa[10][numDeps-2];
         var yAxisName = "Log<sub>10</sub> <em>&#954<sub>&#955</sub></em> <br />(cm<sup>2</sup> g<sup>-1</sup>)";
         ////Logarithmic y:
         //var minYData = 12.0;
@@ -6994,8 +7460,8 @@ Spectral line \n\
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 //Logarithmic y:
-        var yTickPosCnvsM2 = yAxisLength * ((logKappa[0][tTauM2]) - minYData) / rangeYData;
-        var yTickPosCnvs1 = yAxisLength * ((logKappa[0][tTau1]) - minYData) / rangeYData;
+        var yTickPosCnvsM2 = yAxisLength * ((logE*logKappa[0][tTauM2]) - minYData) / rangeYData;
+        var yTickPosCnvs1 = yAxisLength * ((logE*logKappa[0][tTau1]) - minYData) / rangeYData;
         //var yTickPosCnvsRM2 = yAxisLength * ((kappaRos[1][tTauM2]) - minYData) / rangeYData;
         //var yTickPosCnvsR1 = yAxisLength * ((kappaRos[1][tTau1]) - minYData) / rangeYData;
         // vertical position in pixels - data values increase upward:
@@ -7012,8 +7478,8 @@ Spectral line \n\
             xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 
 //logarithmic y:
-            yTickPosCnvsM2 = yAxisLength * ((logKappa[i][tTauM2]) - minYData) / rangeYData;
-            yTickPosCnvs1 = yAxisLength * ((logKappa[i][tTau1]) - minYData) / rangeYData;
+            yTickPosCnvsM2 = yAxisLength * ((logE*logKappa[i][tTauM2]) - minYData) / rangeYData;
+            yTickPosCnvs1 = yAxisLength * ((logE*logKappa[i][tTau1]) - minYData) / rangeYData;
             //yTickPosCnvsRM2 = yAxisLength * ((kappaRos[1][tTauM2]) - minYData) / rangeYData;
             //yTickPosCnvsR1 = yAxisLength * ((kappaRos[1][tTau1]) - minYData) / rangeYData;
             // vertical position in pixels - data values increase upward:
@@ -7058,7 +7524,7 @@ Spectral line \n\
         var lambdanm = 1.0e7 * lambdaScale[0];
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        var yTickPosCnvsR1 = yAxisLength * ((kappaRos[1][tTau1]) - minYData) / rangeYData;
+        var yTickPosCnvsR1 = yAxisLength * ((logE*kappaRos[1][tTau1]) - minYData) / rangeYData;
         var yShiftCnvsR1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsR1;
         cnvsFifteenCtx.beginPath();
         RGBHex = colHex(0, 0, 0);
@@ -7073,7 +7539,7 @@ Spectral line \n\
         var lambdanm = 1.0e7 * lambdaScale[0];
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        var yTickPosCnvsRM2 = yAxisLength * ((kappaRos[1][tTauM2]) - minYData) / rangeYData;
+        var yTickPosCnvsRM2 = yAxisLength * ((logE*kappaRos[1][tTauM2]) - minYData) / rangeYData;
         var yShiftCnvsRM2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsRM2;
         cnvsFifteenCtx.beginPath();
         RGBHex = colHex(0, 0, 0);
@@ -7106,6 +7572,8 @@ Spectral line \n\
     // 
     if ( (ifLineOnly === false) && ((ifShowAtmos === true) && (ionEqElement != "None")) ) {
 //
+        var ifMolPlot = false; //initial default value
+
         var plotRow = 4;
         var plotCol = 0;
         var minXData = logE * tauRos[1][0] - 0.0;
@@ -7113,15 +7581,45 @@ Spectral line \n\
         var xAxisName = "<span title='Rosseland mean optical depth'><a href='http://en.wikipedia.org/wiki/Optical_depth_%28astrophysics%29' target='_blank'>Log<sub>10</sub> <em>&#964</em><sub>Ros</sub></a></span>";
         // Don't use upper boundary condition as lower y-limit - use a couple of points below surface:
         //var numYTicks = 6;
-        // Build total P from P_Gas & P_Rad:
           var iAbnd = 0; //initialization
           for (var jj = 0; jj < nelemAbnd; jj++){
              if (ionEqElement == cname[jj]){
-                 break;   //we found it
+                   break;   //we found it
                  }
              iAbnd++;
           } //jj loop
-           var plotLogNums = [];
+
+         if (iAbnd == nelemAbnd){
+// we have a molecule!
+             ifMolPlot = true;
+             var iAbndMol = 0;
+             for (var jj = 0; jj < nMols; jj++){
+                if (ionEqElement == mname[jj]){
+                   break;
+                }
+               iAbndMol++;
+             } 
+         }
+       // console.log("iAbndMol " + iAbndMol);
+
+       var minYData, maxYData;
+       var plotLogNums = []; 
+       plotLogNums.length = numStages+2;
+       for (var i = 0; i < (numStages+2); i++){
+          plotLogNums[i] = [];
+          plotLogNums[i].length = numDeps;
+       }
+       var plotLogNumsAB = [];
+       plotLogNumsAB.length = numDeps;
+       if (ifMolPlot == true){
+          for (var iTau = 0; iTau < numDeps; iTau++){
+             plotLogNumsAB[iTau] = logE * masterMolPops[iAbndMol][iTau];
+        //     console.log("iTau " + iTau + " plotLogNumsAB " + plotLogNumsAB[iTau]);
+          }
+           var minMaxPoint = minMax(plotLogNumsAB);
+           minYData = plotLogNumsAB[minMaxPoint[0]] - 1.0; // Avoid upper boundary condition [i]=0
+           maxYData = plotLogNumsAB[minMaxPoint[1]] + 1.0;
+       } else { 
            plotLogNums.length = numStages+2;
            for (var i = 0; i < (numStages+2); i++){
               plotLogNums[i] = [];
@@ -7132,11 +7630,12 @@ Spectral line \n\
                plotLogNums[1][iTau] = logE * masterStagePops[iAbnd][1][iTau];
                plotLogNums[4][iTau] = logE * masterStagePops[iAbnd][2][iTau];
                plotLogNums[5][iTau] = logE * masterStagePops[iAbnd][3][iTau];
-               plotLogNums[6][iTau] = logE * masterStagePops[iAbnd][4][iTau];
+               //plotLogNums[6][iTau] = logE * masterStagePops[iAbnd][4][iTau];
             }
+           minYData = Math.min(plotLogNums[0][3], plotLogNums[1][3]) - 1.0; // Avoid upper boundary condition [i]=0
+           maxYData = Math.max(plotLogNums[0][numDeps-1], plotLogNums[1][numDeps-1]);
+      }
 
-        var minYData = Math.min(plotLogNums[0][3], plotLogNums[1][3]) - 1.0; // Avoid upper boundary condition [i]=0
-        var maxYData = Math.max(plotLogNums[0][numDeps-1], plotLogNums[1][numDeps-1]);
         var yAxisName = "Log<sub>10</sub> <em>N</em> <br />(cm<sup>-3</sup>)";
 
         var fineness = "normal";
@@ -7202,34 +7701,48 @@ Spectral line \n\
             var xTickPosCnvs = xAxisLength * (logE * tauRos[1][0] - minXData) / rangeXData; // pixels   
             // horizontal position in pixels - data values increase rightward:
             var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-            var yTickPosCnvs0 = yAxisLength * (plotLogNums[0][0] - minYData) / rangeYData;
+
+
+       var yTickPosCnvs0, lastYShiftCnvs0, yTickPosCnvs1, lastYShiftCnvs1, yTickPosCnvs2, lastYShiftCnvs2, yShiftCnvs2;
+       if (ifMolPlot == true){
+          yTickPosCnvs0 = yAxisLength * (plotLogNumsAB[0] - minYData) / rangeYData;
+          lastYShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
+       } else {
+
+            yTickPosCnvs0 = yAxisLength * (plotLogNums[0][0] - minYData) / rangeYData;
             // vertical position in pixels - data values increase upward:
-            var lastYShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
-            var yTickPosCnvs1 = yAxisLength * (plotLogNums[1][0] - minYData) / rangeYData;
-            var lastYShiftCnvs1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs1;
+            lastYShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
+            yTickPosCnvs1 = yAxisLength * (plotLogNums[1][0] - minYData) / rangeYData;
+            lastYShiftCnvs1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs1;
 
-  var yTickPosCnvs2, lastYShiftCnvs2, yShiftCnvs2; 
- if (ionEqElement != "H"){
-            var yTickPosCnvs2 = yAxisLength * (plotLogNums[4][0] - minYData) / rangeYData;
-            var lastYShiftCnvs2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs2;
-   }
-
+            if (ionEqElement != "H"){
+               yTickPosCnvs2 = yAxisLength * (plotLogNums[4][0] - minYData) / rangeYData;
+               lastYShiftCnvs2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs2;
+            }
+       } //ifMolPlot
+//
+        var yShiftCnvs0, yShiftCnvs1, yShiftCnvs2; 
         for (var i = 1; i < numDeps; i++) {
 
             var xTickPosCnvs = xAxisLength * (logE * tauRos[1][i] - minXData) / rangeXData; // pixels   
             // horizontal position in pixels - data values increase rightward:
             var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 
-            var yTickPosCnvs0 = yAxisLength * (plotLogNums[0][i] - minYData) / rangeYData;
+            if (ifMolPlot == true){
+               yTickPosCnvs0 = yAxisLength * (plotLogNumsAB[i] - minYData) / rangeYData;
             // vertical position in pixels - data values increase upward:
-            var yShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
-            var yTickPosCnvs1 = yAxisLength * (plotLogNums[1][i] - minYData) / rangeYData;
-            var yShiftCnvs1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs1;
- if (ionEqElement != "H"){
-            var yTickPosCnvs2 = yAxisLength * (plotLogNums[4][i] - minYData) / rangeYData;
-            var yShiftCnvs2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs2;
-   }
-
+               yShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
+            } else {
+               yTickPosCnvs0 = yAxisLength * (plotLogNums[0][i] - minYData) / rangeYData;
+            // vertical position in pixels - data values increase upward:
+               yShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
+               yTickPosCnvs1 = yAxisLength * (plotLogNums[1][i] - minYData) / rangeYData;
+               yShiftCnvs1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs1;
+               if (ionEqElement != "H"){
+                  yTickPosCnvs2 = yAxisLength * (plotLogNums[4][i] - minYData) / rangeYData;
+                  yShiftCnvs2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs2;
+               }
+            } //ifMolPlot
    //console.log(" i " + i + " xShiftCnvs " + xShiftCnvs + " yShiftCnvs0 " + yShiftCnvs0);
 
 //Stage I
@@ -7244,30 +7757,32 @@ Spectral line \n\
             cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs0);
             cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs0);
             cnvsSixteenCtx.stroke();
+            lastYShiftCnvs0 = yShiftCnvs0;
+
+    if (ifMolPlot == false){
 //Stage II
             cnvsSixteenCtx.beginPath();
             cnvsSixteenCtx.strokeStyle="#0000FF"; 
             cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs1);
             cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs1);
             cnvsSixteenCtx.stroke();
+            lastYShiftCnvs1 = yShiftCnvs1;
  
 //Stage III 
- if (ionEqElement != "H"){
-            cnvsSixteenCtx.beginPath();
-            cnvsSixteenCtx.strokeStyle="#00FF00";
-            cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs2);
-            cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs2);
-            cnvsSixteenCtx.stroke();
-}
-            lastXShiftCnvs = xShiftCnvs;
-            lastYShiftCnvs0 = yShiftCnvs0;
-            lastYShiftCnvs1 = yShiftCnvs1;
             if (ionEqElement != "H"){
+               cnvsSixteenCtx.beginPath();
+               cnvsSixteenCtx.strokeStyle="#00FF00";
+               cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs2);
+               cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs2);
+               cnvsSixteenCtx.stroke();
                lastYShiftCnvs2 = yShiftCnvs2;
             }
-        }
 
-    }
+    } //ifMolPlot
+            lastXShiftCnvs = xShiftCnvs;
+    } // plot loop, i
+
+  } 
 
 
 // Detailed model output section:
@@ -7282,7 +7797,7 @@ Spectral line \n\
     var xRangeT = 2250;
     var yRangeT = 20000;
     var xOffsetT = 10;
-    var yOffsetT = 1500;
+    var yOffsetT = 2000;
     var charToPxT = 4; // width of typical character font in pixels - CAUTION: finesse!
 
     var zeroInt = 0;
@@ -7499,6 +8014,69 @@ Spectral line \n\
             numPrint(value, 10 + xTab, yTab, txtColor, printModelId);
         }
     }
+
+
+    if (ifPrintChem == true){
+
+          ifMolPlot = false; //default initialization
+          var iAbnd = 0; //initialization
+          for (var jj = 0; jj < nelemAbnd; jj++){
+             if (ionEqElement == cname[jj]){
+                   break;   //we found it
+                 }
+             iAbnd++;
+          } //jj loop
+
+         if (iAbnd == nelemAbnd){
+// we have a molecule!
+             ifMolPlot = true;
+             var iAbndMol = 0;
+             for (var jj = 0; jj < nMols; jj++){
+                if (ionEqElement == mname[jj]){
+                   break;
+                }
+               iAbndMol++;
+             } 
+         }
+
+        txtPrint("Chemical equilibrium population for " + ionEqElement + " (cm<sup>-3</sup>)",
+                   10, yOffsetT, txtColor, printModelId);
+        //Column headings:
+        var xTab = 190;
+        txtPrint("i", 10, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        if (ifMolPlot != true){
+           txtPrint("log<sub>10</sub> <em>N</em><sub>I</sub>", 10 + 2 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>II</sub>", 10 + 3 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>III</sub>", 10 + 4 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        } else {
+           txtPrint("log<sub>10</sub> <em>N</em><sub>Mol</sub>", 10 + 2 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        }   
+
+        for (var i = 0; i < numDeps; i++) {
+            yTab = yOffsetT + vOffset + i * lineHeight;
+            numPrint(i, 10, yTab, txtColor, printModelId);
+            value = logE * tauRos[1][i];
+            value = value.toPrecision(5);
+            numPrint(value, 10 + xTab, yTab, txtColor, printModelId);
+            if (ifMolPlot != true){
+               value = logE * masterStagePops[iAbnd][0][i];
+               value = value.toPrecision(5);
+               numPrint(value, 10 + 2 * xTab, yTab, txtColor, printModelId);
+               value = logE * masterStagePops[iAbnd][1][i];
+               value = value.toPrecision(5);
+               numPrint(value, 10 + 3 * xTab, yTab, txtColor, printModelId);
+               value = logE * masterStagePops[iAbnd][2][i];
+               value = value.toPrecision(5);
+               numPrint(value, 10 + 4 * xTab, yTab, txtColor, printModelId);
+            } else {
+               value = logE * masterMolPops[iAbndMol][i];
+               value = value.toPrecision(5);
+               numPrint(value, 10 + 2 * xTab, yTab, txtColor, printModelId);
+            }
+        }
+
+    } //end ifPrint
 
 
 

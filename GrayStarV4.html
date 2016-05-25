@@ -50,7 +50,7 @@
                     handleShape: "round",
                     sliderType: "min-range",
                     value: "5780",
-                    min: "500",
+                    min: "2500",
                     max: "50000",
                     step: "5",
                     showTooltip: "true",
@@ -224,7 +224,7 @@
                             <td>
                                 <span title="Surface temperature of spherical blackbody radiation emitter of equivalent bolometric surface flux, in Kelvins (K)"> 
                                     <a href="http://en.wikipedia.org/wiki/Effective_temperature" target="_blank">Effective temperature, <em>T</em><sub>eff</sub></a> <br />
-                                    (500 - 50000) 
+                                    (2500 - 50000) 
                                     <a href="http://en.wikipedia.org/wiki/Kelvin" target="_blank">K</a>) <br />
                                     <!-- <input id="Teff" type="number" name="Teff" value=5800 size="5" min="3500" max="25000" step="25"/> -->
                                     <!-- <input id="Teff" type="range" name="Teff" value="5800" min="3500" max="25000" step="10" onchange="displayTeff()"/> -->
@@ -374,7 +374,7 @@
                                         Stage I ground ionization E, <em>&#967</em><sub>I</sub></a> 
                                     (<a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
                                     ) (4.0 - 25.0) <br />
-                                    <input id="chi_I1" type="number" name="chi_I1" value=8.0 size="4" min="4.0" max="25.0" step="0.1"/>
+                                    <input id="chi_I1" type="number" name="chi_I1" value=5.5 size="4" min="4.0" max="25.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
@@ -383,7 +383,7 @@
                                         Stage II ground ionization E, <em>&#967</em><sub>II</sub></a>(
                                     <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
                                     ) (5.0 - 55.0) <br />
-                                    <input id="chi_I2" type="number" name="chi_I2" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
+                                    <input id="chi_I2" type="number" name="chi_I2" value=10.0 size="4" min="5.0" max="55.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
@@ -392,7 +392,7 @@
                                         Stage III ground ionization E, <em>&#967</em><sub>III</sub></a>(
                                     <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
                                     ) (5.0 - 55.0) <br />
-                                    <input id="chi_I3" type="number" name="chi_I3" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
+                                    <input id="chi_I3" type="number" name="chi_I3" value=20.0 size="4" min="5.0" max="55.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
@@ -401,7 +401,7 @@
                                         Stage IV ground ionization E, <em>&#967</em><sub>IV</sub></a>(
                                     <a href="http://en.wikipedia.org/wiki/Electronvolt" target="_blank">eV</a>
                                     ) (5.0 - 55.0) <br />
-                                    <input id="chi_I4" type="number" name="chi_I4" value=8.0 size="4" min="5.0" max="55.0" step="0.1"/>
+                                    <input id="chi_I4" type="number" name="chi_I4" value=40.0 size="4" min="5.0" max="55.0" step="0.1"/>
                                 </span>
                             </td>
                             <td>
@@ -732,11 +732,11 @@
             <fieldset>
               <legend>Narrow band Gaussian filter</legend>
             <span title="Wavelength (nm)">
-                <em>&#955</em>, (360 - 900 nm)
+                <em>&#955</em> (360 - 900 nm)
                 <input id="diskLam" type="number" name="diskLambda" value=500.0 size="4" min="360.0" max="900.0" step="0.01"/>
             </span>
             <span title="RMS deviation (&#963) (nm) (especially useful near spectral lines)">
-                 <em>&#963</em>, (0.01 - 10 nm)
+                 <em>&#963</em> (0.01 - 10 nm)
                 <input id="diskSigma" type="number" name="diskSigma" value=0.01 size="4" min="0.01" max="10.0" step="0.01"/>
             </span>
             </fieldset>
@@ -767,7 +767,15 @@
                        <option value = "Fe">Fe</option>
                        <option value = "Co">Co</option>
                        <option value = "Ni">Ni</option>
-                    </select>Ionization Eq (<em>if</em> Atmos plots <strong>ON</strong>)
+                       <option value = "TiO">TiO</option>
+                       <option value = "CO">CO</option>
+                       <option value = "CN">CN</option>
+                       <option value = "CH">CH</option>
+                       <option value = "C2">C2</option>
+                       <option value = "H2+">H2+</option>
+                       <option value = "OH">OH</option>
+                       <option value = "SiO">SiO</option>
+                    </select>Chem Eq (<span style="font-size:x-small"><em>if</em> Atmos plots <strong>ON</strong></span>)
                 <span title="Turn radiation field plots on/off">
                     <input id="showRad" type="checkbox" name="showRad" />Radiation field
                 </span>       
@@ -796,6 +804,9 @@
                 </span>                  
                 <span title="Linear monochromatic continuum limb darkening coefficients (LDC)">
                     <input id="printLDC" type="radio" name="whichPrint" value="ldc"/>Limb darkening coeffs
+                </span>
+                <span title="Ionization stage of molecule number density">
+                    <input id="printChem" type="radio" name="whichPrint" value="chem"/>Chem Eq <span style="font-size:x-small">(See Plot section menu)</span>
                 </span>
             </fieldset>            
         </form>

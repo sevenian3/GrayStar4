@@ -3229,7 +3229,8 @@ var logK = Math.log(k);
 
   };
 
-   var massDensity2 = function(numDeps, nelemAbnd, logNz, cname){
+   var massDensity2 = function(numDeps, nelemAbnd, logNz, cname,
+                                        nMols, masterMolPops, mname, mnameA, mnameB){
    
      var rho = [];
      rho.length = 2;
@@ -3242,22 +3243,42 @@ var logK = Math.log(k);
      var lAmu = logAmu;
 
 //Prepare log atomic masses once for each element:
+//atomic and ionic species
      var logAMass = [];
      logAMass.length = nelemAbnd;
      for (var j = 0; j < nelemAbnd; j++){
        logAMass[j] = Math.log(getMass(cname[j]));
        //System.out.println("j " + j + " logAMass " + logAMass[j]);
      }
+
+// Molecular species
+     var aMassA, aMassB;
+     var logAMassMol = [];
+     logAMassMol.length = nMols;
+     for (var j = 0; j < nelemAbnd; j++){
+       aMassA = getMass(mnameA[j]);
+       aMassB = getMass(mnameB[j]);
+       logAMassMol[j] = Math.log(aMassA + aMassB);
+       //System.out.println("j " + j + " logAMass " + logAMass[j]);
+     }
+//
      for (var i = 0; i < numDeps; i++){
 
        rho[0][i] = 0.0;
+//atomic and ionic species:
        for (var j = 0; j < nelemAbnd; j++){
           logAddend = logNz[j][i] + lAmu + logAMass[j];
           rho[0][i] = rho[0][i] + Math.exp(logAddend); 
           rho[1][i] = Math.log(rho[0][i]);
        }
+////molecular species:
+//       for (var j = 0; j < nMols; j++){
+//          logAddend = masterMolPops[j][i] + lAmu + logAMassMol[j];
+//          rho[0][i] = rho[0][i] + Math.exp(logAddend); 
+//          rho[1][i] = Math.log(rho[0][i]);
+//       }
 
-     }
+     } //numDeps loop, i
       return rho;  
       
    };
