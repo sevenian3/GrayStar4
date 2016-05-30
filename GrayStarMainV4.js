@@ -434,6 +434,9 @@ function main() {
         settingsId[3].value = 1.0;
         //$("#starMass").val(1.0);
         $("#massStar").roundSlider("setValue", "1.0");
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "Arcturus") {
@@ -453,6 +456,9 @@ function main() {
         settingsId[3].value = 1.1;
         //$("#starMass").val(1.1);
         $("#massStar").roundSlider("setValue", "1.1");
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "Vega") {
@@ -472,9 +478,9 @@ function main() {
         settingsId[3].value = 2.1;
         //$("#starMass").val(2.1);
         $("#massStar").roundSlider("setValue", "2.1");
-        var logKapFudge = -1.0;
-        settingsId[25] = -1.0;
-        $("#logKapFudge").val(-1.0);
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "Regulus") {
@@ -494,9 +500,9 @@ function main() {
         settingsId[3].value = 3.8;
         //$("#starMass").val(3.8);
         $("#massStar").roundSlider("setValue", "3.8");
-        var logKapFudge = -1.0;
-        settingsId[25] = -1.0;
-        $("#logKapFudge").val(-1.0);
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "Procyon") {
@@ -516,6 +522,9 @@ function main() {
         settingsId[3].value = 1.4;
         //$("#starMass").val(1.4);
         $("#massStar").roundSlider("setValue", "1.4");
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "61CygniA") {
@@ -535,6 +544,9 @@ function main() {
         settingsId[3].value = 0.6;
         //$("#starMass").val(0.63);
         $("#massStar").roundSlider("setValue", "0.6");
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     if (switchStar === "51Pegasi") {
@@ -554,6 +566,9 @@ function main() {
         settingsId[3].value = 1.1;
         //$("#starMass").val(1.11);
         $("#massStar").roundSlider("setValue", "1.1");
+        var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);
     }
 
     var switchPlanet = "None";
@@ -892,6 +907,10 @@ function main() {
   mnameA[17] = "V"; 
   mnameB[17] = "O"; 
 
+//Testing:
+//  mname[0] = "N2";
+//  mnameA[0] = "N"; 
+//  mnameB[0] = "N"; 
 
   var logE = logTen(Math.E); // for debug output
   var logE10 = Math.log(10.0);
@@ -1771,17 +1790,16 @@ function main() {
         settingsId[25].value = 2.0;
         $("#logKapFudge").val(2.0);
     }
+  var logFudgeTune = 0.0;
   //sigh - don't ask me - makes the Balmer lines show up around A0:
+      if (teff <= F0Vtemp){
+          logFudgeTune = 0.5;
+      }
       if (teff > F0Vtemp){
-        flagArr[25] = true;
-        logKapFudge = -1.0;
-        var logKapFudgeStr = "-1.0";
-        settingsId[25].value = -1.0;
-        $("#logKapFudge").val(-1.0);
+          logFudgeTune = 0.0;
       }
      
-
-
+   var logTotalFudge = logKapFudge + logFudgeTune;
 
 //var ionized = false; // DEBUG
 
@@ -2181,6 +2199,7 @@ function main() {
             storeName = "depth" + String(i);
             depths[1][i] = Number(sessionStorage.getItem(storeName));
             depths[0][i] = Math.exp(temp[1][i]);
+//console.log("  *****  Getting logKappa from memory ******");
             for (var iL = 0; iL < numLams; iL++){
                storeName = "kapp" + String(iL) + "_" + String(i);
                logKappa[iL][i] = Number(sessionStorage.getItem(storeName));
@@ -2248,7 +2267,6 @@ function main() {
             guessPGas = phx10kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
             guessPe = phx10kRefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
             guessNe = phx10kRefNe(numDeps, temp, guessPe);
-            //logKapFudge = -1.0;  //sigh - don't ask me - makes the Balmer lines show up around A0
         }
 
   //console.log("guessPGas[1] " + " guessPe[1][i] " + " guessNe[1][i]");
@@ -2376,6 +2394,12 @@ function main() {
   kappaRos[1] = [];
   kappaRos[0].length = numDeps;
   kappaRos[1].length = numDeps;
+  var kappa500 = [];
+  kappa500.length = 2;
+  kappa500[0] = [];
+  kappa500[1] = [];
+  kappa500[0].length = numDeps;
+  kappa500[1].length = numDeps;
   var pGas = [];
   pGas.length = 2;
   pGas[0] = [];
@@ -2502,7 +2526,7 @@ var logAmu = Math.log(amu);
 // Iteration *within* the outer Pe-Pgas iteration:
 //Iterate the electron densities and ionization fractions:
 //
- for (var neIter = 0; neIter < 3; neIter++){
+ for (var neIter = 0; neIter < 1; neIter++){
 
    //console.log(" iTau " + " logNums[iStage][iTau]");
    //console.log(" species " + " thisChiI " + " thisUwV");
@@ -2792,16 +2816,21 @@ var logAmu = Math.log(amu);
       logKappa = kappas2(numDeps, newPe, zScale, temp, rho,
                      numLams, lambdaScale, logAz[1],
                      masterStagePops[0][0], masterStagePops[0][1],
-                     masterStagePops[1][0], masterStagePops[1][1], newNe, teff, logKapFudge);
+                     masterStagePops[1][0], masterStagePops[1][1], newNe, teff, logTotalFudge);
 
       kappaRos = kapRos(numDeps, numLams, lambdaScale, logKappa, temp);
 
-      var t500 = lamPoint(numLams, lambdaScale, 500.0e-7);
-
-
+//Extract the "kappa_500" monochroamtic continuum oapcity scale
+// - this means we'll try interpreting the prescribed tau grid (still called "tauRos")as the "tau500" scale 
+      var it500 = lamPoint(numLams, lambdaScale, 500.0e-7);
+      for (var i = 0; i < numDeps; i++){
+         kappa500[1][i] = logKappa[it500][i];
+         kappa500[0][i] = Math.exp(kappa500[1][i]);
+      } 
 
         //press = Hydrostat.hydrostatic(numDeps, grav, tauRos, kappaRos, temp);
-        pGas = hydroFormalSoln(numDeps, grav, tauRos, kappaRos, temp, guessPGas);
+        //pGas = hydroFormalSoln(numDeps, grav, tauRos, kappaRos, temp, guessPGas);
+        pGas = hydroFormalSoln(numDeps, grav, tauRos, kappa500, temp, guessPGas);
         pRad = radPress(numDeps, temp);
 
 
@@ -2826,7 +2855,8 @@ var logAmu = Math.log(amu);
       //   " masterStagePops[0][3][36]/NH " + logE*(masterStagePops[0][3][36]-logNH[36]));
 
         // Then construct geometric depth scale from tau, kappa and rho
-        var depths = depthScale(numDeps, tauRos, kappaRos, rho);
+        //var depths = depthScale(numDeps, tauRos, kappaRos, rho);
+        var depths = depthScale(numDeps, tauRos, kappa500, rho);
         //for (var i = 0; i < numDeps; i++) {
         //    console.log("depths[i] " + (1.0e-5 * depths[i]));
         //}
@@ -2848,7 +2878,8 @@ var logAmu = Math.log(amu);
 //console.log(" " + logE * tauRos[1][iTau] + " " + temp[0][iTau]);
             for (var i = 0; i < numTCorr; i++) {
 //newTemp = TCorr.tCorr(numDeps, tauRos, temp);
-                newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappaRos);
+                //newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappaRos);
+                newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappa500);
                 for (var iTau = 0; iTau < numDeps; iTau++) {
 //console.log(" " + logE*tauRos[1][iTau] + " " + temp[0][iTau]);
                     temp[1][iTau] = newTemp[1][iTau];
@@ -3404,10 +3435,13 @@ ifConvec = false;
 //// Seed first numLams wavelengths with continuum wavelength and kappa values
 //
         for (var iL = 0; iL < numLams; iL++) {
+        //    console.log("iL " + iL + " lambdaScale[iL] " + lambdaScale[iL]);
             masterLams[iL] = lambdaScale[iL];
             for (var iD = 0; iD < numDeps; iD++) {
                 logMasterKaps[iL][iD] = logKappa[iL][iD]; 
-            //    console.log("iL " + iL + "iD " + iD + " masterLams[iL] " + masterLams[iL] + " logMasterKaps[iL][iD] " + logMasterKaps[iL][iD]);
+         //      if ( (lambdaScale[iL] > 1.0e-7*450.0) && (lambdaScale[iL] < 1.0e-7*550.0) ){
+          //      console.log("iL " + iL + "iD " + iD + " logKappa[iL][iD] " + logE*logKappa[iL][iD]);
+           //    }
             }
         }
 //initialize the rest with dummy values
@@ -3528,8 +3562,6 @@ ifConvec = false;
             var listLogKappaL = lineKap(listLam0nm, listLogNums, listLogf[iLine], listLinePoints, listLineProf,
                     numDeps, zScaleList, tauRos, temp, rho);
             //int listNumPoints = listLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
-            //double logTauL[][] = LineTau2.tauLambda(numDeps, listNumPoints, logKappaL,
-            //        kappa, tauRos, rho, logg);
             var listLineLambdas = [];
             listLineLambdas.length = listNumPoints;
             for (var il = 0; il < listNumPoints; il++) {
@@ -3558,71 +3590,17 @@ ifConvec = false;
             }
         } //numLines loop
 
-//int numMaster = masterLams.length;
-        //console.log("tauLambda call 1");
-        var logTauMaster = tauLambda(numDeps, numMaster, logMasterKaps,
-                logKappa, tauRos, numLams, lambdaScale, masterLams);
-        //Evaluate formal solution of rad trans eq at each lambda throughout line profile
-        // Initial set to put lambda and tau arrays into form that formalsoln expects
-        //double[] masterLambdas = new double[numMaster];
-        //double[][] masterIntens = new double[numMaster][numThetas];
-
-        var masterIntensLam = [];
-        masterIntensLam.length = numThetas;
-        var masterFluxLam = [];
-        masterFluxLam.length = 2;
-        //
-        lineMode = false; //no scattering for overall SED
-
-        for (var il = 0; il < numMaster; il++) {
-
-//                        // lineProf[0][*] is DeltaLambda from line centre in cm
-//                        if (il === listNumPoints - 1) {
-//                            lineLambdas[il] = lam0; // Extra row for line centre continuum taus scale
-//                        } else {
-//lineLambdas[il] = (1.0E7 * linePoints[0][il]) + lam0; //convert to nm
-//masterLambdas[il] = masterLams[il];
-//                        }
-            for (var id = 0; id < numDeps; id++) {
-                //console.log("il " + il + " id " + id + " logTauMaster " + logTauMaster[il][id]);
-                thisTau[1][id] = logTauMaster[il][id];
-                thisTau[0][id] = Math.exp(logTauMaster[il][id]);
-            } // id loop
-
-            masterIntensLam = formalSoln(numDeps,
-                    cosTheta, masterLams[il], thisTau, temp, lineMode);
-            masterFluxLam = flux2(masterIntensLam, cosTheta);
-            for (var it = 0; it < numThetas; it++) {
-                masterIntens[il][it] = masterIntensLam[it];
-                //System.out.println(" il " + il + " it " + it + " logIntens " + logE*Math.log(lineIntensLam[it]) );
-            } //it loop - thetas
-
-            //console.log("il " + il + " masterFluxLam[0] " + masterFluxLam[0] + " masterFluxLam[1] " + logE*masterFluxLam[1]);
-            masterFlux[0][il] = masterFluxLam[0];
-            masterFlux[1][il] = masterFluxLam[1];
-            //System.out.println("il " + il + " masterLams[il] " + masterLams[il] + " masterFlux[1][il] " + logE * masterFlux[1][il]);
-            //// Teff test - Also needed for convection module!:
-            if (il > 1) {
-                lambda2 = masterLams[il]; // * 1.0E-7;  // convert nm to cm
-                lambda1 = masterLams[il - 1]; // * 1.0E-7;  // convert nm to cm
-                fluxSurfBol = fluxSurfBol
-                        + masterFluxLam[0] * (lambda2 - lambda1);
-            }
-        } //il loop
-        var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
-        var logSigma = Math.log(sigma);
-        logFluxSurfBol = Math.log(fluxSurfBol);
-        var logTeffFlux = (logFluxSurfBol - logSigma) / 4.0;
-        var teffFlux = Math.exp(logTeffFlux);
-        ////Teff test
-        //console.log("FLUX: Recovered Teff = " + teffFlux);
-        //Compute JOhnson-Cousins photometric color indices:
-        // Disk integrated Flux
-
+ //  for (var iL = 0; iL < numMaster; iL++) {
+ //     console.log("iL " + iL + " masterLams[iL] " + masterLams[iL]);
+ //     for (var iD = 0; iD < numDeps; iD++) {
+ //     if ( (masterLams[iL] > 1.0e-7*450.0) && (masterLams[iL] < 1.0e-7*550.0) ){
+ //            console.log("iL " + iL + "iD " + iD + " logMasterKaps[iL][iD] " + logE*logMasterKaps[iL][iD]);
+ //         }
+ //     }
+ //  }
 //Continuum monochromatic optical depth array:
-        //console.log("tauLambda call 2");
-        var logTauCont = tauLambda(numDeps, numLams, logContKaps,
-                logKappa, tauRos, numLams, lambdaScale, lambdaScale);
+        var logTauCont = tauLambdaCont(numLams, logKappa,
+                 kappa500, numDeps, tauRos, logTotalFudge);
         //Evaluate formal solution of rad trans eq at each lambda
         //        // Initial set to put lambda and tau arrays into form that formalsoln expects
         var contIntens = [];
@@ -3647,9 +3625,15 @@ ifConvec = false;
 
         for (var il = 0; il < numLams; il++) {
 
+      //console.log("1: il " + il + " lambdaScale[il] " + lambdaScale[il]);
             for (var id = 0; id < numDeps; id++) {
                 thisTau[1][id] = logTauCont[il][id];
                 thisTau[0][id] = Math.exp(logTauCont[il][id]);
+                //thisTau[1][id] = tauRos[1][id]; //test
+                //thisTau[0][id] = tauRos[0][id]; //test
+        //   if ( (lambdaScale[il] > 1.0e-7*450.0) && (lambdaScale[il] < 1.0e-7*550.0) ){
+        //      console.log("1: il " + il + " id " + id + " temp[0][id] " + temp[0][id] + " thisTau[1][id] " + logE*thisTau[1][id]);
+        //   }
             } // id loop
 
             contIntensLam = formalSoln(numDeps,
@@ -3659,10 +3643,15 @@ ifConvec = false;
 
             for (var it = 0; it < numThetas; it++) {
                 contIntens[il][it] = contIntensLam[it];
+       // if (it == 0){
+       //     console.log("il " + il + " it " + it + " lambdaScale[il] " + lambdaScale[il]  
+       //      + " contIntens[il][it] " + logE*Math.log(contIntens[il][it]));
+       //  }
             } //it loop - thetas
 
             contFlux[0][il] = contFluxLam[0];
             contFlux[1][il] = contFluxLam[1];
+            //console.log("il " + il + " contFlux[1][il] " + logE*contFlux[1][il]);
 
 
             //// Teff test - Also needed for convection module!:
@@ -3673,6 +3662,74 @@ ifConvec = false;
                         + contFluxLam[0] * (lambda2 - lambda1);
             }
         } //il loop
+
+//int numMaster = masterLams.length;
+        var logTauMaster = tauLambda(numMaster, masterLams, logMasterKaps,
+                numDeps, kappa500, tauRos, logTotalFudge);
+        //Evaluate formal solution of rad trans eq at each lambda throughout line profile
+        // Initial set to put lambda and tau arrays into form that formalsoln expects
+        //double[] masterLambdas = new double[numMaster];
+        //double[][] masterIntens = new double[numMaster][numThetas];
+
+        var masterIntensLam = [];
+        masterIntensLam.length = numThetas;
+        var masterFluxLam = [];
+        masterFluxLam.length = 2;
+        //
+        lineMode = false; //no scattering for overall SED
+
+        for (var il = 0; il < numMaster; il++) {
+
+//                        // lineProf[0][*] is DeltaLambda from line centre in cm
+//                        if (il === listNumPoints - 1) {
+//                            lineLambdas[il] = lam0; // Extra row for line centre continuum taus scale
+//                        } else {
+//lineLambdas[il] = (1.0E7 * linePoints[0][il]) + lam0; //convert to nm
+//masterLambdas[il] = masterLams[il];
+//                        }
+      //console.log("2: il " + il + " masterLams[il] " + masterLams[il]);
+            for (var id = 0; id < numDeps; id++) {
+                //console.log("il " + il + " id " + id + " logTauMaster " + logTauMaster[il][id]);
+                thisTau[1][id] = logTauMaster[il][id];
+                thisTau[0][id] = Math.exp(logTauMaster[il][id]);
+       //    if ( (masterLams[il] > 1.0e-7*450.0) && (masterLams[il] < 1.0e-7*550.0) ){
+        //        console.log("2: il " + il + " id " + id + " temp[0][id] " + temp[0][id] + " thisTau[1][id] " + logE*thisTau[1][id]);
+         //  }
+            } // id loop
+
+            masterIntensLam = formalSoln(numDeps,
+                    cosTheta, masterLams[il], thisTau, temp, lineMode);
+            masterFluxLam = flux2(masterIntensLam, cosTheta);
+            for (var it = 0; it < numThetas; it++) {
+                masterIntens[il][it] = masterIntensLam[it];
+        //if (it == 0){
+         //   console.log("il " + il + " it " + it + " masterLams " + masterLams[il]  
+         //      + " masterIntens[il][it] " + logE*Math.log(masterIntens[il][it]));
+         //}
+                //System.out.println(" il " + il + " it " + it + " logIntens " + logE*Math.log(lineIntensLam[it]) );
+            } //it loop - thetas
+
+            //console.log("il " + il + " masterFluxLam[0] " + masterFluxLam[0] + " masterFluxLam[1] " + logE*masterFluxLam[1]);
+            masterFlux[0][il] = masterFluxLam[0];
+            masterFlux[1][il] = masterFluxLam[1];
+            //System.out.println("il " + il + " masterLams[il] " + masterLams[il] + " masterFlux[1][il] " + logE * masterFlux[1][il]);
+            //// Teff test - Also needed for convection module!:
+            if (il > 1) {
+                lambda2 = masterLams[il]; // * 1.0E-7;  // convert nm to cm
+                lambda1 = masterLams[il - 1]; // * 1.0E-7;  // convert nm to cm
+                fluxSurfBol = fluxSurfBol
+                        + masterFluxLam[0] * (lambda2 - lambda1);
+            }
+        } //il loop
+        var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
+        var logSigma = Math.log(sigma);
+        logFluxSurfBol = Math.log(fluxSurfBol);
+        var logTeffFlux = (logFluxSurfBol - logSigma) / 4.0;
+        var teffFlux = Math.exp(logTeffFlux);
+        ////Teff test
+        //console.log("FLUX: Recovered Teff = " + teffFlux);
+        //Compute JOhnson-Cousins photometric color indices:
+        // Disk integrated Flux
 
 //Extract linear monochromatic continuum limb darlening coefficients (LDCs) ("epsilon"s):
     var ldc = [];
@@ -4009,14 +4066,8 @@ var logEv = Math.log(eV);
     //
     //Compute monochromatic optical depth scale, Tau_lambda throughout line profile
     //CAUTION: Returns numPoints+1 x numDeps array: the numPoints+1st row holds the line centre continuum tau scale
-    // Method 1: double logTauL[][] = LineTau.tauLambda(numDeps, lineProf, logKappaL,
-    // Method 1:        kappa, tauRos, rho, depths);
-    // Method 2:
-    //var logTauL = tauLambda(numDeps, linePoints, logKappaL,
-    //        kappa, tauRos, rhoSun);
-        //console.log("tauLambda call 3");
-    var logTauL = tauLambda(numDeps, numPoints, logTotKappa,
-            logKappa, tauRos, numLams, lambdaScale, lineLambdas);
+    var logTauL = tauLambda(numPoints, lineLambdas, logTotKappa,
+            numDeps, kappa500, tauRos, logTotalFudge);
     //Evaluate formal solution of rad trans eq at each lambda throughout line profile
     // Initial set to put lambda and tau arrays into form that formalsoln expects
     //var numPoints = linePoints[0].length + 1; //Extra wavelength point at end for monochromatic continuum tau scale
@@ -4083,7 +4134,8 @@ var logEv = Math.log(eV);
   lineFlux2[1].length = numPoints;
   for (var i = 0; i < numPoints; i++){
      lineFlux2[0][i] = lineFlux[0][i] / contFlux2[i];
-     //console.log("i " + i + " lineFlux[0][i] " + lineFlux[0][i] + " contFlux2[i] " + contFlux2[i]); 
+     //console.log("i " + i + " lineFlux[0][i] " + logE*Math.log(lineFlux[0][i]) + " contFlux2[i] " 
+     //    + logE*Math.log(contFlux2[i])); 
      lineFlux2[1][i] = Math.log(lineFlux2[0][i]);
    }
 
@@ -6023,7 +6075,7 @@ Spectral line \n\
         // Add label
         RGBHex = colHex(0, 255, 100);
         txtPrint("<span style='font-size:small'><em>&#964</em><sub><em>&#955</em>_0</sub>=1</span>",
-                xShift+150, yShift, RGBHex, plotTwoId);
+                xShift+15, yShift, RGBHex, plotTwoId);
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
         //        titleXPos, titleYPos - 40, zeroInt, zeroInt, zeroInt, masterId);
@@ -6655,6 +6707,9 @@ Spectral line \n\
         UBVRIBands(r255, g255, b255, lamUBVRI[5]);
         //Data loop - plot the result!
 
+//Continuum spectrum - For testing: 
+//        var contFlux3 = interpolV(contFlux[0], lambdaScale, masterLams);
+
         var dSizeCnvs = 1.0; //plot point size
         var dSize0Cnvs = 1.0;
         var opac = 1.0; //opacity
@@ -6674,16 +6729,19 @@ Spectral line \n\
 
         // Avoid upper boundary at i=0
 
+        var yShiftCnvs, yShiftCCnvs, yShift0Cnvs, yShiftNCnvs;
         //var logLambdanm = 7.0 + logTen(masterLams[0]);  //logarithmic
         var lambdanm = 1.0e7 * masterLams[0];
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 //Logarithmic y:
         var yTickPosCnvs = yAxisLength * ((masterFlux[0][0] / norm) - minYData) / rangeYData;
+        //var yTickPosCCnvs = yAxisLength * ((contFlux3[0] / norm) - minYData) / rangeYData;
         var yTickPos0Cnvs = yAxisLength * ((masterIntens[0][0] / norm) - minYData) / rangeYData;
         var yTickPosNCnvs = yAxisLength * ((masterIntens[0][numThetas - 2] / norm) - minYData) / rangeYData;
         // vertical position in pixels - data values increase upward:
         var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+        //var lastYShiftCCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCCnvs;
         var lastYShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
         var lastYShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
         var xShift, yShift;
@@ -6699,10 +6757,12 @@ Spectral line \n\
 
 //logarithmic y:
             yTickPosCnvs = yAxisLength * ((masterFlux[0][i] / norm) - minYData) / rangeYData;
+            //yTickPosCCnvs = yAxisLength * ((contFlux3[i] / norm) - minYData) / rangeYData;
             yTickPos0Cnvs = yAxisLength * ((masterIntens[i][0] / norm) - minYData) / rangeYData;
             yTickPosNCnvs = yAxisLength * ((masterIntens[i][numThetas - 2] / norm) - minYData) / rangeYData;
             // vertical position in pixels - data values increase upward:
             yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+            //yShiftCCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCCnvs;
             yShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
             yShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
 
@@ -6719,6 +6779,13 @@ Spectral line \n\
             cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
             cnvsFiveCtx.lineTo(xShiftCnvs, yShiftCnvs);
             cnvsFiveCtx.stroke();  
+//Contintuum spectrum - for testing
+            //cnvsFiveCtx.beginPath();
+            //RGBHex = colHex(255, 0, 0);
+            //cnvsFiveCtx.strokeStyle=RGBHex; 
+            //cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShiftCCnvs);
+            //cnvsFiveCtx.lineTo(xShiftCnvs, yShiftCCnvs);
+            //cnvsFiveCtx.stroke();  
             //cnvsFiveCtx.beginPath();
             //cnvsFiveCtx.arc(xShiftCnvs, yShift0Cnvs, dSize0Cnvs, 0, 2*Math.PI);
             //RGBHex = colHex(r2550, g2550, b2550);
@@ -6744,6 +6811,7 @@ Spectral line \n\
 
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
+            //lastYShiftCCnvs = yShiftCCnvs;
             lastYShift0Cnvs = yShift0Cnvs;
             lastYShiftNCnvs = yShiftNCnvs;
         }
@@ -7864,29 +7932,36 @@ Spectral line \n\
         txtPrint("log<sub>10</sub> <em>N</em><sub>e</sub> (cm<sup>-3</sup>)", 10 + 7 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>&#956</em> (g)", 10 + 8 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>&#954</em><sub>Ros</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 9 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#954</em><sub>500</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 10 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
 
         for (var i = 0; i < numDeps; i++) {
             yTab = yOffsetT + vOffset + i * lineHeight;
             numPrint(i, 10, yTab, txtColor, printModelId);
             value = logE * tauRos[1][i];
+            //value = tauRos[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + xTab, yTab, txtColor, printModelId);
             value = logE * Math.log(depths[i]);
+            //value = (depths[i]);
             value = value.toPrecision(5);
             numPrint(value, 10 + 2 * xTab, yTab, txtColor, printModelId);
             value = logE * temp[1][i];
+            //value = temp[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 3 * xTab, yTab, txtColor, printModelId);
             value = logE * pGas[1][i];
+            //value = pGas[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 4 * xTab, yTab, txtColor, printModelId);
             value = logE * pRad[1][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 5 * xTab, yTab, txtColor, printModelId);
             value = logE * rho[1][i];
+            //value = rho[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 6 * xTab, yTab, txtColor, printModelId);
             value = logE * newNe[1][i];
+            //value =  newNe[0][i] * k * temp[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 7 * xTab, yTab, txtColor, printModelId);
             value = logE * Math.log(mmw[i]);
@@ -7895,6 +7970,9 @@ Spectral line \n\
             value = logE * kappaRos[1][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 9 * xTab, yTab, txtColor, printModelId);
+            value = logE * kappa500[1][i];
+            value = value.toPrecision(5);
+            numPrint(value, 10 + 10 * xTab, yTab, txtColor, printModelId);
 
         }
 

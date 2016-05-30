@@ -1073,149 +1073,202 @@ var lineTotalKap = function(linePoints, logKappaL,
 
 /**
  * Method 2: Compute monochromatic tau scales by re-scaling from Tau_Ross -
- * PROBLEM: the approximate, scaled solar kappa_Ros values are not consistent
- * with the prescribed Tau_Ros values HOWEVER: this method removes dependence on
- * the flaky depth scale calculation and vulnerability to low rho value at the
- * surface 
  * 
  * Compute the monochromatic optical depth scale, tau_lambda, at each
  * lambda across the line profile 
- * Also computes line centre Continuum
- * monochromatic optical dpeth scale for continuum rectification And stores it
- * in array element numPoints+1 This may differ from the prescribed Tau_Ross
- * because kappa_Ross was NOT computed consistently with it 
- * 
- * * PROBLEM: line kappaL values converted to mass extinction by division by rho()
- * are not consistent with fake Kramer's Law based scaling of kappa_Ros with g.
- * Try leaving kappaLs as linear extinctions and converting the scaled kappa_Ros
- * back to linear units with solar rho()
  * 
  * Inputs: lineGrid -only neded for row 0 - wavelengths logKappaL - monochromatic line extinction
  * co-efficients kappa - we need the background continuum extinction
  * co-efficients, too!
  */
-var tauLambda = function(numDeps, numPoints, logKappaL,
-        kappa, tauRos, numLams, lambdaScale, lambdaPoints) {
+/* This version is for computing the monochromatic optical depth distribution from a line blanketed
+ *  * and a continuum monochromatic extinction distribution */
+/* logTauCont is the optical depth scale corresponding to the continuum extinction logKappa*/
+
+/* This might be the wrong approach - using the *local* monochromatic continuum optical depth and extinction
+ *  * scale for reference at each wavelength - the alternative is to use a universal tau and kappa scale
+ *   * for reference, like Rosseland tau and kappa (or those at 500 nm)*/
+
+//var tauLambda = function(numPoints, lambdaPoints, logKappaL,
+//      numLams, lambdaScale, logKappa, numDeps, logTauCont, logKappaRef, tauRef, logTotalFudge) {
+var tauLambda = function(numPoints, lambdaPoints, logKappaL,
+       numDeps, logKappaRef, tauRef, logTotalFudge) {
 
     //No monochromatic optical depth can be less than the Rosseland optical depth,
     // so prevent zero tau_lambda values by setting each tau_lambda(lambda) at the 
     //top of the atmosphere to the tau_Ross value at the top 
     // - prevents trying to take a log of zero!
     var logE = logTen(Math.E); // for debug output
-    var minTauL = tauRos[0][0];
-    var minLogTauL = tauRos[1][0];
+    var logE10 = Math.log(10.0); 
+    var minTauL = tauRef[0][0];
+    var minLogTauL = tauRef[1][0];
 
     //var numPoints = linePoints[0].length;
 
-    // returns numPoints+1 x numDeps array: the numPoints+1st row holds the line centre continuum tau scale
+    //NOT TRUE ANY LONGER?? // returns numPoints+1 x numDeps array: the numPoints+1st row holds the line centre continuum tau scale
     var logTauL = [];
-    logTauL.length = numPoints + 1;
+    logTauL.length = numPoints; // + 1;
     //Must use Array constructor here:
-    for (var row = 0; row < numPoints + 1; row++) {
+    for (var row = 0; row < numPoints; row++) {
         logTauL[row] = [];
         logTauL[row].length = numDeps;
     }
 
-    var tau1, tau2, delta, tauL,
-            integ, logKapRat, logKappaC, lastLogKapRat;
+    var tau1, tau2, delta, tauL, thisTau, lastTau,
+            integ, logKapRat, lastLogKapRat, kapTot;
 
-//Interpolate continuum opacity onto onto line-blanketed opacity lambda array:
-        var kappaC = [];
-        kappaC.length = numLams;
-        var kappaC2 = [];
-        kappaC2.length = numPoints;
-        var kappa2 = [];
-        kappa2.length = numPoints;
+/*
+//Interpolate continuum opacity and corresponding optical depth scale onto onto line-blanketed opacity lambda array:
+        var logKappaC = [];
+        logKappaC.length = numLams;
+        var logKappaC2 = [];
+        logKappaC2.length = numPoints;
+        var logKappa2 = [];
+        logKappa2.length = numPoints;
         for (var i = 0; i < numPoints; i++){
-           kappa2[i] = [];
-           kappa2[i].length = numDeps;
+           logKappa2[i] = [];
+           logKappa2[i].length = numDeps;
+        }
+        var logTauC = [];
+        logTauC.length = numLams;
+        var logTauC2 = [];
+        logTauC2.length = numPoints;
+        var logTau2 = [];
+        logTau2.length = numPoints;
+        for (var i = 0; i < numPoints; i++){
+           logTau2[i] = [];
+           logTau2[i].length = numDeps;
         }
         for (var id = 0; id < numDeps; id++) {
            for (var il = 0; il < numLams; il++) {
     //         console.log("id " + id + " il " + il + " kappa[il][id] " + kappa[il][id]);
-              kappaC[il] = kappa[il][id];
+              logKappaC[il] = logKappa[il][id];
+              logTauC[il] = logTauCont[il][id];
            }
-           kappaC2 = interpolV(kappaC, lambdaScale, lambdaPoints);
+           logKappaC2 = interpolV(logKappaC, lambdaScale, lambdaPoints);
+           logTauC2 = interpolV(logTauC, lambdaScale, lambdaPoints);
            for (var il = 0; il < numPoints; il++){
-              kappa2[il][id] = kappaC2[il];
+              logKappa2[il][id] = logKappaC2[il];
+              logTau2[il][id] = logTauC2[il];
            }
         }
-
-
+*/
     for (var il = 0; il < numPoints; il++) {
 
         tau1 = minTauL; //initialize accumulator
         logTauL[il][0] = minLogTauL; // Set upper boundary TauL           
 
-        //System.out.println("LineTau: minTauL: " + minTauL);
         //
         //Trapezoid method: first integrand:
         //total extinction co-efficient
 
-        // Convert kappa_Ros to cm^-1 for consistency with kappaL:
-        //logKappaC = kappa[1][0] + rhoSun[1][0];
-        //logKappaC = kappa[1][0];
 
-        //delta = tauRos[0][1] - tauRos[0][0];
-        //logKapRat = logKappaL[il][0] - kappa[1][0];
-        //console.log(" il " + il + " logKappaL[il][0] " + logKappaL[il][0] + " kappa2[il][0] " + kappa2[il][0]);
-        //lastLogKapRat = logKappaL[il][0] - logKappaC;
-        lastLogKapRat = logKappaL[il][0] - kappa2[il][0];
+        //// With local monochromatic optical depth scale as reference scale:
+        //lastLogKapRat = logKappaL[il][0] - logKappa2[il][0];
+        //lastLogKapRat = lastLogKapRat + logE10*logTotalFudge;
+        //With Rosseland optical depth scale as reference scale:
+        ////lastLogKapRat = Math.log(kapTot) - kappaRef[1][0];
+        lastLogKapRat = logKappaL[il][0] - logKappaRef[1][0];
+        lastLogKapRat = lastLogKapRat + logE10*logTotalFudge;
 
-        //tau2 = tau1 + ((Math.exp(logKapRat) + 1.0) * delta);
-        //opacity being handed in is now total oppcity: line plux continuum:
-        //tau2 = tau1 + (Math.exp(logKapRat) * delta);
-
-        //logTauL[il][1] = Math.log(tau2);
-        //tau1 = tau2;
 
         for (var id = 1; id < numDeps; id++) {
 
 
             // To test: continue with Euler's method:
 
-            // Convert kappa_Ros to cm^-1 for consistency with kappaL:
-            //logKappaC = kappa[1][id] + rhoSun[1][id];
-            //logKappaC = kappa[1][id];
+            //// With local monochromatic optical depth scale as reference scale:
+            //thisTau = Math.exp(logTau2[il][id]);
+            //lastTau = Math.exp(logTau2[il][id - 1]);
+            //With Rosseland optical depth scale as reference scale:
+             thisTau = tauRef[0][id];
+             lastTau = tauRef[0][id-1];
 
-            delta = tauRos[0][id] - tauRos[0][id - 1];
-            //logKapRat = logKappaL[il][id] - kappa[1][id];
-            //logKapRat = logKappaL[il][id] - logKappaC;
-            logKapRat = logKappaL[il][id] - kappa2[il][id];
-
-            //tau2 = tau1 + ((Math.exp(logKapRat) + 1.0) * delta);
+            delta = thisTau - lastTau;
+            // With local monochromatic optical depth scale as reference scale:
+            //logKapRat = logKappaL[il][id] - logKappa2[il][id];
+           // logKapRat = logKapRat + logE10*logTotalFudge;
+            //With Rosseland optical depth scale as reference scale:
+            logKapRat = logKappaL[il][id] - logKappaRef[1][id];
+            logKapRat = logKapRat + logE10*logTotalFudge;
             //opacity being handed in is now total oppcity: line plux continuum:
             integ = 0.5 * (Math.exp(logKapRat) + Math.exp(lastLogKapRat));
             tau2 = tau1 + (integ * delta);
-            //tau2 = tau1 + (Math.exp(logKapRat) * delta);
 
             logTauL[il][id] = Math.log(tau2);
             tau1 = tau2;
             lastLogKapRat = logKapRat;
 
-           // if (id === 12) {
-            //    console.log("il " + il + " id " + id + " logTauL[il][id] " + logE * logTauL[il][id]);
-             //console.log("tauLambda: il, id, lambdaPoints, logKappaL, logKappa2, logKapRat, logTauL : " 
-              //   + il + " " + id + " " + lambdaPoints[il] + " " + logE*logKappaL[il][id] + " " + logE*kappa2[il][id] + " " + logE*logKapRat + " " + logE*logTauL[il][id] );
-           // }
-
         } //id loop
 
     } //il loop
-    /* No!
-     //This is probably superfluous here, but let's do it this way for consistency with code that was
-     // dependent on Method 1:
-     //Now compute the monochromatic line centre continuum optical depth scale and store it in an numPoints+1st column of
-     // logTauL array:
-     for (var id = 0; id < numDeps; id++) {
-     
-     logTauL[numPoints][id] = tauRos[1][id];
-     
-     }
-     */
     return logTauL;
 
 };
+
+/* This version is for computing the monochromatic optical depth distribution from a continuum monochromatic extinction
+ * distribution and a reference extinction scale */
+//
+// kappaRef is usual 2 x numDeps array with linear (row 0) and logarithmic (row 1) reference extinction coefficient
+// values
+// tauRef is the optical depth distribution corresponding to the extinction distribution kappaRef
+    var tauLambdaCont = function(numCont, logKappaCont,
+             logKappaRef, numDeps, tauRef, logTotalFudge) {
+
+        //No monochromatic optical depth can be less than the Rosseland optical depth,
+        // so prevent zero tau_lambda values by setting each tau_lambda(lambda) at the
+        //top of the atmosphere to the tau_Ross value at the top
+        // - prevents trying to take a log of zero!
+        var logE = Math.log10(Math.E); // for debug output
+        var logE10 = Math.log(10.0); 
+        var minTauC = tauRef[0][0];
+        var minLogTauC = tauRef[1][0];
+
+        //int numPoints = linePoints[0].length;
+        // returns numPoints+1 x numDeps array: the numPoints+1st row holds the line centre continuum tau scale
+        //double[][] logTauC = new double[numCont][numDeps];
+        var logTauC = [];
+        logTauC.length = numCont;
+        for (var i = 0; i < numCont; i++){
+           logTauC[i] = [];
+           logTauC[i].length = numDeps;
+        }
+
+        var tau1, tau2, delta, tauL,
+                integ, logKapRat, lastLogKapRat;
+
+//Interpolate continuum opacity onto onto line-blanketed opacity lambda array:
+//
+        for (var il = 0; il < numCont; il++) {
+
+            tau1 = minTauC; //initialize accumulator
+            logTauC[il][0] = minLogTauC; // Set upper boundary TauL
+
+            lastLogKapRat = logKappaCont[il][0] - logKappaRef[1][0];
+            lastLogKapRat = lastLogKapRat + logE10*logTotalFudge;
+
+            for (var id = 1; id < numDeps; id++) {
+
+                delta = tauRef[0][id] - tauRef[0][id - 1];
+                logKapRat = logKappaCont[il][id] - logKappaRef[1][id];
+                logKapRat = logKapRat + logE10*logTotalFudge;
+
+                //trapezoid rule:
+                integ = 0.5 * (Math.exp(logKapRat) + Math.exp(lastLogKapRat));
+                tau2 = tau1 + (integ * delta);
+
+                logTauC[il][id] = Math.log(tau2);
+                tau1 = tau2;
+                lastLogKapRat = logKapRat;
+
+            } //id loop
+
+        } //il loop
+
+        return logTauC;
+
+    }; //end method tauLambda
+
 
 /**
  *
@@ -1850,10 +1903,12 @@ var logEv = Math.log(eV);
 //Treat at least one molecule - if there are really no molecules for an atomic species, 
 //there will be one phantom molecule in the denominator of the ionization fraction
 //with an impossibly high dissociation energy
+   var ifMols = true;
    if (numMols == 0){
+       ifMols = false;
        numMols = 1;
 //This should be inherited, but let's make sure: 
-       dissEArr[0] = 29.0; //eV
+       dissEArr[0] = 19.0; //eV
    }
 
 //Molecular partition functions - default initialization:
@@ -1994,8 +2049,10 @@ var logEv = Math.log(eV);
                denominator = denominator + addend; 
             }
 //molecular contribution
-           for (var iMol = 0; iMol < numMols; iMol++){
-              denominator = denominator + invSahaMol[iMol];
+           if (ifMols == true){
+              for (var iMol = 0; iMol < numMols; iMol++){
+                denominator = denominator + invSahaMol[iMol];
+              }
            }
 // 
             var logDenominator = Math.log(denominator); 

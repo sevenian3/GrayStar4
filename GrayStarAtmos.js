@@ -2427,12 +2427,12 @@ var logK = Math.log(k);
 
   //      console.log("i " + i + " logNH1 " + log10E*logNH1[i] + " logNH2 " + log10E*logNH2[i] 
   //  + " logNHe1 " + log10E*logNHe1[i] + " logNHe2 " + log10E*logNHe2[i] + " logPe " + log10E*pe[1][i]);
-        logPH1 = logNH1[i] + temp[1][i] + logK;
-        logPH2 = logNH2[i] + temp[1][i] + logK;
-        logPHe1 = logNHe1[i] + temp[1][i] + logK;
-        logPHe2 = logNHe2[i] + temp[1][i] + logK;
+        //logPH1 = logNH1[i] + temp[1][i] + logK;
+        //logPH2 = logNH2[i] + temp[1][i] + logK;
+        //logPHe1 = logNHe1[i] + temp[1][i] + logK;
+        //logPHe2 = logNHe2[i] + temp[1][i] + logK;
         //console.log("i " + i + " logPH1 " + log10E*logPH1 + " logPH2 " + log10E*logPH2 
- //   + " logPHe1 " + log10E*logPHe1 + " logPHe2 " + log10E*logPHe2 + " logPe " + log10E*pe[1][i]);
+       //+ " logPHe1 " + log10E*logPHe1 + " logPHe2 " + log10E*logPHe2 + " logPe " + log10E*pe[1][i]);
      }
 
      var logKappa = [];
@@ -2725,9 +2725,9 @@ var logK = Math.log(k);
         gauntHelp = Math.exp(logGauntHelp);
 
               //if (iLam == 142){
-      //        if (iLam == 70){
+              if (iLam == 142){
     //console.log("lambdaA " + lambdaA);
-       //     }
+            }
 
 //HI b-f depth independent factors:
 //Start at largest threshold wavelength and break out of loop when next threshold lambda is less than current lambda:
@@ -2845,7 +2845,8 @@ var logK = Math.log(k);
                      kappa = Math.exp(logKapH1bf); 
   //System.out.println("HIbf " + log10E*logKapH1bf);
 //if (iTau == 36 && iLam == 70){
-//           console.log("logKapH1bf " + log10E*(logKapH1bf)); //-rho[1][iTau]));
+//if (iLam == 70){
+           //console.log("logKapH1bf " + log10E*(logKapH1bf)); //-rho[1][iTau]));
 //}
 //H I f-f:
 // cm^2 per *neutral* H atom
@@ -2866,6 +2867,8 @@ var logK = Math.log(k);
        //System.out.println("HIff " + log10E*logKapH1ff);
 
 //if (iTau == 36 && iLam == 70){
+//if (iTau == 36 && iLam == 70){
+//if (iLam == 70){
            //console.log("logKapH1ff " + log10E*(logKapH1ff)); //-rho[1][iTau]));
 //}
 
@@ -2920,7 +2923,8 @@ var logK = Math.log(k);
                   kappa = kappa + Math.exp(logKapHmbf); 
        //System.out.println("Hmbf " + log10E*logKapHmbf);
 //if (iTau == 36 && iLam == 70){
-         //console.log("logE10*1.0 " + (logE10*1.0));
+//if (iLam == 70){
+         ////console.log("logE10*1.0 " + (logE10*1.0));
            //console.log("logKapHmbf " + log10E*(logKapHmbf)); //-rho[1][iTau]));
 //}
              } //wavelength condition
@@ -2955,6 +2959,7 @@ var logK = Math.log(k);
                   kappa = kappa + Math.exp(logKapHmff); 
        //System.out.println("Hmff " + log10E*logKapHmff);
 //if (iTau == 36 && iLam == 70){
+//if (iLam == 70){
            //console.log("logKapHmff " + log10E*(logKapHmff)); //-rho[1][iTau]));
 //}
              } //wavelength condition
@@ -2988,7 +2993,8 @@ var logK = Math.log(k);
            kappa = kappa + Math.exp(logKapH2p); 
   //System.out.println("H2p " + log10E*logKapH2p);
 //if (iTau == 36 && iLam == 70){
-//           console.log("logKapH2p " + log10E*(logKapH2p)); //-rho[1][iTau]) + " logAH2p " + log10E*logAH2p
+//if (iLam == 70){
+           //console.log("logKapH2p " + log10E*(logKapH2p)); //-rho[1][iTau]) + " logAH2p " + log10E*logAH2p
 // + " logSigmaH2p " + log10E*logSigmaH2p + " (UH2p*theta)*logE10 " + log10E*((UH2p*theta)*logE10) + " logNH2[iTau] " + log10E*logNH2[iTau]);
 //}
           } //wavelength condition
@@ -3020,7 +3026,8 @@ var logK = Math.log(k);
                 kappa = kappa + Math.exp(logKapHe); 
        //System.out.println("He " + log10E*logKapHe);
 //if (iTau == 36 && iLam == 70){
-//           console.log("logKapHe " + log10E*(logKapHe)); //-rho[1][iTau]));
+//if (iLam == 70){
+           //console.log("logKapHe " + log10E*(logKapHe)); //-rho[1][iTau]));
 //}
           } //wavelength condition
        } // temperature condition
@@ -3087,8 +3094,9 @@ var logK = Math.log(k);
                    kappa = kappa + Math.exp(logKapHemff); 
        //System.out.println("Hemff " + log10E*logKapHemff);
 //if (iTau == 36 && iLam == 70){
+//if (iLam == 70){
 //if (iLam == 155){
-//           console.log("logKapHemff " + log10E*(logKapHemff)); //-rho[1][iTau]));
+           //console.log("logKapHemff " + log10E*(logKapHemff)); //-rho[1][iTau]));
 //}
  
              } //wavelength condition
@@ -3108,7 +3116,8 @@ var logK = Math.log(k);
                kappa = kappa + Math.exp(logKapE); 
        //System.out.println("E " + log10E*logKapE);
 //if (iTau == 36 && iLam == 70){
-//           console.log("logKapE " + log10E*(logKapE)); //-rho[1][iTau]));
+//if (iLam == 70){
+           //console.log("logKapE " + log10E*(logKapE)); //-rho[1][iTau]));
 //}
 
 //Metal b-f
@@ -3128,10 +3137,13 @@ var logK = Math.log(k);
 // Fudge is in cm^2/g:  Converto to natural log:
  //console.log("base10 logKapFudge " + logKapFudge);
    var logEKapFudge = logE10 * logKapFudge;
- //console.log("baseE logKapFudge " + logKapFudge);
+//console.log("baseE logKapFudge " + logKapFudge);
    logKappa[iLam][iTau] = logKappa[iLam][iTau] + logEKapFudge;
-//if (iTau == 36 && iLam == 142){
-      //System.out.println(" " + log10E*(logKappa[iLam][iTau]+rho[1][iTau]));
+//if (iTau == 36 && iLam == 70){
+//if (iLam == 142){
+//console.log("baseE logKapFudge " + logKapFudge);
+      //console.log(" " + log10E*(logKappa[iLam][iTau]+rho[1][iTau]));
+//      console.log(" " + iTau + " " + Math.exp(logKappa[iLam][iTau]+rho[1][iTau]));
 //}
 
 //
@@ -3155,6 +3167,7 @@ var logK = Math.log(k);
 
      var numerator, denominator, deltaLam, logdBdTau, logNumerator, logDenominator;
      var logTerm, logDeltaLam, logInvKap, logInvKapRos;
+     var logE = logTen(Math.E);
 
      for (var iTau = 0; iTau < numDeps; iTau++){
 
@@ -3181,6 +3194,7 @@ var logK = Math.log(k);
         kappaRos[1][iTau] = -1.0 * logInvKapRos; //logarithmic
         kappaRos[0][iTau] = Math.exp(kappaRos[1][iTau]);
 
+        //console.log("iTau " + iTau + " kappaRos " + logE*kappaRos[1][iTau]);
      }
 
      return kappaRos;
