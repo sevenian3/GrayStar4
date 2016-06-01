@@ -3472,6 +3472,9 @@ ifConvec = false;
          thisUwV[0] = 0.0; //default initialization
          thisUwV[1] = 0.0;
 //
+             //Get the components for the power series expansion approximation of the Hjerting function
+             // for treating Voigt profiles:
+            var hjertComp = hjertingComponents();
 
         for (var iLine = 0; iLine < numLines; iLine++) {
         //for (var iLine = 0; iLine < 1; iLine++) {
@@ -3556,9 +3559,9 @@ ifConvec = false;
             // Gaussian + Lorentzian approximation to profile (voigt()):
             //var listLineProf = voigt(listLinePoints, listLam0nm, listLogGammaCol[iLine],
             //        numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
-            // // Real Voigt fn profile (voigt2()):        
+            // // Real Voigt fn profile (voigt2()):    
             var listLineProf = voigt(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
-                    numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
+                    numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
             var listLogKappaL = lineKap(listLam0nm, listLogNums, listLogf[iLine], listLinePoints, listLineProf,
                     numDeps, zScaleList, tauRos, temp, rho);
             //int listNumPoints = listLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
@@ -3883,7 +3886,7 @@ ifConvec = false;
 // *****************************
 // 
 //
-    // Line profile section:
+    // User line profile section:
 //
 //
 //
@@ -3912,7 +3915,7 @@ ifConvec = false;
     } else {
         //console.log("voigt called");
         var lineProf = voigt(linePoints, lam0, logAij, logGammaCol,
-                numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
+                numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
     }
 
 //
@@ -4052,8 +4055,6 @@ var logEv = Math.log(eV);
     }
     //
     //Compute depth-dependent logarithmic monochromatic extinction co-efficient, kappa_lambda(lambda, tauRos):
-    //Handing in rhoSun instead of rho here is a *weird* fake to get line broadening to scale with logg 
-    //approximately okay for saturated lines:   There's something wrong!              
     var lineLambdas = [];
     lineLambdas.length = numPoints;
             for (var il = 0; il < numPoints; il++) {
@@ -4182,7 +4183,7 @@ var logEv = Math.log(eV);
     // **********  Basic canvas parameters: These are numbers in px - needed for calculations:
     // All plots and other output must fit within this region to be white-washed between runs
 
-    var xRangeText = 1550;
+    var xRangeText = 2050;
     var yRangeText = 65;
     var xOffsetText = 10;
     var yOffsetText = 10;

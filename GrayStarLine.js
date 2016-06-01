@@ -254,7 +254,7 @@ var lineGrid = function(lam0In, massIn, xiTIn,
  */
 var voigt = function(linePoints, lam0In, logAij, logGammaCol,
         numDeps, teff, tauRos, temp, press,
-        tempSun, pressSun) {
+        tempSun, pressSun, hjertComp) {
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
     var k = 1.3806488E-16; // Boltzmann constant in ergs/K
@@ -314,6 +314,8 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
     var gamma, logGamma, a, logA, voigt, core, wing, logWing, logVoigt;
     var Aij = Math.exp(logAij);
     var il = 36;
+// For Hjerting function approximation:
+   var vSquare, vFourth, vAbs, a2, a3, a4, Hjert0, Hjert1, Hjert2, Hjert3, Hjert4, hjertFn;
     //console.log("il " + il + " temp[il] " + temp[0][il] + " press[il] " + logE*press[1][il]);
     for (var id = 0; id < numDeps; id++) {
 
@@ -340,12 +342,43 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
         //Voigt "a" parameter with line centre wavelength:
         logA = 2.0 * logLam0 + logGamma - ln4pi - logC - logDopp;
         a = Math.exp(logA);
+// Powers of a needed for Hjerting function power expansion approximation:
+        a2 = Math.exp(2.0*logA);
+        a3 = Math.exp(3.0*logA);
+        a4 = Math.exp(4.0*logA);
         //    if (id === 12) {
         //console.log("LineGrid: lam0 " + lam0 +  " logGam " + logE * logGamma + " logA " + logE * logA);
         //   }
         for (var il = 0; il < numPoints; il++) {
 
             v[il] = linePoints[1][il];
+            vAbs = Math.abs(v[il]);
+            vSquare = vAbs * vAbs;
+            vFourth = vSquare * vSquare;
+
+//Approximate Hjerting fn from tabulated expansion coefficients:
+// Interpolate in Hjerting table to exact "v" value for each expanstion coefficient:
+// Row 0 of Hjerting component table used for tabulated abscissae, Voigt "v" parameter
+            if (vAbs <= 12.0){
+              //we are within abscissa domain of table
+              Hjert0 = interpol(hjertComp[0], hjertComp[1], vAbs);
+              Hjert1 = interpol(hjertComp[0], hjertComp[2], vAbs);
+              Hjert2 = interpol(hjertComp[0], hjertComp[3], vAbs);
+              Hjert3 = interpol(hjertComp[0], hjertComp[4], vAbs);
+              Hjert4 = interpol(hjertComp[0], hjertComp[5], vAbs);
+           } else {
+              // We use the analytic expansion
+              Hjert0 = 0.0;
+              Hjert1 = (0.56419 / vSquare) + (0.846 / vFourth); 
+              Hjert2 = 0.0;
+              Hjert3 = -0.56 / vFourth;
+              Hjert4 = 0.0;
+           }
+//Approximate Hjerting fn with power expansion in Voigt "a" parameter 
+// "Observation & Analysis of Stellar Photospeheres" (D. Gray), 3rd Ed., p. 258:
+          hjertFn = Hjert0 + a*Hjert1 + a2*Hjert2 + a3*Hjert3 + a4*Hjert4; 
+
+/* Gaussian + Lorentzian approximation:    
             //System.out.println("LineProf: il, v[il]: " + il + " " + v[il]);
             if (v[il] <= 2.0 && v[il] >= -2.0) {
 
@@ -371,15 +404,20 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
             //    console.log("LINEGRID- WING: wing: " + wing + " logV " + logV);
              //}
             } // end else
-
+*/
 //System.out.println("LINEGRID: il, v[il]: " + il + " " + v[il] + " lineProf[0][il]: " + lineProf[0][il]);
 //System.out.println("LINEGRID: il, Voigt, H(): " + il + " " + voigt);
 //Convert from H(a,v) in dimensionless voigt untis to physical phi(Delta almbda) profile 
-            logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+           // if (id === 20) {
+           //     console.log("lam0In " + lam0In);
+           //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " v " + v[il] + " voigt " + voigt + " hjertFn " + hjertFn);
+           // }
+            //logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+            logVoigt = Math.log(hjertFn) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
             lineProf[il][id] = Math.exp(logVoigt);
-           // if (id === 12) {
-                //console.log("lam0In " + lam0In);
-            //    console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
+           // if (id === 20) {
+           //     console.log("lam0In " + lam0In);
+           //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
            // }
         } // il lambda loop
 
@@ -991,6 +1029,8 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
             //Convert to mass co-efficient in g/cm^2:          
             // This direct approach won't work - is not consistent with fake Kramer's law scaling of Kapp_Ros with g instead of rho
             logKappaL[il][id] = logKappaL[il][id] - rho[1][id];
+//Try something...
+            logKappaL[il][id] = logKappaL[il][id] + Math.log(4.0);
             //var refRhoIndx = 16;
           //  if (id == 12) {
            //     console.log("LINEKAPPA: id, il " + id + " " + il + " logKappaL " + logE * logKappaL[il][id]
