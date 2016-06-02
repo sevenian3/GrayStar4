@@ -317,6 +317,7 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
 // For Hjerting function approximation:
    var vSquare, vFourth, vAbs, a2, a3, a4, Hjert0, Hjert1, Hjert2, Hjert3, Hjert4, hjertFn;
     //console.log("il " + il + " temp[il] " + temp[0][il] + " press[il] " + logE*press[1][il]);
+   
     for (var id = 0; id < numDeps; id++) {
 
 //Formula from p. 56 of Radiative Transfer in Stellar Atmospheres (Rutten),
@@ -405,6 +406,242 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
              //}
             } // end else
 */
+//System.out.println("LINEGRID: il, v[il]: " + il + " " + v[il] + " lineProf[0][il]: " + lineProf[0][il]);
+//System.out.println("LINEGRID: il, Voigt, H(): " + il + " " + voigt);
+//Convert from H(a,v) in dimensionless voigt untis to physical phi(Delta almbda) profile 
+           // if (id === 20) {
+           //     console.log("lam0In " + lam0In);
+           //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " v " + v[il] + " voigt " + voigt + " hjertFn " + hjertFn);
+           // }
+            //logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+            logVoigt = Math.log(hjertFn) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+            lineProf[il][id] = Math.exp(logVoigt);
+           // if (id === 20) {
+           //     console.log("lam0In " + lam0In);
+           //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
+           // }
+        } // il lambda loop
+
+    } //id loop
+
+
+    return lineProf;
+};
+
+
+/**
+ * Line profile, phi_lambda(lambda): Assume Voigt function profile - need H(a,v)
+ * Assumes CRD, LTE, ??? 
+ * Input parameters: lam0 - line center wavelength in nm
+ * mass - mass of absorbing particle (amu) logGammaCol - log_10(gamma) - base 10
+ * logarithmic collisional (pressure) damping co-efficient (s^-1) epsilon -
+ * convective microturbulence- non-thermal broadening parameter (km/s) 
+ * Also needs
+ * atmospheric structure information: numDeps WON'T WORK - need observer's frame
+ * fixed lambda at all depths: temp structure for depth-dependent thermal line
+ * broadening Teff as typical temp instead of above pressure structure, pGas, if
+ * scaling gamma
+ */
+var stark = function(linePoints, lam0In, logAij, logGammaCol,
+        numDeps, teff, tauRos, temp, press, Ne,
+        tempSun, pressSun, hjertComp) {
+
+    var c = 2.9979249E+10; // light speed in vaccuum in cm/s
+    var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+    var logC = Math.log(c);
+    var logK = Math.log(k);
+
+    var lam0 = lam0In; // * 1.0E-7; //nm to cm
+    var logLam0 = Math.log(lam0);
+    var logLam0A = Math.log(lam0) + Math.log(8.0); //cm to A
+    var ln10 = Math.log(10.0);
+    var ln2 = Math.log(2.0);
+    var ln4pi = Math.log(4.0 * Math.PI);
+    var lnSqRtPi = 0.5 * Math.log(Math.PI);
+    var sqPi = Math.sqrt(Math.PI);
+
+    var logE = logTen(Math.E); // for debug output
+    // linePoints Row 0 : Delta lambdas in cm - will need to be in nm for Planck and Rad Trans?
+    //            Row 1 : Delta lambdas in Doppler widths
+    //
+    var doppler = linePoints[0][1] / linePoints[1][1];
+    var logDopp = Math.log(doppler);
+    //System.out.println("LineProf: doppler, logDopp: " + doppler + " " + logE*logDopp);
+
+    //Put input parameters into linear cgs units:
+    //double gammaCol = Math.pow(10.0, logGammaCol);
+
+    // Lorentzian broadening:
+    // Assumes Van der Waals dominates radiative damping
+    // log_10 Gamma_6 for van der Waals damping around Tau_Cont = 1 in Sun 
+    //  - p. 57 of Radiative Transfer in Stellar Atmospheres (Rutten)
+    var logGammaSun = 9.0 * ln10; // Convert to base e 
+    //double logFudge = Math.log(2.5);  // Van der Waals enhancement factor
+
+    var tau1 = tauPoint(numDeps, tauRos, 1.0);
+    //System.out.println("LINEGRID: Tau1: " + tau1);
+    //logA = 2.0 * logLam0 + logGamma - ln4pi - logC - logDopp;
+    //a = Math.exp(logA);
+    //System.out.println("LINEGRID: logA: " + logE * logA);
+    //Set up a half-profile Delta_lambda grid in Doppler width units 
+    //from line centre to wing
+
+    var numPoints = linePoints[0].length;
+    //System.out.println("LineProf: numPoints: " + numPoints);
+
+    // Return a 2D numPoints X numDeps array of normalized line profile points (phi)
+
+    var lineProf = [];
+    lineProf.length = numPoints;
+    //Have to use Array constructor here:
+    for (var row = 0; row < numPoints; row++) {
+        lineProf[row] = [];
+        lineProf[row].length = numDeps;
+    }
+    //Java: double[][] lineProf = new double[numPoints][numDeps];
+
+    // Line profiel points in Doppler widths - needed for Voigt function, H(a,v):
+    var v = [];
+    v.length = numPoints;
+    var logV, ii;
+//        lineProf[0][0] = 0.0; v[0] = 0.0; //Line centre - cannot do logaritmically!
+    var gamma, logGamma, a, logA, voigt, core, wing, logWing, logVoigt;
+    var Aij = Math.exp(logAij);
+    var il = 36;
+// For Hjerting function approximation:
+   var vSquare, vFourth, vAbs, a2, a3, a4, Hjert0, Hjert1, Hjert2, Hjert3, Hjert4, hjertFn;
+    //console.log("il " + il + " temp[il] " + temp[0][il] + " press[il] " + logE*press[1][il]);
+   
+   //Parameters for linear Stark broadening:
+   //Assymptotic ("far wing") "K" parameters
+   //Stehle & Hutcheon, 1999, A&A Supp Ser, 140, 93 and CDS data table
+   var logKStark = [];
+   logKStark.length = 5; //For now: Halpha to Hepsilon 
+   logKStark[0] = Math.log(2.56e-03);  //Halpha
+   logKStark[1] = Math.log(7.06e-03);   //Hbeta
+   logKStark[2] = Math.log(1.19e-02);  //Hgamma
+   logKStark[3] = Math.log(1.94e-02);  //Hdelta
+   logKStark[4] = Math.log(2.95e-02);  //Hepsilon
+   var thisLogK = logKStark[4]; //default initialization
+   //which Balmer line are we?  crude but effective:
+   if (lam0In > 650.0e-7){
+      console.log("Halpha");
+      thisLogK = logKStark[0];  //Halpha
+   } 
+   if ( (lam0In > 480.0e-7) && (lam0In < 650.0e-7) ){
+      console.log("Hbeta");
+      thisLogK = logKStark[1];  //Hbeta
+   }
+   if ( (lam0In > 420.0e-7) && (lam0In < 470.0e-7) ){
+      console.log("Hgamma");
+      thisLogK = logKStark[2];  //Hgamma
+   }
+   if ( (lam0In > 400.0e-7) && (lam0In < 450.0e-7) ){
+      console.log("Hdelta");
+      thisLogK = logKStark[3];  //Hdelta
+   }
+   if ( (lam0In < 400.0e-7) ){
+      console.log("Hepsilon");
+      thisLogK = logKStark[4];  //Hepsilon
+   }
+
+//
+   var F0, logF0, lamOverF0, logLamOverF0; //electrostatic field strength (e.s.u.)
+   var deltaAlpha, logDeltaAlpha, logStark, logStarkTerm; //reduced wavelength de-tuning parameter (Angstroms/e.s.u.)
+   var logF0Fac = Math.log(1.249e-9);
+// log wavelength de-tunings in A:
+   var logLinePoints, thisPoint;
+//   var logLinePoints = [];
+//   logLinePoints.length = numPoints;
+//   for (var i = 0; i < numPoints; i++){
+//     console.log("i " + i + " linePoints[0][i] " + linePoints[0][i]);
+//     logLinePoints[i] = Math.log(linePoints[0][i]) - Math.log(8.0); 
+//   }
+ 
+    for (var id = 0; id < numDeps; id++) {
+
+//linear Stark broadening stuff:
+        logF0 = logF0Fac + (0.666667)*Ne[1][id];
+        logLamOverF0 = logLam0A - logF0; 
+        lamOverF0 = Math.exp(logLamOverF0);
+
+  //console.log("id " + id + " logF0 " + logE*logF0 + " logLamOverF0 " + logE*logLamOverF0 + " lamOverF0 " + lamOverF0);
+
+//Formula from p. 56 of Radiative Transfer in Stellar Atmospheres (Rutten),
+// logarithmically with respect to solar value:
+        logGamma = press[1][id] - pressSun[1][tau1] + 0.7 * (tempSun[1][tau1] - temp[1][id]) + logGammaSun;
+        //logGamma = logGamma + logFudge + logGammaCol;
+        logGamma = logGamma + logGammaCol;
+   //Add radiation (natural) broadning:
+        gamma = Math.exp(logGamma) + Aij;
+        logGamma = Math.log(gamma); 
+            //        if (id == 12){
+            //console.log("LineGrid: logGamma: " + id + " " + logE * logGamma + " press[1][id] " + press[1][id] + " pressSun[1][tau1] "
+            // + pressSun[1][tau1] + " temp[1][id] " + temp[1][id] + " tempSun[1][tau1] " + tempSun[1][tau1]);
+            //     }
+
+        //if (id == 16) {
+        //    console.log("lam0In " + lam0In);
+        //    console.log("tau1, press[1][id], pressSun[1][tau1], tempSun[1][tau1], temp[1][id], logGammaSun " +
+         //           tau1 + " " + " " + logE*press[1][id] + " " + logE*pressSun[1][tau1] + " " + tempSun[1][tau1] + " " + temp[1][id] + " " + logE*logGammaSun);
+        //    console.log("LineGrid: logGamma: " + id + " " + logE * logGamma);
+       // }
+
+        //Voigt "a" parameter with line centre wavelength:
+        logA = 2.0 * logLam0 + logGamma - ln4pi - logC - logDopp;
+        a = Math.exp(logA);
+// Powers of a needed for Hjerting function power expansion approximation:
+        a2 = Math.exp(2.0*logA);
+        a3 = Math.exp(3.0*logA);
+        a4 = Math.exp(4.0*logA);
+        //    if (id === 12) {
+        //console.log("LineGrid: lam0 " + lam0 +  " logGam " + logE * logGamma + " logA " + logE * logA);
+        //   }
+        for (var il = 0; il < numPoints; il++) {
+
+            v[il] = linePoints[1][il];
+            vAbs = Math.abs(v[il]);
+            vSquare = vAbs * vAbs;
+            vFourth = vSquare * vSquare;
+
+//Approximate Hjerting fn from tabulated expansion coefficients:
+// Interpolate in Hjerting table to exact "v" value for each expanstion coefficient:
+// Row 0 of Hjerting component table used for tabulated abscissae, Voigt "v" parameter
+            if (vAbs <= 12.0){
+              //we are within abscissa domain of table
+              Hjert0 = interpol(hjertComp[0], hjertComp[1], vAbs);
+              Hjert1 = interpol(hjertComp[0], hjertComp[2], vAbs);
+              Hjert2 = interpol(hjertComp[0], hjertComp[3], vAbs);
+              Hjert3 = interpol(hjertComp[0], hjertComp[4], vAbs);
+              Hjert4 = interpol(hjertComp[0], hjertComp[5], vAbs);
+           } else {
+              // We use the analytic expansion
+              Hjert0 = 0.0;
+              Hjert1 = (0.56419 / vSquare) + (0.846 / vFourth); 
+              Hjert2 = 0.0;
+              Hjert3 = -0.56 / vFourth;
+              Hjert4 = 0.0;
+           }
+//Approximate Hjerting fn with power expansion in Voigt "a" parameter 
+// "Observation & Analysis of Stellar Photospeheres" (D. Gray), 3rd Ed., p. 258:
+          hjertFn = Hjert0 + a*Hjert1 + a2*Hjert2 + a3*Hjert3 + a4*Hjert4; 
+
+            //System.out.println("LineProf: il, v[il]: " + il + " " + v[il]);
+//linear Stark wings
+            if (vAbs > 2.0) {
+
+               thisPoint = 1.0e8 * Math.abs(linePoints[0][il]); //cm to A
+               logLinePoints = Math.log(thisPoint); 
+               logDeltaAlpha = logLinePoints - logF0;
+               deltaAlpha = Math.exp(logDeltaAlpha);
+               logStarkTerm = 0.5 * ( Math.log(lamOverF0 + deltaAlpha) - logDeltaAlpha );
+               logStark = thisLogK + logStarkTerm - 2.5*logDeltaAlpha; 
+
+               //console.log("il " + il + " logDeltaAlpha " + logE*logDeltaAlpha + " logStarkTerm " + logE*logStarkTerm  + " logStark " + logE*logStark);
+
+               hjertFn = hjertFn + Math.exp(logStark);
+               //console.log("hjertFn " + hjertFn + " Math.exp(logStark) " + Math.exp(logStark));
+            } 
 //System.out.println("LINEGRID: il, v[il]: " + il + " " + v[il] + " lineProf[0][il]: " + lineProf[0][il]);
 //System.out.println("LINEGRID: il, Voigt, H(): " + il + " " + voigt);
 //Convert from H(a,v) in dimensionless voigt untis to physical phi(Delta almbda) profile 

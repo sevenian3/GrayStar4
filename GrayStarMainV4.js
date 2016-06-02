@@ -3474,7 +3474,13 @@ ifConvec = false;
 //
              //Get the components for the power series expansion approximation of the Hjerting function
              // for treating Voigt profiles:
-            var hjertComp = hjertingComponents();
+        var hjertComp = hjertingComponents();
+        var listLineProf = [];
+        listLineProf.length = listNumPoints;
+        for (var i = 0; i < listNumPoints; i++){
+           listLineProf[i] = [];
+           listLineProf[i].length = numDeps;
+        }
 
         for (var iLine = 0; iLine < numLines; iLine++) {
         //for (var iLine = 0; iLine < 1; iLine++) {
@@ -3559,9 +3565,14 @@ ifConvec = false;
             // Gaussian + Lorentzian approximation to profile (voigt()):
             //var listLineProf = voigt(listLinePoints, listLam0nm, listLogGammaCol[iLine],
             //        numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
-            // // Real Voigt fn profile (voigt2()):    
-            var listLineProf = voigt(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
+            // // Real Voigt fn profile (voigt2()):   
+            if (species == "HI"){
+               listLineProf = stark(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
+                    numDeps, teff, tauRos, temp, pGas, newNe, tempSun, pGasSun, hjertComp); 
+            } else {
+               listLineProf = voigt(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
                     numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
+            }
             var listLogKappaL = lineKap(listLam0nm, listLogNums, listLogf[iLine], listLinePoints, listLineProf,
                     numDeps, zScaleList, tauRos, temp, rho);
             //int listNumPoints = listLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
