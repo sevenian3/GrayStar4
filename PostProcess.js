@@ -30,7 +30,9 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     //var vegaColors = [0.0, 0.0, 0.0, 0.0, 0.0]; //For re-calibrating with raw Vega colours
     // Aug 2015 - with 14-line linelist:
     //var vegaColors = [0.289244, -0.400324, 0.222397, -0.288568, -0.510965];
-    var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
+    //var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
+    //With Balmer line linear Stark broadening wings:
+    vegaColors = [0.321691, -0.248000, 0.061419, -0.463083, -0.524502];
 
     var deltaLam, newY, product;
 
@@ -73,27 +75,27 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     // Ux-Bx: 
     raw = 2.5 * logTen(bandFlux[1] / bandFlux[0]);
     colors[0] = raw - vegaColors[0];
-    //console.log("U-B: " + colors[0] + " raw " + raw + " bandFlux[1] " + bandFlux[1] + " bandFlux[0] " + bandFlux[0]);
+    console.log("U-B: " + colors[0] + " raw " + raw + " bandFlux[1] " + bandFlux[1] + " bandFlux[0] " + bandFlux[0]);
 
     // B-V:
     raw = 2.5 * logTen(bandFlux[3] / bandFlux[2]);
     colors[1] = raw - vegaColors[1];
-    //console.log("B-V: " + colors[1]);
+    console.log("B-V: " + colors[1]);
 
     // V-R:
     raw = 2.5 * logTen(bandFlux[4] / bandFlux[3]);
     colors[2] = raw - vegaColors[2];
-    //console.log("V-R: " + colors[2]);
+    console.log("V-R: " + colors[2]);
 
     // V-I:
     raw = 2.5 * logTen(bandFlux[5] / bandFlux[3]);
     colors[3] = raw - vegaColors[3];
-    //console.log("V-I: " + colors[3]);
+    console.log("V-I: " + colors[3]);
 
     // R-I:
     raw = 2.5 * logTen(bandFlux[5] / bandFlux[4]);
     colors[4] = raw - vegaColors[4];
-    //console.log("R-I: " + colors[4]);
+    console.log("R-I: " + colors[4]);
 
     return colors;
 
@@ -974,63 +976,14 @@ if (surfEquRotV > 0.0){
   }; //end method convol
 */   
 
-var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, diskSigma, lamUV, lamIR) {
+//var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, diskSigma, lamUV, lamIR) {
+var tuneColor = function(lambdaScale, intens, numThetas, numLams, gaussian, lamUV, lamIR) {
     //No! iColors now returns band-integrated intensities
 
   //diskSigma = 10.0;  //test
   //diskSigma = 0.01;  //test
-//wavelength sampling interval in nm for interpolation 
-    var deltaLam = 0.001;  //nm
-      var sigma = diskSigma / deltaLam; //sigma of Gaussian in pixels 
-//Number of wavelength elements for Gaussian
-       var numSigmas = 2.5; //+/- 2.5 sigmas
-       var numGauss = Math.ceil(2.0 * numSigmas * sigma);  //+/- 2.5 sigmas
- //ensure odd number of elements in Gausian kernal
-       if ((numGauss % 2) == 0){
-          numGauss++;
-       }
-       var gauss = [];
-       gauss.length = numGauss;
-       var midPix = Math.floor(numGauss/2);
-
-////Area normalization factors:
-//       var rootTwoPi = Math.sqrt(2.0 * Math.PI);
-//       var prefac = 1.0 / (sigma * rootTwoPi); 
-
-       var x, expFac;
-//Construct Gaussian in pixel space:
-       //var sum = 0.0;  //test
-       for (var i = 0; i < numGauss; i++){
-          x = (i - midPix);
-          expFac = x / sigma; 
-          expFac = expFac * expFac; 
-          gauss[i] = Math.exp(-0.5 * expFac); 
-          //gauss[i] = prefac * gauss[i];
-          //sum+= gauss[i];   //test
-          //console.log("i " + i + " gauss[i] " + gauss[i]);  //test
-          } 
-       //console.log("Gaussian area: " + sum); 
-
-//establish filter lambda scale:
-   var filterLam = [];
-   filterLam.length = numGauss;
-   lamStart = diskLambda - (numSigmas * diskSigma); //nm
-   var ii = 0; 
-   for (var i = 0; i < numGauss; i++){
-      ii = 1.0 * i;
-      filterLam[i] = lamStart + (ii * deltaLam); //nm
-      filterLam[i] = 1.0e-7 * filterLam[i]; //cm for reference to lambdaScale
-  //Keep wthin limits of treated SED:
-    if (filterLam[i] < 1.0e-7*lamUV){
-      gauss[i] = 0.0;
-     }  
-    if (filterLam[i] > 1.0e-7*lamIR){
-      gauss[i] = 0.0;
-     }  
-   } 
-       for (var i = 0; i < numGauss; i++){
-          //console.log("i " + i + " filterLam[i] " + filterLam[i] + " gauss[i] " + gauss[i]);  //test
-          } 
+    var numGauss = gaussian[0].length;
+    var deltaLam = gaussian[0][1] - gaussian[0][0];
 
   //console.log("numGauss " + numGauss + " sigma " + sigma + " lamStart " + lamStart);
 
@@ -1053,7 +1006,8 @@ var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, di
     //    for (var ib = 0; ib < numBands; ib++) {
 
             bandIntens[it] = 0.0; //initialization
-            var newY = interpolV(intensLam, lambdaScale, filterLam);
+            //var newY = interpolV(intensLam, lambdaScale, filterLam);
+            var newY = interpolV(intensLam, lambdaScale, gaussian[0]);
 
 //wavelength loop is over photometric filter data wavelengths
 
@@ -1061,7 +1015,8 @@ var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, di
 
 //In this case - interpolate model SED onto wavelength grid of tunable filter 
 
-                product = gauss[il] * newY[il];
+               // product = gauss[il] * newY[il];
+                product = gaussian[1][il] * newY[il];
                 //Rectangular picket integration
                 bandIntens[it] = bandIntens[it] + (product * deltaLam);
                 //console.log("Photometry: ib: " + ib + " bandIntens: " + bandIntens[ib][it]);
@@ -1076,6 +1031,81 @@ var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, di
     return bandIntens;
 
 }; //iColours
+
+
+//Create area normalized Gaussian appropriate for interpolating onto high resolution wavelength gid
+var gaussian = function(lambdaScale, numLams, lambdaIn, sigmaIn, lamUV, lamIR) {
+    //No! iColors now returns band-integrated intensities
+
+  //diskSigma = 10.0;  //test
+  //diskSigma = 0.01;  //test
+//wavelength sampling interval in nm for interpolation
+    var deltaLam = 0.001;  //nm
+      var sigma = sigmaIn / deltaLam; //sigma of Gaussian in pixels
+//Number of wavelength elements for Gaussian
+       var numSigmas = 2.5; //+/- 2.5 sigmas
+       var numGauss = Math.ceil(2.0 * numSigmas * sigma);  //+/- 2.5 sigmas
+ //ensure odd number of elements in Gausian kernal
+       if ((numGauss % 2) == 0){
+          numGauss++;
+       }
+//Row 0 holds wavelengths in cm
+//Row 1 holds Gaussian
+       var gauss = [];
+       gauss.length = 2;
+       gauss[0] = [];
+       gauss[0].length = numGauss;
+       gauss[1] = [];
+       gauss[1].length = numGauss;
+       var midPix = Math.floor(numGauss/2);
+
+////Area normalization factors:
+//       var rootTwoPi = Math.sqrt(2.0 * Math.PI);
+//       var prefac = 1.0 / (sigma * rootTwoPi);
+
+       var x, expFac;
+//Construct Gaussian in pixel space:
+       //var sum = 0.0;  //test
+       for (var i = 0; i < numGauss; i++){
+          x = (i - midPix);
+          expFac = x / sigma;
+          expFac = expFac * expFac;
+          gauss[1][i] = Math.exp(-0.5 * expFac);
+          //gauss[i] = prefac * gauss[i];
+          //sum+= gauss[i];   //test
+          //console.log("i " + i + " gauss[i] " + gauss[i]);  //test
+          }
+       //console.log("Gaussian area: " + sum);
+
+//establish filter lambda scale:
+   //var filterLam = [];
+   //filterLam.length = numGauss;
+   lamStart = lambdaIn - (numSigmas * sigmaIn); //nm
+   var ii = 0;
+   for (var i = 0; i < numGauss; i++){
+      ii = 1.0 * i;
+     // filterLam[i] = lamStart + (ii * deltaLam); //nm
+     // filterLam[i] = 1.0e-7 * filterLam[i]; //cm for reference to lambdaScale
+      gauss[0][i] = lamStart + (ii * deltaLam); //nm
+      gauss[0][i] = 1.0e-7 * gauss[0][i]; //cm for reference to lambdaScale
+  //Keep wthin limits of treated SED:
+    if (gauss[0][i] < 1.0e-7*lamUV){
+      gauss[1][i] = 0.0;
+     }
+    if (gauss[0][i] > 1.0e-7*lamIR){
+      gauss[1][i] = 0.0;
+     }
+   }
+      // for (var i = 0; i < numGauss; i++){
+      //    console.log("i " + i + " filterLam[i] " + gauss[0][i] + " gauss[i] " + gauss[1][i]);  //test
+      // }
+
+  //console.log("numGauss " + numGauss + " sigma " + sigma + " lamStart " + lamStart);
+
+    return gauss;
+
+}; //gaussian
+
 
 // Extract linear monochromatic continuum limb darkening coefficients (LDCs, "epsilon"s)
 // // from intensity distribution (needeed for rotational broadening kernel on client side)
@@ -1113,3 +1143,130 @@ var tuneColor = function(lambdaScale, intens, numThetas, numLams, diskLambda, di
  };  //end method ldc
 
 
+ //Discrete cosine and sine Fourier transform of input narrow-band intensity profile
+ //
+ // We will interpret theta/(theta/2) with respect to the local surface normal of the star to 
+ // be the spatial domain "x" coordinate - this is INDEPENDENT of the distance to, and linear
+ // radius of, the star! :-)
+ var fourier = function(numThetas, cosTheta, filtIntens){
+
+  var pi = Math.PI; //a handy enough wee quantity
+  var halfPi = pi / 2.0; 
+
+    //number of sample points in full intensity profile I(theta), theta = -pi/2 to pi/2 RAD:
+      var numX0 = 2 * numThetas - 1;
+
+//We have as input the itnesity half-profile I(cos(theta)), cos(theta) = 1 to 0 
+ //create the doubled root-intensity profile sqrt(I(theta/halfPi)), theta/halfPi = -1 to 1 
+ //this approach assumes the real (cosine) and imaginary (sine) components are in phase 
+     var rootIntens2 = [];
+     var x0 = [];
+     rootIntens2.length = numX0;
+     x0.length = numX0;
+     var normIntens;
+//negative x domain of doubled profile:
+     var j = 0;
+     for (var i = numThetas-1; i >=0; i--){
+        x0[j] = -1.0*Math.acos(cosTheta[1][i]) / halfPi;
+        normIntens = filtIntens[i] / filtIntens[0]; //normalize
+        rootIntens2[j] = Math.sqrt(normIntens);
+        //console.log("i " + i + " cosTheta " + cosTheta[1][i] + " filtIntens " + filtIntens[i] + " normIntens " + normIntens
+        //  + " j " + j + " x0 " + x0[j] + " rootIntens2 " + rootIntens2[j] );
+        j++; 
+     }
+//positive x domain of doubled profile:
+     for (var i = numThetas; i < numX0; i++){
+        j = i - (numThetas-1); 
+        x0[i] = Math.acos(cosTheta[1][j]) / halfPi;
+        normIntens = filtIntens[j] / filtIntens[0]; //normalize
+        //rootIntens2[i] = Math.sqrt(normIntens); 
+        rootIntens2[i] = normIntens; 
+        //console.log("j " + j + " cosTheta " + cosTheta[1][j] + " filtIntens " + filtIntens[j] + " normIntens " + normIntens
+        //  + " i " + i + " x0 " + x0[i] + " rootIntens2 " + rootIntens2[i] );
+     }  
+
+//create the uniformly sampled spatial domain ("x") and the complementary
+//spatial frequecy domain "k" domain
+//
+//We're interpreting theta/halfPi with respect to local surface normal at surface
+//of star as the spatial domain, "x"
+  var minX = -2.0;
+  var maxX = 1.0;  
+  var numX = 100;  //(is also "numK" - ??)
+  var deltaX = (maxX - minX) / numX;
+
+//Complentary limits in "k" domain; k = 2pi/lambda (radians)
+//  - lowest k value corresponds to one half spatial wavelength (lambda) = 2 (ie. 1.0 - (-1.0)):
+  var maxLambda = 2.0 * 2.0;
+  // stupid?? var minK = 2.0 * pi / maxLambda;  //(I know, I know, but let's keep this easy for the human reader)
+//  - highest k value has to do with number of points sampling x:  Try Nyquist sampling rate of 
+//     two x points per lambda  
+  var minLambda = 8.0 * 2.0 * deltaX;
+  var maxK = 2.0 * pi / minLambda; //"right-going" waves
+  var minK = -1.0 * maxK;  //"left-going" waves
+  var deltaK = (maxK - minK) / numX;
+ // console.log("maxK " + maxK + " minK " + minK + " deltaK " + deltaK);
+
+
+  var x = [];
+  var k = [];
+  x.length = numX;
+  k.length = numX; 
+  var ii;
+  for (var i = 0; i < numX; i++){
+     ii = 1.0 * i;
+     x[i] = minX + ii*deltaX; 
+     k[i] = minK + ii*deltaK;
+    // console.log("i " + i + " x " + x[i] + " k " + k[i]);
+  }  
+
+//Interpolate the rootIntens2(theta/halfpi) signal onto uniform spatial sampling:
+  //doesn't work: var rootIntens3 = interpolV(rootIntens2, x0, x);
+  var rootIntens3 = [];
+  rootIntens3.length = numX;
+  for (var i = 0; i < numX; i++){
+     rootIntens3[i] = interpol(x0, rootIntens2, x[i]);
+     //console.log("i " + i + " x " + x[i] + " rootIntens3 " + rootIntens3[i]);
+  }
+
+//returned variable ft:
+//  Row 0: wavenumber, spatial frequency, k (radians)
+//  Row 1: cosine transform (real component)
+//  Row 2: sine transform (imaginary component 
+      var ft = [];
+      ft.length = 3;
+      ft[0] = [];
+      ft[1] = [];
+      ft[2] = [];
+      ft[0].length = numX-1;
+      ft[1].length = numX-1;
+      ft[2].length = numX-1;
+
+ var argument, rootFt;
+ //numXFloat = 1.0 * numX;
+//Outer loop is over the elements of vector holding the power at each frequency "k"
+    for (var ik = 0; ik < numX-1; ik++){
+//intiialize ft
+       ft[0][ik] = k[ik];
+       rootFtCos = 0.0;
+       rootFtSin = 0.0;
+       ft[1][ik] = 0.0; 
+       ft[2][ik] = 0.0; 
+//Inner llop is cumulative summation over spatial positions "x" - the Fourier cosine and sine series
+       for (var ix = 0; ix < numX-1; ix++){
+         //ixFloat = 1.0 * ix;
+         argument = -1.0 * k[ik] * x[ix];
+         //console.log("ik " + ik + " ix " + ix + " argument " + argument + " x " + x[ix] + " rootIntens3 " + rootIntens3[ix]); 
+         // cosine series:
+         rootFtCos = rootFtCos + rootIntens3[ix] * Math.cos(argument);  
+         // sine series:
+         rootFtSin = rootFtSin + rootIntens3[ix] * Math.sin(argument); 
+       } //ix loop 
+         ft[1][ik] = rootFtCos; // * rootFtCos; //Power 
+         ft[2][ik] = rootFtSin; // * rootFtSin;
+         //console.log("ik " + ik + " k " + k[ik] + " ft[1] " + ft[1][ik]); 
+    } //ik loop
+
+      return ft;
+
+   }; //end method fourier

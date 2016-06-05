@@ -1812,9 +1812,9 @@ function main() {
     var textId = document.getElementById("outPanel"); // text output area
 
     //var masterId = document.getElementById("container"); // graphical output area
-    var plotOneId = document.getElementById("plotOne");
-    var cnvsOneId = document.getElementById("plotOneCnvs");
-    var cnvsOneCtx = cnvsOneId.getContext("2d"); 
+   // var plotOneId = document.getElementById("plotOne");
+   // var cnvsOneId = document.getElementById("plotOneCnvs");
+   // var cnvsOneCtx = cnvsOneId.getContext("2d"); 
     var plotTwoId = document.getElementById("plotTwo");
     var cnvsTwoId = document.getElementById("plotTwoCnvs");
     var cnvsTwoCtx = cnvsTwoId.getContext("2d"); 
@@ -1858,12 +1858,15 @@ function main() {
     var plotSixteenId = document.getElementById("plotSixteen");
     var cnvsSixteenId = document.getElementById("plotSixteenCnvs");
     var cnvsSixteenCtx = cnvsSixteenId.getContext("2d"); 
+    var plotSeventeenId = document.getElementById("plotSeventeen");
+    var cnvsSeventeenId = document.getElementById("plotSeventeenCnvs");
+    var cnvsSeventeenCtx = cnvsSeventeenId.getContext("2d"); 
 
     var printModelId = document.getElementById("printModel"); //detailed model print-out area
 
 
     if (ifShowAtmos === true) {
-        plotOneId.style.display = "block";
+        //plotOneId.style.display = "block";
         plotTwoId.style.display = "block";
         plotThreeId.style.display = "block";
         plotFourteenId.style.display = "block";
@@ -1874,6 +1877,7 @@ function main() {
     if (ifShowRad === true) {
         plotFourId.style.display = "block";
         plotFiveId.style.display = "block";
+        plotSeventeenId.style.display = "block";
     }
     if (ifShowLine === true) {
         plotSixId.style.display = "block";
@@ -1885,7 +1889,7 @@ function main() {
     }
 
     if (ifShowAtmos === false) {
-        plotOneId.style.display = "none";
+        //plotOneId.style.display = "none";
         plotTwoId.style.display = "none";
         plotThreeId.style.display = "none";
         plotFourteenId.style.display = "none";
@@ -4614,7 +4618,13 @@ Spectral line \n\
     var lamMaxStr = lamMax.toString(10);
     var bandIntens = iColors(masterLams, masterIntens, numThetas, numMaster);
 
-    var tuneBandIntens = tuneColor(masterLams, masterIntens, numThetas, numMaster, diskLambda, diskSigma, lamUV, lamIR);
+    //var tuneBandIntens = tuneColor(masterLams, masterIntens, numThetas, numMaster, diskLambda, diskSigma, lamUV, lamIR);
+    var gaussFilter = gaussian(masterLams, numMaster, diskLambda, diskSigma, lamUV, lamIR);
+    var tuneBandIntens = tuneColor(masterLams, masterIntens, numThetas, numMaster, gaussFilter, lamUV, lamIR);
+
+    //Fourier transform of narrow band image:
+    var ft = fourier(numThetas, cosTheta, tuneBandIntens);
+    var numK = ft[0].length;
 
     //Vega's disk center values of B, V, R intensity normalized by B+V+R:
     //var vegaBVR = [1.0, 1.0, 1.0]; //for now
@@ -5519,7 +5529,7 @@ Spectral line \n\
     if (ifLineOnly === false) {
 
         var plotRow = 1;
-        var plotCol = 1;
+        var plotCol = 2;
         // WARNING: Teff axis is backwards!!
         var minXData = logTen(100000.0); //K
         var maxXData = logTen(1000.0); //K
@@ -5872,7 +5882,7 @@ Spectral line \n\
     //
     //  *****   PLOT ONE / PLOT 1
     //
-
+/*
     // Plot one: log(Tau) vs log(rho)
     // 
     if ((ifLineOnly === false) && (ifShowAtmos === true)) {
@@ -5994,7 +6004,7 @@ Spectral line \n\
         txtPrint("<span style='font-size:small; color:#444444'><em>&#964</em><sub>Ros</sub>=1</span>",
                 xShift, yShift, lineColor, plotOneId);
     }
-
+*/
 //
 //
 //  *****   PLOT TWO / PLOT 2
@@ -6005,7 +6015,7 @@ Spectral line \n\
 // 
     if ((ifLineOnly === false) && (ifShowAtmos === true)) {
 
-        var plotRow = 1;
+        var plotRow = 2;
         var plotCol = 2;
         var minXData = logE * tauRos[1][0];
         var maxXData = logE * tauRos[1][numDeps - 1];
@@ -6215,7 +6225,7 @@ Spectral line \n\
 
     if ((ifLineOnly === false) && (ifShowAtmos === true)) {
 
-        var plotRow = 2;
+        var plotRow = 3;
         var plotCol = 2;
         var minXData = logE * tauRos[1][0];
         var maxXData = logE * tauRos[1][numDeps - 1];
@@ -6405,7 +6415,7 @@ Spectral line \n\
  
    if ((ifLineOnly === false) && (ifShowRad === true)) {
 
-        var plotRow = 3;
+        var plotRow = 1;
         var plotCol = 1;
 //
         var minXData = 180.0 * Math.acos(cosTheta[1][0]) / Math.PI;
@@ -6413,6 +6423,7 @@ Spectral line \n\
         var xAxisName = "<em>&#952</em> (<sup>o</sup>)";
         var minYData = 0.0;
         var maxYData = 1.0;
+        //var maxYData = tuneBandIntens[0] / norm;
         var yAxisName = "<span title='Monochromatic surface specific intensity'><a href='http://en.wikipedia.org/wiki/Specific_radiative_intensity' target='_blank'><em>I</em><sub>&#955</sub>(<em>&#952</em>)/<br /><em>I</em><sub>&#955</sub>(0)</a></span>";
 
         var fineness = "normal";
@@ -6445,24 +6456,18 @@ Spectral line \n\
         //var iLamMax = iLamMinMax[1];
         //var lamMax = (1.0e7 * masterLams[iLamMax]).toPrecision(3);
 
-        var lam1 = (1.0e7 * masterLams[0]).toPrecision(3);
-        var lam1Str = lam1.toString(10);
-        var lamN = (1.0e7 * masterLams[numMaster - 1]).toPrecision(3);
-        var lamNStr = lamN.toString(10);
-        var lam0r = (1.0e7 * lam0).toPrecision(3);
-        var lam0rStr = lam0r.toString(10);
 //
+        lineColor = "#000000";
+        var diskLamLbl = diskLambda.toPrecision(3);
+        var diskLamStr = diskLamLbl.toString(10);
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
-        txtPrint("<span style='font-size:small'><span style='color:#00FF88'><em>&#955</em><sub>Max</sub> = " + lamMaxStr + "nm</span><br /> "
-                + " <span style='color:blue'><em>&#955</em> = " + lam1Str + "nm</span><br /> "
-                + " <span style='color:red'><em>&#955</em> = " + lamNStr + "nm</span><br />"
-                + " <span style='color:#444444'>line <em>&#955</em><sub>0</sub> = " + lam0rStr + "nm</span></span>",
-                xAxisXCnvs+10, titleOffsetY+yAxisLength-20, lineColor, plotFourId);
+        txtPrint("<span style='font-size:small'><span style='color:#000000'><em>&#955</em><sub>Filter</sub> = " + diskLamStr + "nm</span><br /> ",
+                xAxisXCnvs+10, titleOffsetY+20, lineColor, plotFourId);
         // Add title annotation:
 
 
-        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>Limb darkening and reddening</a></span>",
+        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>Limb darkening </a></span>",
                 titleOffsetX, titleOffsetY, lineColor, plotFourId);
         //Data loop - plot the result!
 
@@ -6487,16 +6492,10 @@ Spectral line \n\
         var xTickPosCnvs = xAxisLength * (180.0 * Math.acos(cosTheta[1][0]) / Math.PI - minXData) / rangeXData; // pixels   
         // horizontal position in pixels - data values increase rightward:
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        var yTickPosCnvs = yAxisLength * ((masterIntens[iLamMax][0] / masterIntens[iLamMax][0]) - minYData) / rangeYData;
-        var yTickPos0Cnvs = yAxisLength * ((masterIntens[0][0] / masterIntens[0][0]) - minYData) / rangeYData;
-        var yTickPosNCnvs = yAxisLength * ((masterIntens[numMaster - 1][0] / masterIntens[numMaster - 1][0]) - minYData) / rangeYData;
-        var yTickPosLnCnvs = yAxisLength * ((lineIntens[keyLambds[0]][0] / lineIntens[keyLambds[0]][0]) - minYData) / rangeYData;
+        var yTickPosCnvs = yAxisLength * ((tuneBandIntens[0] / tuneBandIntens[0]) - minYData) / rangeYData;
 
         // vertical position in pixels - data values increase upward:
         var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-        var lastYShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
-        var lastYShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
-        var lastYShiftLnCnvs = (yAxisYCnvs + yAxisLength) - yTickPosLnCnvs;
 //
         for (var i = 1; i < numThetas; i++) {
 
@@ -6504,21 +6503,15 @@ Spectral line \n\
             // horizontal position in pixels - data values increase rightward:
             var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 
-            yTickPosCnvs = yAxisLength * ((masterIntens[iLamMax][i] / masterIntens[iLamMax][0]) - minYData) / rangeYData;
-            yTickPos0Cnvs = yAxisLength * ((masterIntens[0][i] / masterIntens[0][0]) - minYData) / rangeYData;
-            yTickPosNCnvs = yAxisLength * ((masterIntens[numMaster - 1][i] / masterIntens[numMaster - 1][0]) - minYData) / rangeYData;
-            yTickPosLnCnvs = yAxisLength * ((lineIntens[keyLambds[0]][i] / lineIntens[keyLambds[0]][0]) - minYData) / rangeYData;
+            yTickPosCnvs = yAxisLength * ((tuneBandIntens[i] / tuneBandIntens[0]) - minYData) / rangeYData;
 
             // vertical position in pixels - data values increase upward:
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-            var yShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
-            var yShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
-            var yShiftLnCnvs = (yAxisYCnvs + yAxisLength) - yTickPosLnCnvs;
 
 //Plot points
             cnvsFourCtx.beginPath();
             cnvsFourCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            RGBHex = colHex(r255, g255, b255);
+            RGBHex = colHex(0, 0, 0);
             cnvsFourCtx.strokeStyle = RGBHex;
             cnvsFourCtx.stroke();
 //line plot
@@ -6528,49 +6521,9 @@ Spectral line \n\
             cnvsFourCtx.lineTo(xShiftCnvs, yShiftCnvs);
             cnvsFourCtx.stroke();  
             //
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.arc(xShiftCnvs, yShift0Cnvs, dSize0Cnvs, 0, 2*Math.PI);
-            RGBHex = colHex(r2550, g2550, b2550);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.stroke();
-//
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.moveTo(lastXShiftCnvs, lastYShift0Cnvs);
-            cnvsFourCtx.lineTo(xShiftCnvs, yShift0Cnvs);
-            cnvsFourCtx.stroke();  
-//
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.arc(xShiftCnvs, yShiftNCnvs, dSize0Cnvs, 0, 2*Math.PI);
-            RGBHex = colHex(r255N, g255N, b255N);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.stroke();
-//
-            cnvsFourCtx.beginPath();
-            RGBHex = colHex(r255N, g255N, b255N);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.moveTo(lastXShiftCnvs, lastYShiftNCnvs);
-            cnvsFourCtx.lineTo(xShiftCnvs, yShiftNCnvs);
-            cnvsFourCtx.stroke(); 
-// 
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.arc(xShiftCnvs, yShiftLnCnvs, dSize0Cnvs, 0, 2*Math.PI);
-            RGBHex = colHex(100, 100, 100);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.stroke();
-//
-            cnvsFourCtx.beginPath();
-            RGBHex = colHex(100, 100, 100);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.moveTo(lastXShiftCnvs, lastYShiftLnCnvs);
-            cnvsFourCtx.lineTo(xShiftCnvs, yShiftLnCnvs);
-            cnvsFourCtx.stroke();  
 
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
-            lastYShift0Cnvs = yShift0Cnvs;
-            lastYShiftNCnvs = yShiftNCnvs;
-            lastYShiftLnCnvs = yShiftLnCnvs;
         }
     }
 
@@ -6584,7 +6537,7 @@ Spectral line \n\
 // 
     if ((ifLineOnly === false) && (ifShowRad === true)) {
 
-        var plotRow = 2;
+        var plotRow = 3;
         var plotCol = 1;
 //
         var minXData = 1.0e7 * masterLams[0];
@@ -7871,6 +7824,154 @@ Spectral line \n\
     } // plot loop, i
 
   } 
+
+
+    //
+    //
+    //  *****   PLOT SEVENTEEN / PLOT 17
+    //
+    //
+    // Plot seventeen:  Fourier (cosine) transform of Intensity profile across disk (I(theta/(pi/2)))
+ 
+   if ((ifLineOnly === false) && (ifShowRad === true)) {
+
+        var plotRow = 2;
+        var plotCol = 1;
+//
+        var minXData = ft[0][0];
+        var maxXData = ft[0][numK-1];
+// console.log("minXData " + minXData + " maxXData " + maxXData);
+        var xAxisName = "<em>k</em> (RAD/RAD)";
+        var iFtMinMax = minMax(ft[1]);
+// console.log("iFtMinMax[1] " + iFtMinMax[1] + " ft[1][iFtMinMax[1]] " + ft[1][iFtMinMax[1]]);
+//logarithmic        var minYData = -2.0;  //logarithmic
+//logarithmic        var maxYData = logE*Math.log(ft[1][iFtMinMax[1]]);  //logarithmic
+        var minYData = ft[1][iFtMinMax[0]];  //logarithmic
+        var maxYData = ft[1][iFtMinMax[1]];  //logarithmic
+        //var maxYData = tuneBandIntens[0] / norm;
+        var yAxisName = "<span title='Monochromatic surface specific intensity'><a href='http://en.wikipedia.org/wiki/Specific_radiative_intensity' target='_blank'><em>I</em><sub>&#955</sub>(<em>k</em>)/<br /><em>I</em><sub>&#955</sub>(0)</a></span>";
+
+        var fineness = "normal";
+//
+        var panelOrigin = washer(plotRow, plotCol, wColor, plotSeventeenId, cnvsSeventeenId);
+        panelX = panelOrigin[0];
+        panelY = panelOrigin[1];
+        cnvsSeventeenCtx.fillStyle = wColor;
+        cnvsSeventeenCtx.fillRect(0, 0, panelWidth, panelHeight);
+        var xAxisParams = XAxis(panelX, panelY,
+                minXData, maxXData, xAxisName, fineness,
+                plotSeventeenId, cnvsSeventeenCtx);
+        var yAxisParams = YAxis(panelX, panelY,
+                minYData, maxYData, yAxisName,
+                plotSeventeenId, cnvsSeventeenCtx);
+        var rangeXData = xAxisParams[1];
+        var deltaXData = xAxisParams[2];
+        var deltaXPxl = xAxisParams[3];
+        var rangeYData = yAxisParams[1];
+        var deltaYData = yAxisParams[2];
+        var deltaYPxl = yAxisParams[3];
+        minXData = xAxisParams[6]; //updated value
+        minYData = yAxisParams[6]; //updated value
+        maxXData = xAxisParams[7]; //updated value
+        maxYData = yAxisParams[7]; //updated value        
+// console.log("minXData " + minXData + " maxXData " + maxXData);
+        //
+        // Add legend annotation:
+
+        //var iLamMinMax = minMax2(masterFlux);
+        //var iLamMax = iLamMinMax[1];
+        //var lamMax = (1.0e7 * masterLams[iLamMax]).toPrecision(3);
+
+//
+        lineColor = "#000000";
+        var diskLamLbl = diskLambda.toPrecision(3);
+        var diskLamStr = diskLamLbl.toString(10);
+        titleX = panelX + titleOffsetX;
+        titleY = panelY + titleOffsetY;
+        txtPrint("<span style='font-size:small'><span style='color:#000000'><em>&#955</em><sub>Filter</sub> = " + diskLamStr + "nm</span><br /> ",
+                xAxisXCnvs+10, titleOffsetY+20, lineColor, plotSeventeenId);
+        // Add title annotation:
+
+
+        txtPrint("<span style='font-size:normal; color:blue'><a href='https://en.wikipedia.org/wiki/Discrete_Fourier_transform' target='_blank'> Fourier transform of <em>I</em><sub>&#955</sub>(<em>&#952</em>)/ <em>I</em><sub>&#955</sub>(0)</a> </a></span>",
+                titleOffsetX, titleOffsetY, lineColor, plotSeventeenId);
+        //Data loop - plot the result!
+
+        var dSizeCnvs = 2.0; //plot point size
+        var dSize0Cnvs = 1.0;
+        var opac = 1.0; //opacity
+        // RGB color
+        // PTot:
+        var r255 = 0;
+        var g255 = 255;
+        var b255 = 100; //green 
+        // PGas:
+        var r2550 = 0;
+        var g2550 = 0;
+        var b2550 = 255; //blue
+        // PRad:
+        var r255N = 255;
+        var g255N = 0;
+        var b255N = 0; //red
+
+
+        var xTickPosCnvs = xAxisLength * (ft[0][0] - minXData) / rangeXData; // pixels   
+        // horizontal position in pixels - data values increase rightward:
+        var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
+//logarithmic        var yTickPosCnvs = yAxisLength * (logE*Math.log(ft[1][0]) - minYData) / rangeYData; //logarithmic
+       var yTickPosCnvs = yAxisLength * (ft[1][0] - minYData) / rangeYData;
+       var yTickPos2Cnvs = yAxisLength * (ft[2][0] - minYData) / rangeYData;
+
+        // vertical position in pixels - data values increase upward:
+        var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+        var lastYShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
+//
+        for (var i = 1; i < numK; i++) {
+
+  //console.log("i " + i + " ft[0] " + ft[0][i] + " ft[1] " + ft[1][i]);
+            xTickPosCnvs = xAxisLength * (ft[0][i] - minXData) / rangeXData; // pixels   
+            // horizontal position in pixels - data values increase rightward:
+            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
+
+//logarithmic            yTickPosCnvs = yAxisLength * (logE*Math.log(ft[1][i]) - minYData) / rangeYData; //logarithmic
+            yTickPosCnvs = yAxisLength * (ft[1][i] - minYData) / rangeYData;
+            yTickPos2Cnvs = yAxisLength * (ft[2][i] - minYData) / rangeYData;
+
+            // vertical position in pixels - data values increase upward:
+            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+            var yShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
+
+//Plot points
+            cnvsSeventeenCtx.beginPath();
+            cnvsSeventeenCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
+            RGBHex = colHex(0, 0, 0);
+            cnvsSeventeenCtx.strokeStyle = RGBHex;
+            cnvsSeventeenCtx.stroke();
+//line plot
+            cnvsSeventeenCtx.beginPath();
+            cnvsSeventeenCtx.strokeStyle = RGBHex;
+            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
+            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShiftCnvs);
+            cnvsSeventeenCtx.stroke();  
+            //
+//Plot points
+            cnvsSeventeenCtx.beginPath();
+            cnvsSeventeenCtx.arc(xShiftCnvs, yShift2Cnvs, dSizeCnvs, 0, 2*Math.PI);
+            RGBHex = colHex(250, 0, 0);
+            cnvsSeventeenCtx.strokeStyle = RGBHex;
+            cnvsSeventeenCtx.stroke();
+//line plot
+            cnvsSeventeenCtx.beginPath();
+            cnvsSeventeenCtx.strokeStyle = RGBHex;
+            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShift2Cnvs);
+            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShift2Cnvs);
+            cnvsSeventeenCtx.stroke();  
+
+            lastXShiftCnvs = xShiftCnvs;
+            lastYShiftCnvs = yShiftCnvs;
+            lastYShift2Cnvs = yShift2Cnvs;
+        }
+    }
 
 
 // Detailed model output section:
