@@ -453,7 +453,7 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
 
     var lam0 = lam0In; // * 1.0E-7; //nm to cm
     var logLam0 = Math.log(lam0);
-    var logLam0A = Math.log(lam0) + Math.log(8.0); //cm to A
+    var logLam0A = Math.log(lam0) + 8.0*Math.log(10.0); //cm to A
     var ln10 = Math.log(10.0);
     var ln2 = Math.log(2.0);
     var ln4pi = Math.log(4.0 * Math.PI);
@@ -515,33 +515,36 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
    //Parameters for linear Stark broadening:
    //Assymptotic ("far wing") "K" parameters
    //Stehle & Hutcheon, 1999, A&A Supp Ser, 140, 93 and CDS data table
+   //Assume K has something to do with "S" and proceed as in Observation and Analysis of
+   // Stellar Photosphere, 3rd Ed. (D. Gray), Eq. 11.50,
+   var logTuneStark = Math.log(1.0e10); //convert DeltaI K parameters to deltaS STark profile parameters 
    var logKStark = [];
    logKStark.length = 5; //For now: Halpha to Hepsilon 
-   logKStark[0] = Math.log(2.56e-03);  //Halpha
-   logKStark[1] = Math.log(7.06e-03);   //Hbeta
-   logKStark[2] = Math.log(1.19e-02);  //Hgamma
-   logKStark[3] = Math.log(1.94e-02);  //Hdelta
-   logKStark[4] = Math.log(2.95e-02);  //Hepsilon
+   logKStark[0] = Math.log(2.56e-03) + logTuneStark;  //Halpha
+   logKStark[1] = Math.log(7.06e-03) + logTuneStark;   //Hbeta
+   logKStark[2] = Math.log(1.19e-02) + logTuneStark;  //Hgamma
+   logKStark[3] = Math.log(1.94e-02) + logTuneStark;  //Hdelta
+   logKStark[4] = Math.log(2.95e-02) + logTuneStark;  //Hepsilon
    var thisLogK = logKStark[4]; //default initialization
    //which Balmer line are we?  crude but effective:
    if (lam0In > 650.0e-7){
-      console.log("Halpha");
+    //  console.log("Halpha");
       thisLogK = logKStark[0];  //Halpha
    } 
    if ( (lam0In > 480.0e-7) && (lam0In < 650.0e-7) ){
-      console.log("Hbeta");
+    //  console.log("Hbeta");
       thisLogK = logKStark[1];  //Hbeta
    }
    if ( (lam0In > 420.0e-7) && (lam0In < 470.0e-7) ){
-      console.log("Hgamma");
+    //  console.log("Hgamma");
       thisLogK = logKStark[2];  //Hgamma
    }
    if ( (lam0In > 400.0e-7) && (lam0In < 450.0e-7) ){
-      console.log("Hdelta");
+   //   console.log("Hdelta");
       thisLogK = logKStark[3];  //Hdelta
    }
    if ( (lam0In < 400.0e-7) ){
-      console.log("Hepsilon");
+   //   console.log("Hepsilon");
       thisLogK = logKStark[4];  //Hepsilon
    }
 
@@ -550,7 +553,7 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
    var deltaAlpha, logDeltaAlpha, logStark, logStarkTerm; //reduced wavelength de-tuning parameter (Angstroms/e.s.u.)
    var logF0Fac = Math.log(1.249e-9);
 // log wavelength de-tunings in A:
-   var logLinePoints, thisPoint;
+   var logThisPoint, thisPoint;
 //   var logLinePoints = [];
 //   logLinePoints.length = numPoints;
 //   for (var i = 0; i < numPoints; i++){
@@ -625,21 +628,21 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
 //Approximate Hjerting fn with power expansion in Voigt "a" parameter 
 // "Observation & Analysis of Stellar Photospeheres" (D. Gray), 3rd Ed., p. 258:
           hjertFn = Hjert0 + a*Hjert1 + a2*Hjert2 + a3*Hjert3 + a4*Hjert4; 
-
+          logStark = -49.0; //re-initialize
             //System.out.println("LineProf: il, v[il]: " + il + " " + v[il]);
 //linear Stark wings
             if (vAbs > 2.0) {
 
                thisPoint = 1.0e8 * Math.abs(linePoints[0][il]); //cm to A
-               logLinePoints = Math.log(thisPoint); 
-               logDeltaAlpha = logLinePoints - logF0;
+               logThisPoint = Math.log(thisPoint); 
+               logDeltaAlpha = logThisPoint - logF0;
                deltaAlpha = Math.exp(logDeltaAlpha);
-               logStarkTerm = 0.5 * ( Math.log(lamOverF0 + deltaAlpha) - logDeltaAlpha );
-               logStark = thisLogK + logStarkTerm - 2.5*logDeltaAlpha; 
+               logStarkTerm = ( Math.log(lamOverF0 + deltaAlpha) - logLamOverF0 );
+               logStark = thisLogK + 0.5*logStarkTerm - 2.5*logDeltaAlpha; 
 
                //console.log("il " + il + " logDeltaAlpha " + logE*logDeltaAlpha + " logStarkTerm " + logE*logStarkTerm  + " logStark " + logE*logStark);
 
-               hjertFn = hjertFn + Math.exp(logStark);
+               //not here! hjertFn = hjertFn + Math.exp(logStark);
                //console.log("hjertFn " + hjertFn + " Math.exp(logStark) " + Math.exp(logStark));
             } 
 //System.out.println("LINEGRID: il, v[il]: " + il + " " + v[il] + " lineProf[0][il]: " + lineProf[0][il]);
@@ -650,7 +653,14 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
            //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " v " + v[il] + " voigt " + voigt + " hjertFn " + hjertFn);
            // }
             //logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
-            logVoigt = Math.log(hjertFn) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+            logVoigt = Math.log(hjertFn) - lnSqRtPi - logDopp;
+            logStark = logStark - logF0;
+            if (vAbs > 2.0){
+               //console.log("il " + il + " v[il] " + v[il] + " logVoigt " + logE*logVoigt + " logStark " + logE*logStark);
+               voigt = Math.exp(logVoigt) + Math.exp(logStark);
+               logVoigt = Math.log(voigt);
+            }
+            logVoigt = logVoigt + 2.0 * logLam0 - logC;
             lineProf[il][id] = Math.exp(logVoigt);
            // if (id === 20) {
            //     console.log("lam0In " + lam0In);
@@ -2372,7 +2382,7 @@ var logEv = Math.log(eV);
         } //id loop
 
         return logNums;
-    }; //end method stagePops    
+    }; //end method stagePops2    
     
 
 //Diatomic molecular equilibrium routine that accounts for molecule formation:
@@ -2394,7 +2404,9 @@ var logEv = Math.log(eV);
     var molPops = function(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
                  numMolsB, logNumB, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
                  logGroundRatio, numDeps, temp) {
-
+        //           molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB, 
+         //    thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+          //           logGroundRatio, numDeps, temp)
 
  //console.log("Line: nmrtrLog10UwB[0] " + nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + nmrtrLog10UwB[1]);
 
@@ -2441,7 +2453,6 @@ var logEv = Math.log(eV);
        dissEArr[0] = 29.0; //eV
    }
 
-    //var molPops = function(logNum, numeratorLogNumB, numeratorDissE, numeratorLog10UwA, numeratorLog10QwAB, numeratorLogMuAB,  //species A data - ionization equilibrium of A
 //Molecular partition functions - default initialization:
        var thisLogUwB = [];
        thisLogUwB.length = numMolsB;
@@ -2509,7 +2520,7 @@ var logEv = Math.log(eV);
  
        //}
 //   For molecular species:
-        var nmrtrSaha, nmrtrLogSahaMol, nmrtrInvSahaMol;
+        var nmrtrSaha, nmrtrLogSahaMol, nmrtrLogInvSahaMol; //, nmrtrInvSahaMol;
         var logMolFrac = [];
         logMolFrac.length = numDeps;
         var logSahaMol = []; 
@@ -2554,11 +2565,15 @@ var logEv = Math.log(eV);
 // for molecule formation:
 
    //Ionization stage Saha factors: 
-//console.log("id " + id + " nmrtrLogNumB[id] " + logE*nmrtrLogNumB[id]);             
+//          if (id == 24){
+//console.log("id " + id + " nmrtrLogNumB[id] " + logE*nmrtrLogNumB[id] + " pp nmrtB " + (logE*(nmrtrLogNumB[id]+temp[1][id]+logK)) + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + logE*nmrtrLogQwAB);             
+//   }
                nmrtrLogSahaMol = nmrtrLogMolSahaFac - nmrtrLogNumB[id] - (nmrtrBoltzFacIAB / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + nmrtrThisLogUwB + thisLogUwA - nmrtrLogQwAB;
-               nmrtrLogSahaMol = -1.0 * nmrtrLogSahaMol;
-               nmrtrInvSahaMol = Math.exp(nmrtrLogSahaMol);
-
+               nmrtrLogInvSahaMol = -1.0 * nmrtrLogSahaMol;
+               //nmrtrInvSahaMol = Math.exp(nmrtrLogSahaMol);
+     //     if (id == 24){
+     //         console.log("nmrtrLogInvSahaMol " + logE*nmrtrLogInvSahaMol);
+     //     }
           //if (id == 36){
           //     console.log("nmrtrBoltzFacIAB " + nmrtrBoltzFacIAB + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + nmrtrLogQwAB);   
           //     console.log("nmrtrLogSahaMol " + logE*nmrtrLogSahaMol + " nmrtrInvSahaMol " + nmrtrInvSahaMol);
@@ -2584,21 +2599,25 @@ var logEv = Math.log(eV);
             var denominator = Math.exp(logGroundRatio[id]); //default initialization - ratio of total atomic particles in all ionization stages to number in ground state 
 //molecular contribution
            for (var iMol = 0; iMol < numMolsB; iMol++){
+      //    if (id == 24){
+      //        console.log("iMol " + iMol + " invSahaMol " + invSahaMol[iMol] + " denominator " + denominator);
+      //    } 
               denominator = denominator + invSahaMol[iMol];
            }
 // 
             var logDenominator = Math.log(denominator); 
-            //console.log("id " + id + " logGroundRatio " + logGroundRatio[id] + " logDenominator " + logDenominator);
-            
+      //    if (id == 24){
+      //      console.log("id " + id + " logGroundRatio " + logE*logGroundRatio[id] + " logDenominator " + logE*logDenominator);
+      //    }  
           //if (id == 36){
           //     console.log("logDenominator " + logE*logDenominator);
          // }
             //var logDenominator = Math.log( 1.0 + saha21 + (saha32 * saha21) + (saha43 * saha32 * saha21) + (saha54 * saha43 * saha32 * saha21) );
 
-          logMolFrac[id] = nmrtrInvSahaMol - logDenominator;
-          //if (id == 36){
-           //    console.log("jStg " + jStg + " logIonFrac[jStg] " + logE*logIonFrac[jStg]);
-          //}
+          logMolFrac[id] = nmrtrLogInvSahaMol - logDenominator;
+      //    if (id == 24){
+      //         console.log("id " + id + " logMolFrac[id] " + logE*logMolFrac[id]);
+      //    }
 
             //if (id == 36) {
             //    System.out.println("logSaha21 " + logE*logSaha21 + " logSaha32 " + logE*logSaha32);
@@ -2611,5 +2630,5 @@ var logEv = Math.log(eV);
         } //id loop
 
         return logMolFrac;
-    }; //end method stagePops    
+    }; //end method molPops    
     

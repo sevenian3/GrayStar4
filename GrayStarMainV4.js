@@ -2654,10 +2654,12 @@ var logAmu = Math.log(amu);
          break;  //found it!
        }
     }
-  //console.log("specA_ptr " + specA_ptr + " cname[specA_ptr] " + cname[specA_ptr]); 
 // Get its partition fn:
     species = cname[specA_ptr] + "I"; //neutral stage
     var log10UwA = getPartFn(species); //base 10 log_10 U
+  //console.log("specA_ptr " + specA_ptr + " cname[specA_ptr] " + cname[specA_ptr]); 
+  //console.log("log10UwA " + log10UwA[0] + " " + log10UwA[1]);
+//
     for (var jj = 0; jj < nelemAbnd; jj++){
        if (mnameB[iMol] == cname[jj]){
          specB2_ptr = jj;
@@ -2709,9 +2711,11 @@ var logAmu = Math.log(amu);
              }
           } //jj loop in master cnames list
    //console.log("im " + im + " specB_ptr[im] " + specB_ptr[im] + " cname[specB_ptr[im]] " + cname[specB_ptr[im]]);
-       } //iMol loop in associated molecules
+       } //im loop in associated molecules
    
 //Now load arrays with molecular species AB and atomic species B data for method molPops()  
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var logK = Math.log(k);
        for (var im = 0; im < thisNumMols; im++){
       //special fix for H^+_2:
          if (mname[mname_ptr[im]] == "H2+"){
@@ -2720,11 +2724,17 @@ var logAmu = Math.log(amu);
            specBStage = 0;
          }
           for (var iTau = 0; iTau < numDeps; iTau++){
-             //console.log("iMol " + iMol + " iTau " + iTau + " specB_ptr[iMol] " + specB_ptr[iMol]);
 //Note: Here's one place where ionization equilibrium iteratively couples to molecular equilibrium!
              logNumBArr[im][iTau] = masterStagePops[specB_ptr[im]][specBStage][iTau];
+         //if (mname[iMol] == "TiO"){
+         //    console.log("iMol " + iMol + " iTau " + iTau + " specB_ptr[im] " + specB_ptr[im]);
+         //   console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " logNumBArr " + logE*logNumBArr[im][iTau] 
+         //      + " pp " + (logE*(logNumBArr[im][iTau]+temp[1][iTau]+logK)));
+         //}
+             
           }
           dissEArr[im] = getDissE(mname[mname_ptr[im]]);
+          //console.log("im " + im + " dissEArr " + dissEArr[im]);
           species = cname[specB_ptr[im]] + "I";
           log10UwBArr[im] = getPartFn(species); //base 10 log_10 U 
           log10QwABArr[im] = defaultQwAB;
@@ -2732,6 +2742,9 @@ var logAmu = Math.log(amu);
           massA = getMass(cname[specA_ptr]);
           massB = getMass(cname[specB_ptr[im]]);
           logMuABArr[im] = Math.log(massA) + Math.log(massB) - Math.log(massA + massB) + logAmu;
+   //      if (mname[iMol] == "TiO"){
+  //console.log("im " + im + " log10UwBArr " + log10UwBArr[im][0] + " " + log10UwBArr[im][1] + " logMuABArr " + logE*logMuABArr[im]);
+   //  }
  // One of the species A-associated molecules will be the actual molecule, AB, for which we want
  // the population - pick this out for the numerator in the master fraction:
           if (mname[mname_ptr[im]] == mname[iMol]){
@@ -2746,6 +2759,9 @@ var logAmu = Math.log(amu);
                  nmrtrLogNumB[iTau] = logNumBArr[im][iTau];
               }
           }
+     //    if (mname[iMol] == "TiO"){
+     //         console.log("nmrtrDissE " + nmrtrDissE + " nmrtrLogMuAB " + logE*nmrtrLogMuAB);
+      //   }
        } //im loop
  //console.log("Main: nmrtrLog10UwB[0] " + nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + nmrtrLog10UwB[1]);
 //
@@ -2760,15 +2776,28 @@ var logAmu = Math.log(amu);
               totalIonic = totalIonic + Math.exp(masterStagePops[specA_ptr][iStage][iTau]);
            }
            logGroundRatio[iTau] = Math.log(totalIonic) - masterStagePops[specA_ptr][0][iTau];    
+        // if (mname[iMol] == "TiO"){
+         //   console.log("logtotalIonic " + logE*Math.log(totalIonic) + " logGroundRatio " + logE*logGroundRatio[iTau] + " pp totalionic " + 
+          //        (logE*(Math.log(totalIonic)+temp[1][iTau]+logK)) );
+        // }
          }
        logNumFracAB = molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB, 
                      thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
                      logGroundRatio, numDeps, temp)
 
 //Load molecules into master molecular population array:
+var k = 1.3806488E-16; // Boltzmann constant in ergs/K
+var logK = Math.log(k);
       for (var iTau = 0; iTau < numDeps; iTau++){
          masterMolPops[iMol][iTau] = logNz[specA_ptr][iTau] + logNumFracAB[iTau];
-         //console.log(" " + iTau + " masterMolPops " + logE*masterMolPops[iMol][iTau]);
+        // if (mname[iMol] == "TiO"){
+        //  if (iTau == 24){
+        //    console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " masterMolPops " + logE*masterMolPops[iMol][iTau]
+        //       + " pp " + (logE*(masterMolPops[iMol][iTau]+temp[1][iTau]+logK))
+        //       + " ppA " + (logE*(logNz[specA_ptr][iTau]+temp[1][iTau]+logK)) 
+        //       + " logNumFracAB " + logE*logNumFracAB[iTau]);
+       //     }
+        // }
       }
   } //master iMol loop
 //

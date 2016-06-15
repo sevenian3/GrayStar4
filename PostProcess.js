@@ -75,27 +75,27 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     // Ux-Bx: 
     raw = 2.5 * logTen(bandFlux[1] / bandFlux[0]);
     colors[0] = raw - vegaColors[0];
-    console.log("U-B: " + colors[0] + " raw " + raw + " bandFlux[1] " + bandFlux[1] + " bandFlux[0] " + bandFlux[0]);
+    //console.log("U-B: " + colors[0] + " raw " + raw + " bandFlux[1] " + bandFlux[1] + " bandFlux[0] " + bandFlux[0]);
 
     // B-V:
     raw = 2.5 * logTen(bandFlux[3] / bandFlux[2]);
     colors[1] = raw - vegaColors[1];
-    console.log("B-V: " + colors[1]);
+    //console.log("B-V: " + colors[1]);
 
     // V-R:
     raw = 2.5 * logTen(bandFlux[4] / bandFlux[3]);
     colors[2] = raw - vegaColors[2];
-    console.log("V-R: " + colors[2]);
+    //console.log("V-R: " + colors[2]);
 
     // V-I:
     raw = 2.5 * logTen(bandFlux[5] / bandFlux[3]);
     colors[3] = raw - vegaColors[3];
-    console.log("V-I: " + colors[3]);
+    //console.log("V-I: " + colors[3]);
 
     // R-I:
     raw = 2.5 * logTen(bandFlux[5] / bandFlux[4]);
     colors[4] = raw - vegaColors[4];
-    console.log("R-I: " + colors[4]);
+    //console.log("R-I: " + colors[4]);
 
     return colors;
 
