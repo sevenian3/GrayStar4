@@ -1249,12 +1249,7 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
         stimEm = 1.0 - Math.exp(expFac);
         logStimEm = Math.log(stimEm);
 
-        // logNums is a 2D 3 x numDeps array of logarithmic number densities
-        // Row 0: neutral stage ground state population
-        // Row 1: ionized stage ground state population
-        // Row 2: level population of lower level of bb transition (could be in either stage I or II!) 
-        // Row 3: level population of upper level of bb transition (could be in either stage I or II!) 
-        logNum = logNums[2][id];
+        logNum = logNums[id];
 
         //if (id === refRhoIndx) {
         //    System.out.println("LINEKAPPA: logStimEm " + logE*logStimEm);
@@ -1277,6 +1272,14 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
             // This direct approach won't work - is not consistent with fake Kramer's law scaling of Kapp_Ros with g instead of rho
             logKappaL[il][id] = logKappaL[il][id] - rho[1][id];
 //Try something...
+//
+//// **********************
+////  Opacity problem #2
+////
+////Line opacity needs to be multipied by ~e^4.0 = 55 for Fraunhofer lines in Sun to have even
+////approximately the right strength - actually W_lambda is *still* to small!
+////  - related to Opacity problem #1 (logFudgeTune in GrayStarServer3.java) - ??
+////
             logKappaL[il][id] = logKappaL[il][id] + Math.log(4.0);
             //var refRhoIndx = 16;
           //  if (id == 12) {
@@ -1791,8 +1794,8 @@ var logEv = Math.log(eV);
             thisLogUw = logUw[1];
         }
         if (Ttheta > 0.5 && Ttheta < 1.0){
-            thisLogUw = 0.5 * (Ttheta - 0.5) * logUw[1]
-                + 0.5 * (1.0 - Ttheta) * logUw[0];
+            thisLogUw = 0.5 * logUw[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUw[0] * (1.0 - Ttheta)/(1.0 - 0.5);
         }
 
                 //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
@@ -1978,14 +1981,14 @@ var logEv = Math.log(eV);
            thisLogUw4 = logUw4[1];
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
-           thisLogUw1 = 0.5 * (Ttheta - 0.5) * logUw1[1]
-               + 0.5 * (1.0 - Ttheta) * logUw1[0];
-           thisLogUw2 = 0.5 * (Ttheta - 0.5) * logUw2[1]
-               + 0.5 * (1.0 - Ttheta) * logUw2[0];
-           thisLogUw3 = 0.5 * (Ttheta - 0.5) * logUw3[1]
-               + 0.5 * (1.0 - Ttheta) * logUw3[0];
-           thisLogUw4 = 0.5 * (Ttheta - 0.5) * logUw4[1]
-               + 0.5 * (1.0 - Ttheta) * logUw4[0];
+           thisLogUw1 = 0.5 * logUw1[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUw1[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw2 = 0.5 * logUw2[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUw2[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw3 = 0.5 * logUw3[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUw3[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw4 = 0.5 * logUw4[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUw4[0] * (1.0 - Ttheta)/(1.0 - 0.5);
        }
        //System.out.println("thisLogUw1, ... thisLogUw4 " + logE*thisLogUw1 + " " + logE*thisLogUw2 + " " + logE*thisLogUw3 + " " + logE*thisLogUw4);
        var thisLogUw5 = 0.0; //ionization stage V partition fn, U = 1.0
@@ -2072,7 +2075,7 @@ var logEv = Math.log(eV);
 //  Element "B" refers to array of other species with which A forms molecules "AB" 
 
     var stagePops2 = function(logNum, Ne, chiIArr, log10UwAArr,  //species A data - ionization equilibrium of A
-                 numMols, logNumB, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+                 numMols, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
                  numDeps, temp) {
 
 
@@ -2113,7 +2116,7 @@ var logEv = Math.log(eV);
 
 // Parition functions passed in are 2-element vectore with remperature-dependent base 10 log Us
 // Convert to natural logs:
-        var Ttheta;
+        var Ttheta, thisTemp;
   //Default initializations:
         var thisLogUw = [];
 //We need one more stage in size of saha factor than number of stages we're actualy populating
@@ -2205,6 +2208,7 @@ var logEv = Math.log(eV);
           thisLogUwB[iMol] = 0.0; // variable for temp-dependent computed partn fn of array element B 
        }
          var thisLogUwA = 0.0; // element A 
+         var thisLogQwAB = Math.log(300.0);
 
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
@@ -2227,14 +2231,14 @@ var logEv = Math.log(eV);
            logUwB[iMol][1] = logE10*log10UwBArr[iMol][1];
         }
       //}
-// Molecular partition functions:
-       var logQwAB = [];
-      //if (numMols > 0){
-       logQwAB.length = numMols;
-       for (var iMol = 0; iMol < numMols; iMol++){
-          logQwAB[iMol] = logE10*log10QwABArr[iMol];
-       }
-      //}
+//// Molecular partition functions:
+//       var logQwAB = [];
+//      //if (numMols > 0){
+//       logQwAB.length = numMols;
+//       for (var iMol = 0; iMol < numMols; iMol++){
+//          logQwAB[iMol] = logE10*logQwABArr[iMol];
+//       }
+//      //}
 //Molecular dissociation Boltzmann factors:
         var boltzFacIAB = [];
         var logMolSahaFac = [];
@@ -2265,7 +2269,8 @@ var logEv = Math.log(eV);
             logNe = Ne[1][id];
 
 //Determine temeprature dependenet aprtition functions Uw:
-            Ttheta = 5040.0 / temp[0][id];
+            thisTemp = temp[0][id];
+            Ttheta = 5040.0 / thisTemp;
 
        if (Ttheta >= 1.0){
            for (var iStg = 0; iStg < numStages; iStg++){
@@ -2285,15 +2290,30 @@ var logEv = Math.log(eV);
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
            for (var iStg = 0; iStg < numStages; iStg++){
-              thisLogUw[iStg] = 0.5 * (Ttheta - 0.5) * logUw[iStg][1]
-                + 0.5 * (1.0 - Ttheta) * logUw[iStg][0];
+              thisLogUw[iStg] = 0.5 * logUw[iStg][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                              + 0.5 * logUw[iStg][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
            for (var iMol = 0; iMol < numMols; iMol++){
-              thisLogUwB[iMol] = 0.5 * (Ttheta - 0.5) * logUwB[iMol][1]
-                + 0.5 * (1.0 - Ttheta) * logUwB[iMol][0];
+              thisLogUwB[iMol] = 0.5 * logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                               + 0.5 * logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
        }
          thisLogUw[numStages] = 0.0;
+      for (var iMol = 0; iMol < numMols; iMol++){
+         if (thisTemp < 3000.0){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                        + ( 0.5 * logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+         }
+         if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                        + ( 0.5 * logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+         }
+         if ( thisTemp > 8000.0 ){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                        + ( 0.5 * logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+         }
+      } // iMol loop
+
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
      thisLogUwA = thisLogUw[0];
@@ -2311,7 +2331,7 @@ var logEv = Math.log(eV);
 
 //Molecular Saha factors:
          for (var iMol = 0; iMol < numMols; iMol++){
-             logSahaMol[iMol] = logMolSahaFac[iMol] - logNumB[iMol][id] - (boltzFacIAB[iMol] / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUwB[iMol] + thisLogUwA - logQwAB[iMol];
+             logSahaMol[iMol] = logMolSahaFac[iMol] - logNumB[iMol][id] - (boltzFacIAB[iMol] / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUwB[iMol] + thisLogUwA - thisLogQwAB;
 //For denominator of ionization fraction, we need *inverse* molecular Saha factors (N_AB/NI):
              logSahaMol[iMol] = -1.0 * logSahaMol[iMol];
              invSahaMol[iMol] = Math.exp(logSahaMol[iMol]);
@@ -2401,11 +2421,11 @@ var logEv = Math.log(eV);
 //   in the denominator of the master fraction
 //  Element "B" refers to array of other species with which A forms molecules "AB" 
 
-    var molPops = function(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
-                 numMolsB, logNumB, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+    var molPops = function(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
+                 numMolsB, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
                  logGroundRatio, numDeps, temp) {
-        //           molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB, 
-         //    thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+        //           molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB, 
+         //    thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
           //           logGroundRatio, numDeps, temp)
 
  //console.log("Line: nmrtrLog10UwB[0] " + nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + nmrtrLog10UwB[1]);
@@ -2442,7 +2462,7 @@ var logEv = Math.log(eV);
 
         var logE10 = Math.log(10.0);
 // Convert to natural logs:
-        var Ttheta;
+        var Ttheta, thisTemp;
 
 //Treat at least one molecule - if there are really no molecules for an atomic species, 
 //there will be one phantom molecule in the denominator of the ionization fraction
@@ -2460,7 +2480,9 @@ var logEv = Math.log(eV);
           thisLogUwB[iMol] = 0.0; // variable for temp-dependent computed partn fn of array element B 
        }
          var thisLogUwA = 0.0; // element A 
-         var nmrtrThisLogUwB = 0.0; // element A 
+         var nmrtrThisLogUwB = 0.0; // element A
+         var thisLogQwAB = Math.log(300.0);
+         var nmrtrThisLogQwAB = Math.log(300.0);
 
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
@@ -2485,14 +2507,14 @@ var logEv = Math.log(eV);
            logUwB[iMol][1] = logE10*log10UwBArr[iMol][1];
         }
       //}
-// Molecular partition functions:
-       var nmrtrLogQwAB = logE10*nmrtrLog10QwAB;
-       var logQwAB = [];
-      //if (numMolsB > 0){
-       logQwAB.length = numMolsB;
-       for (var iMol = 0; iMol < numMolsB; iMol++){
-          logQwAB[iMol] = logE10*log10QwABArr[iMol];
-       }
+//// Molecular partition functions:
+//       var nmrtrLogQwAB = logE10*nmrtrLog10QwAB;
+//       var logQwAB = [];
+//      //if (numMolsB > 0){
+//       logQwAB.length = numMolsB;
+//       for (var iMol = 0; iMol < numMolsB; iMol++){
+//          logQwAB[iMol] = logE10*logQwABArr[iMol];
+//       }
       //}
 //Molecular dissociation Boltzmann factors:
         var nmrtrBoltzFacIAB = 0.0;
@@ -2535,7 +2557,8 @@ var logEv = Math.log(eV);
             //// reduce or enhance number density by over-all Rosseland opcity scale parameter
 
 //Determine temeprature dependenet aprtition functions Uw:
-            Ttheta = 5040.0 / temp[0][id];
+            thisTemp = temp[0][id];
+            Ttheta = 5040.0 / thisTemp;
 
        if (Ttheta >= 1.0){
            thisLogUwA = logUwA[0];
@@ -2552,15 +2575,42 @@ var logEv = Math.log(eV);
            }
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
-           thisLogUwA = 0.5 * (Ttheta - 0.5) * logUwA[1]
-                + 0.5 * (1.0 - Ttheta) * logUwA[0];
-           nmrtrThisLogUwB = 0.5 * (Ttheta - 0.5) * nmrtrLogUwB[1]
-                + 0.5 * (1.0 - Ttheta) * nmrtrLogUwB[0];
+           thisLogUwA = 0.5 * logUwA[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + 0.5 * logUwA[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           nmrtrThisLogUwB = 0.5 * nmrtrLogUwB[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                           + 0.5 * nmrtrLogUwB[0] * (1.0 - Ttheta)/(1.0 - 0.5);
            for (var iMol = 0; iMol < numMolsB; iMol++){
-              thisLogUwB[iMol] = 0.5 * (Ttheta - 0.5) * logUwB[iMol][1]
-                + 0.5 * (1.0 - Ttheta) * logUwB[iMol][0];
+              thisLogUwB[iMol] = 0.5 * logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                               + 0.5 * logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
        }
+      for (var iMol = 0; iMol < numMolsB; iMol++){
+         if (thisTemp < 3000.0){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                        + ( 0.5 * logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+         }
+         if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                        + ( 0.5 * logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+         }
+         if ( thisTemp > 8000.0 ){
+            thisLogQwAB = ( 0.5 * logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                        + ( 0.5 * logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+         }
+         if (thisTemp < 3000.0){
+            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                             + ( 0.5 * nmrtrLogQwAB[2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+         }
+         if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
+            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                             + ( 0.5 * nmrtrLogQwAB[3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+         }
+         if ( thisTemp > 8000.0 ){
+            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                             + ( 0.5 * nmrtrLogQwAB[4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+         }
+      } //iMol loop
+
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
 
@@ -2568,7 +2618,7 @@ var logEv = Math.log(eV);
 //          if (id == 24){
 //console.log("id " + id + " nmrtrLogNumB[id] " + logE*nmrtrLogNumB[id] + " pp nmrtB " + (logE*(nmrtrLogNumB[id]+temp[1][id]+logK)) + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + logE*nmrtrLogQwAB);             
 //   }
-               nmrtrLogSahaMol = nmrtrLogMolSahaFac - nmrtrLogNumB[id] - (nmrtrBoltzFacIAB / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + nmrtrThisLogUwB + thisLogUwA - nmrtrLogQwAB;
+               nmrtrLogSahaMol = nmrtrLogMolSahaFac - nmrtrLogNumB[id] - (nmrtrBoltzFacIAB / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + nmrtrThisLogUwB + thisLogUwA - nmrtrThisLogQwAB;
                nmrtrLogInvSahaMol = -1.0 * nmrtrLogSahaMol;
                //nmrtrInvSahaMol = Math.exp(nmrtrLogSahaMol);
      //     if (id == 24){
@@ -2582,7 +2632,7 @@ var logEv = Math.log(eV);
 //Molecular Saha factors:
          for (var iMol = 0; iMol < numMolsB; iMol++){
 //console.log("iMol " + iMol + " id " + id + " logNumB[iMol][id] " + logE*nmrtrLogNumB[id]);             
-             logSahaMol[iMol] = logMolSahaFac[iMol] - logNumB[iMol][id] - (boltzFacIAB[iMol] / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUwB[iMol] + thisLogUwA - logQwAB[iMol];
+             logSahaMol[iMol] = logMolSahaFac[iMol] - logNumB[iMol][id] - (boltzFacIAB[iMol] / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + thisLogUwB[iMol] + thisLogUwA - thisLogQwAB;
 //For denominator of ionization fraction, we need *inverse* molecular Saha factors (N_AB/NI):
              logSahaMol[iMol] = -1.0 * logSahaMol[iMol];
              invSahaMol[iMol] = Math.exp(logSahaMol[iMol]);

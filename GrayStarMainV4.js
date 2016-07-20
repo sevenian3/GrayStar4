@@ -836,8 +836,8 @@ function main() {
   cname[39]="Cs";
 
 //Diatomic molecules:
-  var nMols = 18;
-//  var nMols = 1;
+//  var nMols = 18;
+  var nMols = 1;
   var mname = [];
   var mnameA = [];
   var mnameB = [];
@@ -852,7 +852,7 @@ function main() {
 // For constituent atomic species, A and B, always designate as 'A' whichever element participates in the 
 //  *fewest other* molecuels - we'll put A on the LHS of the molecular Saha equation
 
-  mname[0] = "H2";
+/*  mname[0] = "H2";
   mnameA[0] = "H"; 
   mnameB[0] = "H"; 
   mname[1] = "H2+";
@@ -899,13 +899,13 @@ function main() {
   mnameB[14] = "O"; 
   mname[15] = "CaO";
   mnameA[15] = "Ca"; 
-  mnameB[15] = "O"; 
-  mname[16] = "TiO";
-  mnameA[16] = "Ti"; 
-  mnameB[16] = "O"; 
-  mname[17] = "VO";
+  mnameB[15] = "O";  */
+  mname[0] = "TiO";
+  mnameA[0] = "Ti"; 
+  mnameB[0] = "O"; 
+/*  mname[17] = "VO";
   mnameA[17] = "V"; 
-  mnameB[17] = "O"; 
+  mnameB[17] = "O";  */
 
 //Testing:
 //  mname[0] = "N2";
@@ -1255,7 +1255,7 @@ function main() {
 //
     flagArr[0] = false;
     var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
-    var minTeff = 2500.0;
+    var minTeff = 3200.0;
     var maxTeff = 50000.0;
     if (teff === null || teff == "") {
         alert("Teff must be filled out");
@@ -1790,6 +1790,15 @@ function main() {
         settingsId[25].value = 2.0;
         $("#logKapFudge").val(2.0);
     }
+
+//
+//// ************************
+////
+////  OPACITY  PROBLEM #1 - logFudgeTune:  late type star coninuous oapcity needs to have by multiplied
+////  by 10.0^0.5 = 3.0 for T_kin(tau~1) to fall around Teff and SED to look like B_lmabda(Trad=Teff).
+////   - related to Opacity problem #2 in LineKappa.lineKap() - ??
+////
+//
   var logFudgeTune = 0.0;
   //sigh - don't ask me - makes the Balmer lines show up around A0:
       if (teff <= F0Vtemp){
@@ -2443,8 +2452,8 @@ function main() {
 //Get mass density from chemical composition:
      rho = massDensity2(numDeps, nelemAbnd, logNz, cname,
                                  nMols, masterMolPops, mname, mnameA, mnameB);
-     //for (var i = 0 ; i < numDeps; i++){
-     //  console.log("i " + i + " rho " + logE*rho[1][i]);
+    // for (var i = 0 ; i < numDeps; i++){
+    //   console.log("i " + i + " rho " + logE*rho[1][i]);
     // }
 
 
@@ -2475,8 +2484,12 @@ var logAmu = Math.log(amu);
        }
        var dissEArr = [];
        dissEArr.length = numAssocMols;
-       var log10QwABArr = [];
-       log10QwABArr.length = numAssocMols;
+       var logQwABArr = [];
+       logQwABArr.length = numAssocMols;
+       for (var kk = 0; kk < numAssocMols; kk++){
+          logQwABArr[kk] = [];
+          logQwABArr[kk].length = 5;
+       }
        var logMuABArr = [];
        logMuABArr.length = numAssocMols;
 
@@ -2497,13 +2510,15 @@ var logAmu = Math.log(amu);
            log10UwBArr[i][0] = 0.0;
            log10UwBArr[i][1] = 0.0;
            dissEArr[i] = 29.0;  //eV
-           log10QwABArr[i] = 0.0;
+           for (var kk = 0; kk < 5; kk++){
+               logQwABArr[i][kk] = Math.log(300.0);
+           }
            logMuABArr[i] = Math.log(2.0) + logAmu;  //g
            mname_ptr[i] = 0;
            specB_ptr[i] = 0;
        }
         
-       var defaultQwAB = 0.0; //for now
+       var defaultQwAB = Math.log(300.0); //for now
     //default that applies to most cases - neutral stage (I) forms molecules
        var specBStage = 0; //default that applies to most cases
       
@@ -2515,7 +2530,12 @@ var logAmu = Math.log(amu);
        nmrtrLog10UwB[0] = 0.0;
        nmrtrLog10UwB[1] = 0.0;
        var nmrtrLog10UwA = 0.0;
-       var nmrtrLog10QwAB = 0.0;
+       var nmrtrLogQwAB = [];
+       nmrtrLogQwAB.length = 5;
+       for (var kk = 0; kk < 5; kk++){
+          nmrtrLogQwAB[kk] = Math.log(300.0);
+       }
+
        var nmrtrLogMuAB = logAmu;
        var nmrtrLogNumB = [];
        nmrtrLogNumB.length = numDeps;
@@ -2555,8 +2575,8 @@ var logAmu = Math.log(amu);
        log10UwAArr[3] = getPartFn(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
-       //logNums = stagePops(logNz[iElem], guessNe, thisChiI1,
-       //      thisChiI2, thisChiI3, thisChiI4, thisUw1V, thisUw2V, thisUw3V, thisUw4V,
+       //logNums = stagePops(logNz[iElem], guessNe, chiIArr[0],
+       //      chiIArr[1], chiIArr[2], chiIArr[3], log10UwAArr[0], log10UwAArr[1], log10UwAArr[2], log10UwAArr[3],
        //      numDeps, temp);
        //Find any associated moleculear species in which element A can participate:
        //console.log("iElem " + iElem + " cname " + cname[iElem]);
@@ -2606,7 +2626,8 @@ var logAmu = Math.log(amu);
           dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
           species = cname[specB_ptr[iMol]] + "I"; //neutral stage
           log10UwBArr[iMol] = getPartFn(species); //base 10 log_10 U 
-          log10QwABArr[iMol] = defaultQwAB;
+          //logQwABArr[iMol] = defaultQwAB;
+          logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
           //Compute the reduced mass, muAB, in g:
           massA = getMass(cname[iElem]);
           massB = getMass(cname[specB_ptr[iMol]]);
@@ -2614,7 +2635,7 @@ var logAmu = Math.log(amu);
        }
    } //if thisNumMols > 0 condition
        logNums = stagePops2(logNz[iElem], guessNe, chiIArr, log10UwAArr, 
-                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
                      numDeps, temp)
 
      for (var iStage = 0; iStage < numStages; iStage++){
@@ -2634,6 +2655,7 @@ var logAmu = Math.log(amu);
             // }
   } //iElem loop
 //
+
 
 // Compute all molecular populations:
 //
@@ -2737,7 +2759,8 @@ var logK = Math.log(k);
           //console.log("im " + im + " dissEArr " + dissEArr[im]);
           species = cname[specB_ptr[im]] + "I";
           log10UwBArr[im] = getPartFn(species); //base 10 log_10 U 
-          log10QwABArr[im] = defaultQwAB;
+          //logQwABArr[im] = defaultQwAB;
+          logQwABArr[im] = getMolPartFn(mname[mname_ptr[im]]);
           //Compute the reduced mass, muAB, in g:
           massA = getMass(cname[specA_ptr]);
           massB = getMass(cname[specB_ptr[im]]);
@@ -2752,7 +2775,10 @@ var logK = Math.log(k);
  //console.log("Main: log10UwBArr[im][0] " + log10UwBArr[im][0] + " log10UwBArr[im][1] " + log10UwBArr[im][1]);
               nmrtrLog10UwB[0] = log10UwBArr[im][0];
               nmrtrLog10UwB[1] = log10UwBArr[im][1];
-              nmrtrLog10QwAB = log10QwABArr[im]; 
+              for (var kk = 0; kk < 5; kk++){
+                  nmrtrLogQwAB[kk] = logQwABArr[im][kk];
+                  //console.log("logQwABArr[im] " + logE*logQwABArr[im][0] + " " + logE*logQwABArr[im][1] + " " + logE*logQwABArr[im][2] + " " + logE*logQwABArr[im][3] + " " + logE*logQwABArr[im][4]);
+              }
               nmrtrLogMuAB = logMuABArr[im];
  //console.log("Main: nmrtrDissE " + nmrtrDissE + " nmrtrLogMuAB " + nmrtrLogMuAB);
               for (var iTau = 0; iTau < numDeps; iTau++){
@@ -2781,8 +2807,8 @@ var logK = Math.log(k);
           //        (logE*(Math.log(totalIonic)+temp[1][iTau]+logK)) );
         // }
          }
-       logNumFracAB = molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLog10QwAB, nmrtrLogMuAB, 
-                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, log10QwABArr, logMuABArr,
+       logNumFracAB = molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB, 
+                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
                      logGroundRatio, numDeps, temp)
 
 //Load molecules into master molecular population array:
@@ -2792,14 +2818,15 @@ var logK = Math.log(k);
          masterMolPops[iMol][iTau] = logNz[specA_ptr][iTau] + logNumFracAB[iTau];
         // if (mname[iMol] == "TiO"){
         //  if (iTau == 24){
-        //    console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " masterMolPops " + logE*masterMolPops[iMol][iTau]
-        //       + " pp " + (logE*(masterMolPops[iMol][iTau]+temp[1][iTau]+logK))
-        //       + " ppA " + (logE*(logNz[specA_ptr][iTau]+temp[1][iTau]+logK)) 
-        //       + " logNumFracAB " + logE*logNumFracAB[iTau]);
+            //console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " masterMolPops " + logE*masterMolPops[iMol][iTau]
+            //   + " pp " + (logE*(masterMolPops[iMol][iTau]+temp[1][iTau]+logK))
+            //   + " ppA " + (logE*(logNz[specA_ptr][iTau]+temp[1][iTau]+logK)) 
+            //   + " logNumFracAB " + logE*logNumFracAB[iTau]);
        //     }
-        // }
+       // }
       }
   } //master iMol loop
+
 //
 //Compute updated Ne & Pe:
      //initialize accumulation of electrons at all depths
@@ -2820,7 +2847,7 @@ var logK = Math.log(k);
         guessNe[1][iTau] = newNe[1][iTau];
         newPe[1][iTau] = newNe[1][iTau] + logK + temp[1][iTau];
         newPe[0][iTau] = Math.exp(newPe[1][iTau]);
-       //System.out.println("iTau " + iTau + " newNe " + logE*newNe[1][iTau] + " newPe " + logE*newPe[1][iTau]);
+       //console.log("iTau " + iTau + " newNe " + logE*newNe[1][iTau] + " newPe " + logE*newPe[1][iTau]);
      }
 
   } //end Ne - ionzation fraction iteration
@@ -2876,7 +2903,7 @@ var logK = Math.log(k);
 // Now we can update guessPGas:
             guessPGas[0][iTau] = pGas[0][iTau];
             guessPGas[1][iTau] = pGas[1][iTau];
-            //System.out.println("iTau " + iTau + " pGas[0][iTau] " + logE*pGas[1][iTau] + " newPe[0][iTau] " + logE*newPe[1][iTau]);
+            //console.log("iTau " + iTau + " pGas[0][iTau] " + logE*pGas[1][iTau] + " newPe[0][iTau] " + logE*newPe[1][iTau]);
         }
 
  } //end Pgas/Pe iteration
@@ -2994,53 +3021,86 @@ ifConvec = false;
 
 //
 //Line list:
-    var numLines = 18;
+    var maxNumLines = 18;
+    var numLines = maxNumLines; //default intialization
     //var numLines = 1;  //debug
     var listName = [];
-    listName.length = numLines;
+    listName.length = maxNumLines;
     var listLamLbl = [];
-    listLamLbl.length = numLines;
+    listLamLbl.length = maxNumLines;
     var listElement = [];
-    listElement.length = numLines;
+    listElement.length = maxNumLines;
     var listLam0 = []; // nm
-    listLam0.length = numLines;
+    listLam0.length = maxNumLines;
     var listMass = []; // amu
-    listMass.length = numLines;
+    listMass.length = maxNumLines;
     var listLogGammaCol = [];
-    listLogGammaCol.length = numLines;
+    listLogGammaCol.length = maxNumLines;
     //abundance in logarithmic A12 sysytem
     var listA12 = [];
-    listA12.length = numLines;
+    listA12.length = maxNumLines;
     //Log of unitless oscillator strength, f 
     var listLogf = [];
-    listLogf.length = numLines;
+    listLogf.length = maxNumLines;
     //Einstein coefficient for spontaneous de-excitation, A 
     var listLogAij = [];
-    listLogAij.length = numLines;
+    listLogAij.length = maxNumLines;
     //Ground state ionization E - Stage I (eV) 
     var listChiI1 = [];
-    listChiI1.length = numLines;
+    listChiI1.length = maxNumLines;
     //Ground state ionization E - Stage II (eV)
     var listChiI2 = [];
-    listChiI2.length = numLines;
+    listChiI2.length = maxNumLines;
     //Excitation E of lower E-level of b-b transition (eV)
     var listChiL = [];
-    listChiL.length = numLines;
+    listChiL.length = maxNumLines;
     //Unitless statisital weight, Ground state ionization E - Stage I
     var listGw1 = [];
-    listGw1.length = numLines;
+    listGw1.length = maxNumLines;
     //Unitless statisital weight, Ground state ionization E - Stage II
     var listGw2 = [];
-    listGw2.length = numLines;
+    listGw2.length = maxNumLines;
     //Unitless statisital weight, lower E-level of b-b transition                 
     var listGwL = [];
-    listGwL.length = numLines;
+    listGwL.length = maxNumLines;
     //double[] listGwU For now we'll just set GwU to 1.0
     // Is stage II?
     //var listIonized = [];
-    //listIonized.length = numLines;
+    //listIonized.length = maxNumLines;
     var listStage = [];
-    listStage.length = numLines;
+    listStage.length = maxNumLines;
+    var InvCmToEv = 1.23984e-4;
+
+//Molecular lines:
+    var maxNumMolLines = 1;
+    var numMolLines = maxNumMolLines; //default intialization
+    var molListName = [];
+    molListName.length = maxNumMolLines;
+    var molListMol = [];
+    molListMol.length = maxNumMolLines;
+    var molListLamLbl = [];
+    molListLamLbl.length = maxNumMolLines;
+    var molListLam0 = [];
+    molListLam0.length = maxNumMolLines;
+    var molListLog10gf = [];
+    molListLog10gf.length = maxNumMolLines;
+    var molListLogGammaRad = [];
+    molListLogGammaRad.length = maxNumMolLines;
+    var molListDissE = [];
+    molListDissE.length = maxNumMolLines;
+    var molListChiL = [];
+    molListChiL.length = maxNumMolLines;
+    var molListMass = [];
+    molListMass.length = maxNumMolLines;
+    var molListLogGammaCol = [];
+    molListLogGammaCol.length = maxNumMolLines;
+    var molListGwL = [];
+    molListGwL.length = maxNumMolLines;
+    var molListSystem = []; 
+    molListSystem.length = maxNumMolLines;
+    var molListBranch = [];
+    molListBranch.length = maxNumMolLines;
+     
     //
     //Atomic Data sources:
     //http://www.nist.gov/pml/data/asd.cfm
@@ -3053,6 +3113,12 @@ ifConvec = false;
     //    
     //    
     //    
+
+    //Late-type star line list:
+  if (teff <= F0Vtemp){ 
+
+    numLines = 17; 
+    numMolLines = 0;
         
     //CaII K
     listName[0] = "CaIIHK";
@@ -3097,30 +3163,459 @@ ifConvec = false;
      listLogf[2] = logE*Math.log(1.2711e-02);
      listLogAij[2] = Math.log(4.3889e+05);
      listChiL[2] = 10.2;
-     listMass[2] = getMass(listElement[3]);
+     listMass[2] = getMass(listElement[2]);
      listLogGammaCol[2] = 1.0;
      listGw1[2] = 2.0; // 2n^2
      listGw2[2] = 1.0;
      listGwL[2] = 8.0; // 2n^2
      listStage[2] = 0;
 
+    //Mn I 4032
+     //listName[3] = "Fe I";
+     listName[3] = "Mn I";
+     listElement[3] = "Mn";
+     listLamLbl[3] = "4032 ";
+     listLam0[3] = 403.190;
+     listA12[3] = eheu[24]; 
+     listLogf[3] = logE*Math.log(5.5e-02);
+     listLogAij[3] = Math.log(1.7e+07);
+     listChiL[3] = 0.00000;
+     listMass[3] = getMass(listElement[3]);
+     listLogGammaCol[3] = 0.5;
+     listGw1[3] = 1.0;
+     listGw2[3] = 1.0;
+     listGwL[3] = 5.0;
+     listStage[3] = 0;
+
+
      //Fe I 4045
      //listName[3] = "Fe I";
-     listName[3] = " ";
-     listElement[3] = "Fe";
-     listLamLbl[3] = " ";
-     listLam0[3] = 404.581;
-     listA12[3] = eheu[25]; 
-     listLogf[3] = -0.674;
-     listLogAij[3] = Math.log(8.62e+07);
-     listChiL[3] = 1.485;
-     listMass[3] = getMass(listElement[2]);
+     listName[4] = " ";
+     listElement[4] = "Fe";
+     listLamLbl[4] = " ";
+     listLam0[4] = 404.581;
+     listA12[4] = eheu[25]; 
+     listLogf[4] = -0.674;
+     listLogAij[4] = Math.log(8.62e+07);
+     listChiL[4] = 1.485;
+     listMass[4] = getMass(listElement[4]);
+     listLogGammaCol[4] = 0.0;
+     listGw1[4] = 1.0;
+     listGw2[4] = 1.0;
+     listGwL[4] = 9.0;
+     listStage[4] = 0;
+     
+     //Hdelta
+     listName[5] = "HI<em>&#948</em>";
+     listElement[5] = "H";
+     listLamLbl[5] = " ";
+     listLam0[5] = 410.174;
+     listA12[5] = 12.0; //By definition - it's Hydrogen
+     listLogf[5] = -1.655;
+     listLogAij[5] = Math.log(9.7320e+05);
+     listChiL[5] = 10.2;
+     listMass[5] = getMass(listElement[5]);
+     listLogGammaCol[5] = 1.0;
+     listGw1[5] = 2.0; // 2n^2
+     listGw2[5] = 1.0;
+     listGwL[5] = 8.0; // 2n^2
+     listStage[5] = 0;
+     
+     //CaI 4227
+     listName[6] = "CaI";
+     listElement[6] = "Ca";
+     listLamLbl[6] = "4227";
+     listLam0[6] = 422.673;
+     listA12[6] = eheu[19];
+     listLogf[6] = 0.243;
+     listLogAij[6] = Math.log(2.18e+08);
+     listChiL[6] = 0.00;
+     listMass[6] = getMass(listElement[6]);
+     listLogGammaCol[6] = 1.0;
+     listGw1[6] = 1.0;
+     listGw2[6] = 1.0;
+     listGwL[6] = 1.0;
+     listStage[6] = 0;
+
+     //Fe I 4271
+     //listName[6] = "Fe I";
+     listName[7] = " ";
+     listElement[7] = "Fe";
+     listLamLbl[7] = " ";
+     listLam0[7] = 427.176;
+     listA12[7] = eheu[25]; 
+     listLogf[7] = -1.118;
+     listLogAij[7] = Math.log(2.28e+07);
+     listChiL[7] = 1.485;
+     listMass[7] = getMass(listElement[7]);
+     listLogGammaCol[7] = 0.0;
+     listGw1[7] = 1.0;
+     listGw2[7] = 1.0;
+     listGwL[7] = 9.0;
+     listStage[7] = 0;
+    
+     //Hgamma
+     listName[8] = "HI<em>&#947</em>";
+     listElement[8] = "H";
+     listLamLbl[8] = " ";
+     listLam0[8] = 434.047;
+     listA12[8] = 12.0; //By definition - it's Hydrogen
+     listLogf[8] = -1.350;
+     listLogAij[8] = Math.log(2.5304e+06);
+     listChiL[8] = 10.2;
+     listMass[8] = getMass(listElement[8]);
+     listLogGammaCol[8] = 1.0;
+     listGw1[8] = 2.0; // 2n^2
+     listGw2[8] = 1.0;
+     listGwL[8] = 8.0; // 2n^2
+     listStage[8] = 0;
+
+     //Fe I 4384 
+     //listName[8] = "Fe I";
+     listName[9] = " ";
+     listElement[9] = "Fe";
+     listLamLbl[9] = " ";
+     listLam0[9] = 438.47763;
+     listA12[9] = eheu[25]; 
+     listLogf[9] = logE*Math.log(1.76e-01);
+     listLogAij[9] = Math.log(5.00e+07);
+     listChiL[9] = 1.4848644;
+     listMass[9] = getMass(listElement[9]);
+     listLogGammaCol[9] = 0.0;
+     listGw1[9] = 1.0;
+     listGw2[9] = 1.0;
+     listGwL[9] = 4.0;
+     listStage[9] = 0;
+
+
+     //Hbeta
+     listName[10] = "HI<em>&#946</em>";
+     listElement[10] = "H";
+     listLamLbl[10] = " ";
+     listLam0[10] = 486.128;
+     listA12[10] = 12.0; //By definition - it's Hydrogen
+     listLogf[10] = -0.914;
+     listLogAij[10] = Math.log(9.6683e+06);
+     listChiL[10] = 10.2;
+     listMass[10] = getMass(listElement[10]);
+     listLogGammaCol[10] = 1.0;
+     listGw1[10] = 2.0; // 2n^2
+     listGw2[10] = 1.0;
+     listGwL[10] = 8.0; // 2n^2
+     listStage[10] = 0;
+
+     //MgIb complex
+     listName[11] = " ";
+     listElement[11] = "Mg";
+     listLamLbl[11] = " ";
+     listLam0[11] = 516.876; //nm
+     listA12[11] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[11] = logE*Math.log(1.35e-01);
+     listLogAij[11] = Math.log(1.13e+07);
+     listChiL[11] = 2.709;
+     listMass[11] = getMass(listElement[11]);
+     listLogGammaCol[11] = 1.0;
+     listGw1[11] = 1.0;
+     listGw2[11] = 1.0;
+     listGwL[11] = 5.0;
+     listStage[11] = 0;
+
+
+     //MgIb complex
+     listName[12] = " ";
+     listElement[12] = "Mg";
+     listLamLbl[12] = " ";
+     listLam0[12] = 517.413; //nm
+     listA12[12] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[12] = logE*Math.log(1.35e-01);
+     listLogAij[12] = Math.log(3.37e+07);
+     listChiL[12] = 2.712;
+     listMass[12] = getMass(listElement[12]);
+     listLogGammaCol[12] = 1.0;
+     listGw1[12] = 1.0;
+     listGw2[12] = 1.0;
+     listGwL[12] = 5.0;
+     listStage[12] = 0;
+
+     //MgIb1
+     //listName[14] = "Mg I <em>b</em><sub>1</sub>";
+     listName[13] = "MgI<em>b</em>";
+     listElement[13] = "Mg";
+     listLamLbl[13] = " ";
+     listLam0[13] = 518.505; //nm
+     listA12[13] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[13] = logE*Math.log(1.36e-01);
+     listLogAij[13] = Math.log(5.61e+07);
+     listChiL[13] = 2.717;
+     listMass[13] = getMass(listElement[13]);
+     listLogGammaCol[13] = 1.0;
+     listGw1[13] = 1.0;
+     listGw2[13] = 1.0;
+     listGwL[13] = 5.0;
+     listStage[13] = 0;
+
+     //NaID2
+     //listName[15] = "Na I <em>D</em><sub>2</sub>";
+     listName[14] = " ";
+     listElement[14] = "Na";
+     listLamLbl[14] = " ";
+     listLam0[14] = 588.995;
+     listA12[14] = eheu[10]; // Grevesse & Sauval 98
+     listLogf[14] = -0.193;
+     listLogAij[14] = Math.log(6.16e+07);
+     listChiL[14] = 0.0;
+     listMass[14] = getMass(listElement[14]);
+     listLogGammaCol[14] = 1.0;
+     listGw1[14] = 2.0;
+     listGw2[14] = 1.0;
+     listGwL[14] = 2.0;
+     listStage[14] = 0;
+     
+     //NaID1
+     //listName[16] = "NaI<em>D</em><sub>1, 2</sub>";
+     listName[15] = "NaI<em>D</em>";
+     listElement[15] = "Na";
+     listLamLbl[15] = " ";
+     listLam0[15] = 589.592; //nm
+     listA12[15] = eheu[10]; // Grevesse & Sauval 98    
+     listLogf[15] = -0.495;
+     listLogAij[15] = Math.log(6.14e+07);
+     listChiL[15] = 0.0;
+     listMass[15] = getMass(listElement[15]);
+     listLogGammaCol[15] = 1.0;
+     listGw1[15] = 2.0;
+     listGw2[15] = 1.0;
+     listGwL[15] = 2.0;
+     listStage[15] = 0;
+
+     //Halpha
+     listName[16] = "HI<em>&#945</em>";
+     listElement[16] = "H";
+     listLamLbl[16] = " ";
+     listLam0[16] = 656.282;
+     listA12[16] = 12.0; //By definition - it's Hydrogen
+     listLogf[16] = -0.193;
+     listLogAij[16] = Math.log(6.4651e+07);
+     listChiL[16] = 10.1988357;
+     listMass[16] = getMass(listElement[16]);
+     listLogGammaCol[16] = 1.0;
+     listGw1[16] = 2.0; // 2n^2
+     listGw2[16] = 1.007;
+     listGwL[16] = 8.0; // 2n^2
+     listStage[16] = 0;
+  
+  if (teff < 4500.0){ 
+//Molecules: 
+     numMolLines = 6;
+
+ // Lines from the TiO "beta system": c^1Phi - a^1Delta (p. 90, Tab 4.18, Allen's Astrophys Quant. 4th Ed.)
+ // Data from Bertrand Plez (Laboratoire Univers et Particules de Montpellier.) 
+ // http://www.pages-perso-bertrand-plez.univ-montp2.fr/ 
+
+//     molListName[0] = "TiO c-a Q";
+//     molListMol[0] = "TiO";
+//     molListLamLbl[0] = " ";
+//     molListLam0[0] = 593.738; //nm
+//     molListLog10gf[0] = logTen(2.045422E-01);
+//     molListLogGammaRad[0] = Math.log(3.806587E+07);
+//     molListDissE[0] = getDissE(molListMol[0]);
+//     molListChiL[0] = 4492.9569 * InvCmToEv;  //cm^-1
+//     molListMass[0] = getMolMass(molListMol[0]);
+//     molListLogGammaCol[0] = 0.0;
+//     //molListGwQAB[0] = 1.0;
+//     molListGwL[0] = 1.0;
+//     molListSystem[0] = "a-c";
+//     molListBranch[0] = "Q";
+
+     molListName[0] = "TiO";
+     molListMol[0] = "TiO";
+     molListLamLbl[0] = "c-a Q";
+     molListLam0[0] = 533.86777; //nm
+     molListLog10gf[0] = logTen(1.033235E+00);
+     molListLogGammaRad[0] = Math.log(3.560040E+07);
+     molListDissE[0] = getDissE(molListMol[0]);
+     molListChiL[0] = 3909.5091 * InvCmToEv;  //cm^-1
+     molListMass[0] = getMolMass(molListMol[0]);
+     molListLogGammaCol[0] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[0] = 1.0;
+     molListSystem[0] = "a-c";
+     molListBranch[0] = "Q";
+
+
+     molListName[1] = " ";
+     molListMol[1] = "TiO";
+     molListLamLbl[1] = " ";
+     molListLam0[1] = 533.9297; //nm
+     molListLog10gf[1] = logTen(1.106996E+00);
+     molListLogGammaRad[1] = Math.log(3.556368E+07);
+     molListDissE[1] = getDissE(molListMol[1]);
+     molListChiL[1] = 3974.7805 * InvCmToEv;  //cm^-1
+     molListMass[1] = getMolMass(molListMol[1]);
+     molListLogGammaCol[1] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[1] = 1.0;
+     molListSystem[1] = "a-c";
+     molListBranch[1] = "Q";
+
+
+     molListName[2] = "TiO";
+     molListMol[2] = "TiO";
+     molListLamLbl[2] = "c-a R";
+     molListLam0[2] = 559.77068; //nm
+     molListLog10gf[2] = logTen(6.036916E+00);
+     molListLogGammaRad[2] = Math.log(3.681594E+07);
+     molListDissE[2] = getDissE(molListMol[2]);
+     molListChiL[2] = 3974.7805 * InvCmToEv;  //cm^-1
+     molListMass[2] = getMolMass(molListMol[2]);
+     molListLogGammaCol[2] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[2] = 1.0;
+     molListSystem[2] = "a-c";
+     molListBranch[2] = "Q";
+
+
+
+     molListName[3] = "TiO";
+     molListMol[3] = "TiO";
+     molListLamLbl[3] = "c-a Q";
+     molListLam0[3] = 560.7943; //nm
+     molListLog10gf[3] = logTen(9.843258E+00);
+     molListLogGammaRad[3] = Math.log(3.685389E+07);
+     molListDissE[3] = getDissE(molListMol[3]);
+     molListChiL[3] = 3941.6120 * InvCmToEv;  //cm^-1
+     molListMass[3] = getMolMass(molListMol[3]);
+     molListLogGammaCol[3] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[3] = 1.0;
+     molListSystem[3] = "a-c";
+     molListBranch[3] = "Q";
+
+
+ //    molListName[3] = " ";
+ //    molListMol[3] = "TiO";
+ //    molListLamLbl[3] = " ";
+ //    molListLam0[3] = 560.8227; //nm
+ //    molListLog10gf[3] = logTen(1.016761E+01);
+ //    molListLogGammaRad[3] = Math.log(3.683481E+07);
+ //    molListDissE[3] = getDissE(molListMol[3]);
+ //    molListChiL[3] = 3974.7805 * InvCmToEv;  //cm^-1
+ //    molListMass[3] = getMolMass(molListMol[3]);
+ //    molListLogGammaCol[3] = 0.0;
+ //    //molListGwQAB[0] = 1.0;
+ //    molListGwL[3] = 1.0;
+ //    molListSystem[3] = "a-c";
+ //    molListBranch[3] = "Q";
+ 
+
+     molListName[4] = " ";
+     molListMol[4] = "TiO";
+     molListLamLbl[4] = " ";
+     molListLam0[4] = 560.8284; //nm
+     molListLog10gf[4] = logTen(1.028223E+00);
+     molListLogGammaRad[4] = Math.log(4.262805E+07);
+     molListDissE[4] = getDissE(molListMol[4]);
+     molListChiL[4] = 3454.2620 * InvCmToEv;  //cm^-1
+     molListMass[4] = getMolMass(molListMol[4]);
+     molListLogGammaCol[4] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[4] = 1.0;
+     molListSystem[4] = "a-c";
+     molListBranch[4] = "Q";
+
+
+     molListName[5] = "TiO ";
+     molListMol[5] = "TiO";
+     molListLamLbl[5] = "c-a P ";
+     molListLam0[5] = 561.83943; //nm
+     molListLog10gf[5] = logTen(4.254094E+00);
+     molListLogGammaRad[5] = Math.log(3.685389E+07);
+     molListDissE[5] = getDissE(molListMol[5]);
+     molListChiL[5] = 3974.7805 * InvCmToEv;  //cm^-1
+     molListMass[5] = getMolMass(molListMol[5]);
+     molListLogGammaCol[5] = 0.0;
+     //molListGwQAB[0] = 1.0;
+     molListGwL[5] = 1.0;
+     molListSystem[5] = "a-c";
+     molListBranch[5] = "Q";
+
+} //molecular teff condition 
+ 
+
+  } //end late-type star line list
+
+    //Early-type star line list:
+  if (teff > F0Vtemp){ 
+
+    numLines = 12; 
+        
+    //CaII K
+    listName[0] = "CaIIHK";
+    listElement[0] = "Ca";
+    listLamLbl[0] = " ";
+    listLam0[0] = 393.366;
+    listA12[0] = eheu[19];
+    listLogf[0] = -0.166;
+    listLogAij[0] = Math.log(1.47e+08);
+    listChiL[0] = 0.0;
+    listMass[0] = getMass(listElement[0]);
+    listLogGammaCol[0] = 0.5;
+    listGw1[0] = 1.0;
+    listGw2[0] = 2.0;
+    listGwL[0] = 2.0;
+    listStage[0] = 1;
+    
+     //CaII H
+     //listName[1] = "Ca II H";
+     listName[1] = " ";
+     listElement[1] = "Ca";
+     listLamLbl[1] = " ";
+     listLam0[1] = 396.847;
+     listA12[1] = eheu[19];
+     listLogf[1] = -0.482;
+     listLogAij[1] = Math.log(1.4e+08);
+     listChiL[1] = 0.0;
+     listMass[1] = getMass(listElement[1]);
+     listLogGammaCol[1] = 0.5;
+     listGw1[1] = 1.0;
+     listGw2[1] = 2.0;
+     listGwL[1] = 2.0;
+     listStage[1] = 1;
+     
+     //Hepsilon
+     //listName[2] = "H I <em>&#949</em>";
+     listName[2] = " ";
+     listElement[2] = "H";
+     listLamLbl[2] = " ";
+     listLam0[2] = 397.1198;
+     listA12[2] = 12.0; //By definition - it's Hydrogen
+     listLogf[2] = logE*Math.log(1.2711e-02);
+     listLogAij[2] = Math.log(4.3889e+05);
+     listChiL[2] = 10.2;
+     listMass[2] = getMass(listElement[2]);
+     listLogGammaCol[2] = 1.0;
+     listGw1[2] = 2.0; // 2n^2
+     listGw2[2] = 1.0;
+     listGwL[2] = 8.0; // 2n^2
+     listStage[2] = 0;
+
+    //He I 4026
+     listName[3] = "HeI";
+     listElement[3] = "He";
+     listLamLbl[3] = "4026";
+     listLam0[3] = 402.73292;
+     listA12[3] = eheu[1];
+     listLogf[3] = logE*Math.log(3.9492e-02);
+     listLogAij[3] = Math.log(1.1601e+07);
+     listChiL[3] = 20.964087;
+     listMass[3] = getMass(listElement[3]);
      listLogGammaCol[3] = 0.0;
      listGw1[3] = 1.0;
      listGw2[3] = 1.0;
-     listGwL[3] = 9.0;
+     listGwL[3] = 2.0;
      listStage[3] = 0;
-     
+
+
      //Hdelta
      listName[4] = "HI<em>&#948</em>";
      listElement[4] = "H";
@@ -3130,228 +3625,133 @@ ifConvec = false;
      listLogf[4] = -1.655;
      listLogAij[4] = Math.log(9.7320e+05);
      listChiL[4] = 10.2;
-     listMass[4] = getMass(listElement[3]);
+     listMass[4] = getMass(listElement[4]);
      listLogGammaCol[4] = 1.0;
      listGw1[4] = 2.0; // 2n^2
      listGw2[4] = 1.0;
      listGwL[4] = 8.0; // 2n^2
      listStage[4] = 0;
      
-     //CaI 4227
-     listName[5] = "CaI";
-     listElement[5] = "Ca";
-     listLamLbl[5] = "4227";
-     listLam0[5] = 422.673;
-     listA12[5] = eheu[19];
-     listLogf[5] = 0.243;
-     listLogAij[5] = Math.log(2.18e+08);
-     listChiL[5] = 0.00;
-     listMass[5] = getMass(listElement[4]);
+     //Hgamma
+     listName[5] = "HI<em>&#947</em>";
+     listElement[5] = "H";
+     listLamLbl[5] = " ";
+     listLam0[5] = 434.047;
+     listA12[5] = 12.0; //By definition - it's Hydrogen
+     listLogf[5] = -1.350;
+     listLogAij[5] = Math.log(2.5304e+06);
+     listChiL[5] = 10.2;
+     listMass[5] = getMass(listElement[5]);
      listLogGammaCol[5] = 1.0;
-     listGw1[5] = 1.0;
+     listGw1[5] = 2.0; // 2n^2
      listGw2[5] = 1.0;
-     listGwL[5] = 1.0;
+     listGwL[5] = 8.0; // 2n^2
      listStage[5] = 0;
 
-     //Fe I 4271
-     //listName[6] = "Fe I";
-     listName[6] = " ";
-     listElement[6] = "Fe";
-     listLamLbl[6] = " ";
-     listLam0[6] = 427.176;
-     listA12[6] = eheu[25]; 
-     listLogf[6] = -1.118;
-     listLogAij[6] = Math.log(2.28e+07);
-     listChiL[6] = 1.485;
-     listMass[6] = getMass(listElement[5]);
+
+     //He I 4387
+     listName[6] = "HeI";
+     listElement[6] = "He";
+     listLamLbl[6] = "4388";
+     listLam0[6] = 438.793;
+     listA12[6] = eheu[1];
+     listLogf[6] = -1.364;
+     listLogAij[6] = Math.log(8.9889e+06);
+     listChiL[6] = 21.218;
+     listMass[6] = getMass(listElement[6]);
      listLogGammaCol[6] = 0.0;
      listGw1[6] = 1.0;
      listGw2[6] = 1.0;
-     listGwL[6] = 9.0;
+     listGwL[6] = 3.0;
      listStage[6] = 0;
-    
-     //Hgamma
-     listName[7] = "HI<em>&#947</em>";
-     listElement[7] = "H";
-     listLamLbl[7] = " ";
-     listLam0[7] = 434.047;
-     listA12[7] = 12.0; //By definition - it's Hydrogen
-     listLogf[7] = -1.350;
-     listLogAij[7] = Math.log(2.5304e+06);
-     listChiL[7] = 10.2;
-     listMass[7] = getMass(listElement[6]);
-     listLogGammaCol[7] = 1.0;
-     listGw1[7] = 2.0; // 2n^2
-     listGw2[7] = 1.0;
-     listGwL[7] = 8.0; // 2n^2
-     listStage[7] = 0;
-
-
-     //Fe I 4384 
-     //listName[8] = "Fe I";
-     listName[8] = " ";
-     listElement[8] = "Fe";
-     listLamLbl[8] = " ";
-     listLam0[8] = 438.47763;
-     listA12[8] = eheu[25]; 
-     listLogf[8] = logE*Math.log( 1.76e-01);
-     listLogAij[8] = Math.log(5.00e+07);
-     listChiL[8] = 1.4848644;
-     listMass[8] = getMass(listElement[5]);
-     listLogGammaCol[8] = 0.0;
-     listGw1[8] = 1.0;
-     listGw2[8] = 1.0;
-     listGwL[8] = 4.0;
-     listStage[8] = 0;
-
-     //He I 4387
-     listName[9] = "HeI";
-     listElement[9] = "He";
-     listLamLbl[9] = "4388";
-     listLam0[9] = 438.793;
-     listA12[9] = eheu[1];
-     listLogf[9] = -1.364;
-     listLogAij[9] = Math.log(8.9889e+06);
-     listChiL[9] = 21.218;
-     listMass[9] = getMass(listElement[7]);
-     listLogGammaCol[9] = 0.0;
-     listGw1[9] = 1.0;
-     listGw2[9] = 1.0;
-     listGwL[9] = 3.0;
-     listStage[9] = 0;
 
      //He I 4471
-     listName[10] = "HeI";
-     listElement[10] = "He";
-     listLamLbl[10] = "4471";
-     listLam0[10] = 447.147;
-     listA12[10] = eheu[1];
-     listLogf[10] = -0.986;
-     listLogAij[10] = Math.log(2.4579e+07);
-     listChiL[10] = 20.964;
-     listMass[10] = getMass(listElement[8]);
-     listLogGammaCol[10] = 0.0;
-     listGw1[10] = 1.0;
-     listGw2[10] = 1.0;
-     listGwL[10] = 5.0;
-     listStage[10] = 0;
+     listName[7] = "HeI";
+     listElement[7] = "He";
+     listLamLbl[7] = "4471";
+     listLam0[7] = 447.147;
+     listA12[7] = eheu[1];
+     listLogf[7] = -0.986;
+     listLogAij[7] = Math.log(2.4579e+07);
+     listChiL[7] = 20.964;
+     listMass[7] = getMass(listElement[7]);
+     listLogGammaCol[7] = 0.0;
+     listGw1[7] = 1.0;
+     listGw2[7] = 1.0;
+     listGwL[7] = 5.0;
+     listStage[7] = 0;
 
      //Mg II 4482.2387
      //listName[11] = "4482.387";
-     listName[11] = " ";
-     listElement[11] = "Mg";
-     listLamLbl[11] = " ";
-     listLam0[11] = 448.2387; //nm
-     listA12[11] = eheu[11]; // Grevesse & Sauval 98
-     listLogf[11] = logE*Math.log(9.35e-01);
-     listLogAij[11] = Math.log(2.33e+08);
-     listChiL[11] = 8.863654;
-     listMass[11] = getMass(listElement[10]);
-     listLogGammaCol[11] = 1.0;
-     listGw1[11] = 1.0;
-     listGw2[11] = 1.0;
-     listGwL[11] = 5.0;
-     listStage[11] = 1;
+     listName[8] = " ";
+     listElement[8] = "Mg";
+     listLamLbl[8] = " ";
+     listLam0[8] = 448.2387; //nm
+     listA12[8] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[8] = logE*Math.log(9.35e-01);
+     listLogAij[8] = Math.log(2.33e+08);
+     listChiL[8] = 8.863654;
+     listMass[8] = getMass(listElement[8]);
+     listLogGammaCol[8] = 1.0;
+     listGw1[8] = 1.0;
+     listGw2[8] = 1.0;
+     listGwL[8] = 5.0;
+     listStage[8] = 1;
 
      //Mg II 4482.2387
-     listName[12] = "MgII";
-     listElement[12] = "Mg";
-     listLamLbl[12] = "4482";
-     listLam0[12] = 448.2584; //nm
-     listA12[12] = eheu[11]; // Grevesse & Sauval 98
-     listLogf[12] = logE*Math.log(9.81e-01);
-     listLogAij[12] = Math.log(2.17e+08);
-     listChiL[12] = 8.863762;
-     listMass[12] = getMass(listElement[10]);
-     listLogGammaCol[12] = 1.0;
-     listGw1[12] = 1.0;
-     listGw2[12] = 1.0;
-     listGwL[12] = 3.0;
-     listStage[12] = 1;
+     listName[9] = "MgII";
+     listElement[9] = "Mg";
+     listLamLbl[9] = "4482";
+     listLam0[9] = 448.2584; //nm
+     listA12[9] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[9] = logE*Math.log(9.81e-01);
+     listLogAij[9] = Math.log(2.17e+08);
+     listChiL[9] = 8.863762;
+     listMass[9] = getMass(listElement[9]);
+     listLogGammaCol[9] = 1.0;
+     listGw1[9] = 1.0;
+     listGw2[9] = 1.0;
+     listGwL[9] = 3.0;
+     listStage[9] = 1;
 
      //Hbeta
-     listName[13] = "HI<em>&#946</em>";
-     listElement[13] = "H";
-     listLamLbl[13] = " ";
-     listLam0[13] = 486.128;
-     listA12[13] = 12.0; //By definition - it's Hydrogen
-     listLogf[13] = -0.914;
-     listLogAij[13] = Math.log(9.6683e+06);
-     listChiL[13] = 10.2;
-     listMass[13] = getMass(listElement[9]);
-     listLogGammaCol[13] = 1.0;
-     listGw1[13] = 2.0; // 2n^2
-     listGw2[13] = 1.0;
-     listGwL[13] = 8.0; // 2n^2
-     listStage[13] = 0;
+     listName[10] = "HI<em>&#946</em>";
+     listElement[10] = "H";
+     listLamLbl[10] = " ";
+     listLam0[10] = 486.128;
+     listA12[10] = 12.0; //By definition - it's Hydrogen
+     listLogf[10] = -0.914;
+     listLogAij[10] = Math.log(9.6683e+06);
+     listChiL[10] = 10.2;
+     listMass[10] = getMass(listElement[10]);
+     listLogGammaCol[10] = 1.0;
+     listGw1[10] = 2.0; // 2n^2
+     listGw2[10] = 1.0;
+     listGwL[10] = 8.0; // 2n^2
+     listStage[10] = 0;
 
-     //MgIb1
-     //listName[14] = "Mg I <em>b</em><sub>1</sub>";
-     listName[14] = "MgI<em>b</em>";
-     listElement[14] = "Mg";
-     listLamLbl[14] = " ";
-     listLam0[14] = 518.360; //nm
-     listA12[14] = eheu[11]; // Grevesse & Sauval 98
-     listLogf[14] = -0.867;
-     listLogAij[14] = Math.log(5.61e+07);
-     listChiL[14] = 2.717;
-     listMass[14] = getMass(listElement[10]);
-     listLogGammaCol[14] = 1.0;
-     listGw1[14] = 1.0;
-     listGw2[14] = 1.0;
-     listGwL[14] = 5.0;
-     listStage[14] = 0;
-
-     //NaID2
-     //listName[15] = "Na I <em>D</em><sub>2</sub>";
-     listName[15] = " ";
-     listElement[15] = "Na";
-     listLamLbl[15] = " ";
-     listLam0[15] = 588.995;
-     listA12[15] = eheu[10]; // Grevesse & Sauval 98
-     listLogf[15] = -0.193;
-     listLogAij[15] = Math.log(6.16e+07);
-     listChiL[15] = 0.0;
-     listMass[15] = getMass(listElement[11]);
-     listLogGammaCol[15] = 1.0;
-     listGw1[15] = 2.0;
-     listGw2[15] = 1.0;
-     listGwL[15] = 2.0;
-     listStage[15] = 0;
-     
-     //NaID1
-     //listName[16] = "NaI<em>D</em><sub>1, 2</sub>";
-     listName[16] = "NaI<em>D</em>";
-     listElement[16] = "Na";
-     listLamLbl[16] = " ";
-     listLam0[16] = 589.592; //nm
-     listA12[16] = eheu[10]; // Grevesse & Sauval 98    
-     listLogf[16] = -0.495;
-     listLogAij[16] = Math.log(6.14e+07);
-     listChiL[16] = 0.0;
-     listMass[16] = getMass(listElement[12]);
-     listLogGammaCol[16] = 1.0;
-     listGw1[16] = 2.0;
-     listGw2[16] = 1.0;
-     listGwL[16] = 2.0;
-     listStage[16] = 0;
- 
      //Halpha
-     listName[17] = "HI<em>&#945</em>";
-     listElement[17] = "H";
-     listLamLbl[17] = " ";
-     listLam0[17] = 656.282;
-     listA12[17] = 12.0; //By definition - it's Hydrogen
-     listLogf[17] = -0.193;
-     listLogAij[17] = Math.log(6.4651e+07);
-     listChiL[17] = 10.1988357;
-     listMass[17] = getMass(listElement[13]);
-     listLogGammaCol[17] = 1.0;
-     listGw1[17] = 2.0; // 2n^2
-     listGw2[17] = 1.007;
-     listGwL[17] = 8.0; // 2n^2
-     listStage[17] = 0;
-     
+     listName[11] = "HI<em>&#945</em>";
+     listElement[11] = "H";
+     listLamLbl[11] = " ";
+     listLam0[11] = 656.282;
+     listA12[11] = 12.0; //By definition - it's Hydrogen
+     listLogf[11] = -0.193;
+     listLogAij[11] = Math.log(6.4651e+07);
+     listChiL[11] = 10.1988357;
+     listMass[11] = getMass(listElement[11]);
+     listLogGammaCol[11] = 1.0;
+     listGw1[11] = 2.0; // 2n^2
+     listGw2[11] = 1.007;
+     listGwL[11] = 8.0; // 2n^2
+     listStage[11] = 0;
+
+
+     numMolLines = 0;
+    
+  } //end early-type star line list
+
+
 //
 //
 //
@@ -3370,9 +3770,16 @@ ifConvec = false;
     //int numWing = 0;  //debug
     var listNumPoints = 2 * (listNumCore + listNumWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
 
+    var molListNumCore = 5; //per wing
+    var molListNumWing = 10; // half-core
+    //int numWing = 0;  //debug
+    var molListNumPoints = 2 * (molListNumCore + molListNumWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
+
     //default initializations:
 
-    var numMaster = numLams + (numLines * listNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays 
+    //var numMaster = numLams + (numLines * listNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays 
+    var numMaster = numLams + (numLines * listNumPoints) //total size (number of wavelengths) of master lambda & total kappa arrays 
+                            + (numMolLines * molListNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays 
     var masterLams = [];
     masterLams.length = numMaster;
     var masterIntens = [];
@@ -3496,7 +3903,7 @@ ifConvec = false;
 
 
 //Stuff for the the Teff recovery test:
-        var lambda1, lambda2, fluxSurfBol, logFluxSurfBol, listLam0nm;
+        var lambda1, lambda2, fluxSurfBol, logFluxSurfBol, listLam0nm, molListLam0nm;
         fluxSurfBol = 0;
 
 // This holds 2-element temperature-dependent base 10 logarithmic parition fn:
@@ -3504,6 +3911,7 @@ ifConvec = false;
         thisUwV.length = 2;
          thisUwV[0] = 0.0; //default initialization
          thisUwV[1] = 0.0;
+
 //
              //Get the components for the power series expansion approximation of the Hjerting function
              // for treating Voigt profiles:
@@ -3606,7 +4014,7 @@ ifConvec = false;
                listLineProf = voigt(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
                     numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
             }
-            var listLogKappaL = lineKap(listLam0nm, listLogNums, listLogf[iLine], listLinePoints, listLineProf,
+            var listLogKappaL = lineKap(listLam0nm, listLogNums[2], listLogf[iLine], listLinePoints, listLineProf,
                     numDeps, zScaleList, tauRos, temp, rho);
             //int listNumPoints = listLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
             var listLineLambdas = [];
@@ -3636,6 +4044,117 @@ ifConvec = false;
                 }
             }
         } //numLines loop
+
+//
+//Molecular partition fn
+        var thisQwVAB = []; 
+        thisQwVAB.length = 2;
+         thisQwVAB[0] = 0.0; //default initialization
+         thisQwVAB[1] = 0.0;
+
+        var molListLineProf = [];
+        molListLineProf.length = molListNumPoints;
+        for (var i = 0; i < molListNumPoints; i++){
+           molListLineProf[i] = [];
+           molListLineProf[i].length = numDeps;
+        }
+    
+        var molListLogf;
+
+        for (var iMolLine = 0; iMolLine < numMolLines; iMolLine++) {
+        //for (var iMolLine = 0; iMolLine < 1; iMolLine++) {
+
+          var logE10 = Math.log(10.0);
+          zScaleList = zScale;
+          var iMol = 0; //initialization
+          var logMolNums_ptr = 0; //needed??
+          for (var jj = 0; jj < nMols; jj++){
+             if (molListMol[iMolLine] == mname[jj]){
+                  species = mname[jj];
+//Fake molecular partition fn - for now...
+                thisQwVAB = [0.0, 0.0]; //base 10 log_10 U
+                 break;   //we found it
+                 }
+             iMol++;
+          } //jj loop
+   //console.log("species " + species);
+          //console.log("thisUwV[0] " + thisUwV[0] + " thisUwV[1] " + thisUwV[1]);
+          //console.log("molListChiL " + molListChiL[iMolLine] + " molListGwL " + molListGwL[iMolLine]);
+           var molListLogNums = [];
+           molListLogNums.length = 2;
+           molListLogNums[0] = [];
+           molListLogNums[1] = [];
+           molListLogNums[0].length = numDeps;
+           molListLogNums[1].length = numDeps;
+//
+            for (var iTau = 0; iTau < numDeps; iTau++){
+               molListLogNums[0][iTau] = masterMolPops[iMol][iTau];
+               //molListLogNums[6][iTau] = masterStagePops[iMol][4][iTau];
+               //console.log("iMolLine " + iMolLine + " iTau " + iTau + " molListLogNums[] " + logE*molListLogNums[iTau]);
+            }
+
+//System.out.println("iMolLine " + iMolLine + " numNow " + numNow);
+            //var molListLogN = (molListA12[iMolLine] - 12.0) + logNH;
+            molListLam0nm = molListLam0[iMolLine] * 1.0e-7; // nm to cm
+//console.log("iMolLine " + iMolLine + " molListLam0nm " + molListLam0nm + " molListChiL " + molListChiL[iMolLine] +
+// " thisQwVAB[] " + thisQwVAB[0] + " " + thisQwVAB[1] + " molListGwL " + molListGwL[iMolLine]);  
+            var numHelp = levelPops(molListLam0nm, molListLogNums[0], molListChiL[iMolLine], thisQwVAB,
+                     molListGwL[iMolLine], numDeps, temp);
+
+           for (var iTau = 0; iTau < numDeps; iTau++){
+//Fudge - molecular dissociation routine return results 4 base 10 orders of magnitude too small...
+               //molListLogNums[1][iTau] = logE10*4.0 + numHelp[iTau];
+               molListLogNums[1][iTau] = numHelp[iTau];
+               //console.log("molListMol[i] " + molListMol[iMolLine] + " molListLogNums[iTau] " + logE*molListLogNums[iTau]);
+            }
+            var molListLinePoints = lineGrid(molListLam0nm, molListMass[iMolLine], xiT, numDeps, teff, molListNumCore, molListNumWing,
+                    molListLogGammaCol[iMol], tauRos, temp, pGas, tempSun, pGasSun);
+            // Gaussian + Lorentzian approximation to profile (voigt()):
+            //var molListLineProf = voigt(molListLinePoints, molListLam0nm, molListLogGammaCol[iMolLine],
+            //        numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
+            // // Real Voigt fn profile (voigt2()):   
+            molListLineProf = voigt(molListLinePoints, molListLam0nm, molListLogGammaRad[iMolLine], molListLogGammaCol[iMolLine],
+                    numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
+           
+            molListLogf = logE10 * molListLog10gf[iMolLine]; 
+            //console.log("molListLam0nm " + molListLam0nm + " molListLogf " + molListLogf + " zScaleList " + zScaleList);
+            var molListLogKappaL = lineKap(molListLam0nm, molListLogNums[1], molListLogf, molListLinePoints, molListLineProf,
+                    numDeps, zScaleList, tauRos, temp, rho);
+            //int molListNumPoints = molListLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
+            var molListLineLambdas = [];
+            molListLineLambdas.length = molListNumPoints;
+            for (var il = 0; il < molListNumPoints; il++) {
+// // lineProf[iMolLine][*] is DeltaLambda from line centre in cm
+// if (il === molListNumPoints - 1) {
+//    molListLineLambdas[il] = molListLam0nm; // Extra row for line centre continuum taus scale
+// } else {
+//lineLambdas[il] = (1.0E7 * linePoints[iMolLine][il]) + lam0; //convert to nm
+                molListLineLambdas[il] = molListLinePoints[0][il] + molListLam0nm;
+                //console.log("il " + il + " molListLinePoints[0][il] " + molListLinePoints[0][il] 
+                //                  + " molListLineLambdas[il] " + molListLineLambdas[il] 
+                //                  + " molListLineProf " + molListLineProf[il][24]
+                //                  + " molListLogKappaL " + logE*molListLogKappaL[il][24]);
+                // }
+            }
+
+    
+
+            var masterLamsOut = masterLambda(numLams, numMaster, numNow, masterLams, molListNumPoints, molListLineLambdas);
+            var logMasterKapsOut = masterKappa(numDeps, numLams, numMaster, numNow, masterLams, masterLamsOut, logMasterKaps, molListNumPoints, molListLineLambdas, molListLogKappaL);
+            numNow = numNow + molListNumPoints;
+            //update masterLams and logMasterKaps:
+            for (var iL = 0; iL < numNow; iL++) {
+                masterLams[iL] = masterLamsOut[iL];
+                for (var iD = 0; iD < numDeps; iD++) {
+//Still need to put in multi-Gray levels here:
+                    logMasterKaps[iL][iD] = logMasterKapsOut[iL][iD];
+                    //if (iD === 36) {
+                    //console.log("iL " + iL + "iD " + iD + " masterLams[iL] " + masterLams[iL] + " logMasterKaps[iL][iD] " + logMasterKaps[iL][iD]);
+                    //}
+                }
+            }
+
+        } //numMolLines loop
 
  //  for (var iL = 0; iL < numMaster; iL++) {
  //     console.log("iL " + iL + " masterLams[iL] " + masterLams[iL]);
@@ -4041,17 +4560,25 @@ var logEv = Math.log(eV);
     fakeLog10UwBArr[0].length = 2;
     fakeLog10UwBArr[0][0] = 0.0;
     fakeLog10UwBArr[0][1] = 0.0;
-    var fakeLog10QwABArr = [];
-    fakeLog10QwABArr.length = 1;
-    fakeLog10QwABArr[0] = 0.0;
+    var fakeLogQwABArr = [];
+    fakeLogQwABArr.length = fakeNumMols;
+    for (var im = 0; im < fakeNumMols; im++){
+        fakeLogQwABArr[im] = [];
+        fakeLogQwABArr[im].length = 5;
+    }
+    for (var im = 0; im < fakeNumMols; im++){
+       for (var kk = 0; kk < 5; kk++){
+           fakeLogQwABArr[im][kk] = Math.log(300.0);
+       }        
+    }
     var fakeLogMuABArr = [];
     fakeLogMuABArr.length = 1;
     fakeLogMuABArr[0] = Math.log(2.0) + logAmu; //g 
-  // var logN = stagePops(thisLogN, newNe, chiI1,
-  //       chiI2, chiI3, chiI4, log10Gw1V, log10Gw2V, log10Gw3V, log10Gw4V,
-  //       numDeps, temp);
+   //var logN = stagePops(thisLogN, newNe, chiI1,
+   //      chiI2, chiI3, chiI4, log10Gw1V, log10Gw2V, log10Gw3V, log10Gw4V,
+   //      numDeps, temp);
     var logN = stagePops2(thisLogN, newNe, chiIArr, log10UwAArr, 
-                fakeNumMols, fakeLogNumB, fakeDissEArr, fakeLog10UwBArr, fakeLog10QwABArr, fakeLogMuABArr, 
+                fakeNumMols, fakeLogNumB, fakeDissEArr, fakeLog10UwBArr, fakeLogQwABArr, fakeLogMuABArr, 
                 numDeps, temp);
     for (var iTau = 0; iTau < numDeps; iTau++){
          logNums[0][iTau] = logN[0][iTau];
@@ -4104,7 +4631,7 @@ var logEv = Math.log(eV);
             for (var il = 0; il < numPoints; il++) {
                 lineLambdas[il] = linePoints[0][il] + lam0;
             }
-    var logKappaL = lineKap(lam0, logNums, logF, linePoints, lineProf,
+    var logKappaL = lineKap(lam0, logNums[2], logF, linePoints, lineProf,
             numDeps, zScale, tauRos, temp, rho);
     var logTotKappa = lineTotalKap(lineLambdas, logKappaL, numDeps, logKappa, 
          numPoints, numLams, lambdaScale);
@@ -5432,6 +5959,53 @@ Spectral line \n\
             }
 
         }
+
+
+    //Now label molecular lines:
+    //
+        var iCount = 0;
+        for (var i = 0; i < numMolLines; i++) {
+
+            if ((iCount % 4) === 0) {
+                yPos = thisYPos - 25;
+                barHeight = 20;
+            } else if ((iCount % 4) === 1) {
+                yPos = thisYPos + 85;
+                barHeight = 20;
+            } else if ((iCount % 4) === 2) {
+                yPos = thisYPos - 45;
+                barHeight = 50;
+            } else {
+                yPos = thisYPos + 105;
+                barHeight = 50;
+            }
+
+            xPos = xAxisLength * (molListLam0[i] - minXData) / (maxXData - minXData);
+            xPos = xAxisXCnvs + xPos - 5; // finesse
+            //console.log("xPos " + xPos + " xLabelYOffset " + xLabelYOffset);
+
+            nameLbl = "<span style='font-size: xx-small'>" + molListName[i] + "</span>";
+            lamLblNum = molListLam0[i].toPrecision(4);
+            //lamLblStr = lamLblNum.toString(10);
+            //lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
+            lamLbl = "<span style='font-size: xx-small'>" + molListLamLbl[i] + "</span>";
+            txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
+            txtPrint(lamLbl, xPos, yPos + 10, RGBHex, plotTenId);
+            //Make the tick label, Teff:
+
+            //cnvsTenCtx.fillStyle = lineColor;
+            //cnvsTenCtx.font="normal normal normal 8pt arial";
+            //cnvsTenCtx.fillText(listName[i], xPos, yPos);
+            //cnvsTenCtx.fillText(lamLblStr, xPos, yPos+10);
+
+            if (molListName[i] != " "){
+               iCount++;
+            }
+
+        }
+
+
+
     } //end PLOT TEN
 
 //
@@ -6870,6 +7444,11 @@ Spectral line \n\
 //console.log("lam0 " + lam0 + " lineLambdas[iStart] " + lineLambdas[iStart] + " lineLambdas[iStop] " + lineLambdas[iStop]);
         var maxXData = 1.0e7 * linePoints[0][iStop];
         var minXData = 1.0e7 * linePoints[0][iStart];
+        ////Special setting for movie:
+        //iStart = 0;
+        //iStop = numPoints-1;
+        //var maxXData = 0.5;
+        //var minXData = -0.5;
 //console.log("numPoints " + numPoints + " linePoints[iStart] " + linePoints[0][iStart] + " linePoints[iStop] " + linePoints[0][iStop]);
 //console.log("minXData " + minXData + " maxXData " + maxXData);
         //   
@@ -7021,11 +7600,11 @@ Spectral line \n\
             yTickPosCnvs = yAxisLength * (lnFlx[i] - minYData) / rangeYData;
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
 
-// plot point
-            cnvsSixCtx.beginPath();
-            cnvsFiveCtx.strokeStyle=lineColor; 
-            cnvsSixCtx.arc(xShiftCnvs, yShiftCnvs, dSizeSymCnvs, 0, 2*Math.PI);
-            cnvsSixCtx.stroke();
+//// plot point
+//            cnvsSixCtx.beginPath();
+//            cnvsFiveCtx.strokeStyle=lineColor; 
+//            cnvsSixCtx.arc(xShiftCnvs, yShiftCnvs, dSizeSymCnvs, 0, 2*Math.PI);
+//            cnvsSixCtx.stroke();
 //line plot
             cnvsSixCtx.beginPath();
             cnvsSixCtx.strokeStyle=lineColor; 
@@ -7083,9 +7662,10 @@ Spectral line \n\
         // Row 6: quadruply ionized stage ground state population
         //minXData = Math.min(logNums[0][tTau1], logNums[1][tTau1], logNums[4][tTau1]); 
         maxXData = Math.max(logNums[0][tTau1], logNums[1][tTau1], logNums[4][tTau1]);
-        //minXData = logE * minXData; 
+        minXData = logE * minXData; 
         maxXData = logE * maxXData; 
-        minXData = 0.0;
+        //maxXData = 15.0; 
+        //minXData = 0.0;
 
         var xAxisName = "<span title='Logarithmic number density of particles in lower E-level of b-b transition at <em>&#964</em>_Ros=1'>Log<sub>10</sub> <em>N</em><sub>l</sub>(<em>&#964</em><sub>Ros</sub>=1) cm<sup>-3</sup></span>";
         var minYData = 0.0;
@@ -7166,7 +7746,7 @@ Spectral line \n\
         //   }
 
             var RGBHex = "#FF0000";
-            var tickWidthPops = 2;
+            var tickWidthPops = 4;
         xFinesse = 0;
         yFinesse = 0;
         var yShiftL = 0;
@@ -7184,7 +7764,7 @@ Spectral line \n\
             // log number density in each E-level:
             //var xRangePops = Math.floor(xRange * (logE*logNums[lPoint[i]][tTau1] / maxXData));
             var xRangePops = Math.floor(xAxisLength * ( (logE * logNums[i][tTau1] - minXData) / (maxXData - minXData)));
-            var tickWidthPops = 2;
+            var tickWidthPops = 6;
 
  // Energy level logarithmic population horizontal bars:
            yShift = XBar(yData[i], minYData, maxYData, xRangePops, tickWidthPops,
@@ -7223,7 +7803,7 @@ Spectral line \n\
         // Vertical bar:
         var vBarHeightCnvs = Math.floor(yShiftU - yShiftL);
         var xTickPosCnvs = (maxXData - minXData) / 3; // pixels
-        var vBarWidth = 2; //pixels 
+        var vBarWidth = 4; //pixels 
         var yFinesse = Math.floor(yShiftL - yAxisYCnvs); 
         xShiftDum = YBar(xTickPosCnvs, minXData, maxXData, vBarWidth, vBarHeightCnvs,
                          yFinesse, RGBHex, plotEightId, cnvsEightCtx); 
@@ -7949,11 +8529,11 @@ Spectral line \n\
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 //logarithmic        var yTickPosCnvs = yAxisLength * (logE*Math.log(ft[1][0]) - minYData) / rangeYData; //logarithmic
        var yTickPosCnvs = yAxisLength * (ft[1][0] - minYData) / rangeYData;
-       var yTickPos2Cnvs = yAxisLength * (ft[2][0] - minYData) / rangeYData;
+       //var yTickPos2Cnvs = yAxisLength * (ft[2][0] - minYData) / rangeYData;
 
         // vertical position in pixels - data values increase upward:
         var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-        var lastYShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
+        //var lastYShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
 //
         for (var i = 1; i < numK; i++) {
 
@@ -7964,41 +8544,42 @@ Spectral line \n\
 
 //logarithmic            yTickPosCnvs = yAxisLength * (logE*Math.log(ft[1][i]) - minYData) / rangeYData; //logarithmic
             yTickPosCnvs = yAxisLength * (ft[1][i] - minYData) / rangeYData;
-            yTickPos2Cnvs = yAxisLength * (ft[2][i] - minYData) / rangeYData;
+           // yTickPos2Cnvs = yAxisLength * (ft[2][i] - minYData) / rangeYData;
 
             // vertical position in pixels - data values increase upward:
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-            var yShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
+           // var yShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
 
-//Plot points
-            cnvsSeventeenCtx.beginPath();
-            cnvsSeventeenCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            RGBHex = colHex(0, 0, 0);
-            cnvsSeventeenCtx.strokeStyle = RGBHex;
-            cnvsSeventeenCtx.stroke();
+////Plot points
+//            cnvsSeventeenCtx.beginPath();
+//            cnvsSeventeenCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
+//            RGBHex = colHex(0, 0, 0);
+//            cnvsSeventeenCtx.strokeStyle = RGBHex;
+//            cnvsSeventeenCtx.stroke();
 //line plot
             cnvsSeventeenCtx.beginPath();
             cnvsSeventeenCtx.strokeStyle = RGBHex;
+            RGBHex = colHex(0, 0, 0);
             cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
             cnvsSeventeenCtx.lineTo(xShiftCnvs, yShiftCnvs);
             cnvsSeventeenCtx.stroke();  
             //
-//Plot points
-            cnvsSeventeenCtx.beginPath();
-            cnvsSeventeenCtx.arc(xShiftCnvs, yShift2Cnvs, dSizeCnvs, 0, 2*Math.PI);
-            RGBHex = colHex(250, 0, 0);
-            cnvsSeventeenCtx.strokeStyle = RGBHex;
-            cnvsSeventeenCtx.stroke();
-//line plot
-            cnvsSeventeenCtx.beginPath();
-            cnvsSeventeenCtx.strokeStyle = RGBHex;
-            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShift2Cnvs);
-            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShift2Cnvs);
-            cnvsSeventeenCtx.stroke();  
+////Plot points
+//            cnvsSeventeenCtx.beginPath();
+//            cnvsSeventeenCtx.arc(xShiftCnvs, yShift2Cnvs, dSizeCnvs, 0, 2*Math.PI);
+//            RGBHex = colHex(250, 0, 0);
+//            cnvsSeventeenCtx.strokeStyle = RGBHex;
+//            cnvsSeventeenCtx.stroke();
+////line plot
+//            cnvsSeventeenCtx.beginPath();
+//            cnvsSeventeenCtx.strokeStyle = RGBHex;
+//            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShift2Cnvs);
+//            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShift2Cnvs);
+//            cnvsSeventeenCtx.stroke();  
 
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
-            lastYShift2Cnvs = yShift2Cnvs;
+           // lastYShift2Cnvs = yShift2Cnvs;
         }
     }
 

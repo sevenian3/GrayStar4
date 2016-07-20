@@ -1006,6 +1006,21 @@ var minMax2 = function(x) {
 
 }; // end of getMass method
 
+//
+    var getMolMass = function(molName){
+
+    var molMass = 2.0;  //default initialization (H_2)
+
+    if (molName == "TiO"){
+       molMass = getMass("O") + getMass("Ti");
+        }
+
+
+//
+    return molMass;
+
+
+}; // end of getMolMass method
 
 
 // Ground state ionization energies in eV 
@@ -2240,6 +2255,172 @@ return dissE;
 return log10PartFn;
 
 };  //end of method getIonE    
+
+//
+   var getMolPartFn = function(species){
+
+// Diatomic Partition fn values, Q_AB, from
+//http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+A/588/A96
+//See: Barklem, P. S.; Collet, R., 2016, Astronomy & Astrophysics, Volume 588, id.A96
+//Just do linear piecewise interpolation in log of to hottest five values for now:
+   var logPartFn = [];
+   logPartFn.length = 5;
+   //default initialization
+   logPartFn[0] = 0.0;  //for T = 130 K
+   logPartFn[1] = 0.0;  //for T = 500 K
+   logPartFn[2] = 0.0;  //for T = 3000 K
+   logPartFn[3] = 0.0;  //for T = 8000 K
+   logPartFn[4] = 0.0;  //for T = 10000 K
+
+
+
+      if (species == "H2"){
+         logPartFn[0] = Math.log(8.83429e-01);
+         logPartFn[1] = Math.log(3.12970e+00);
+         logPartFn[2] = Math.log(2.22684e+01);
+         logPartFn[3] = Math.log(1.24852e+02);
+         logPartFn[4] = Math.log(1.94871e+02);
+       }
+
+      if (species == "C2"){
+         logPartFn[0] = Math.log(2.53157e+01);
+         logPartFn[1] = Math.log(2.08677e+02);
+         logPartFn[2] = Math.log(6.75852e+03);
+         logPartFn[3] = Math.log(6.15554e+04);
+         logPartFn[4] = Math.log(1.07544e+05);
+       }
+
+      if (species == "N2"){
+         logPartFn[0] = Math.log(2.28805e+01);
+         logPartFn[1] = Math.log(8.76988e+01);
+         logPartFn[2] = Math.log(7.89979e+02);
+         logPartFn[3] = Math.log(4.32734e+03);
+         logPartFn[4] = Math.log(6.68047e+03);
+       }
+
+      if (species == "O2"){
+         logPartFn[0] = Math.log(9.78808e+01);
+         logPartFn[1] = Math.log(3.70966e+02);
+         logPartFn[2] = Math.log(4.34427e+03);
+         logPartFn[3] = Math.log(3.30098e+04);
+         logPartFn[4] = Math.log(5.76869e+04);
+       }
+
+      if (species == "H2+"){
+         logPartFn[0] = Math.log(3.40918e+00);
+         logPartFn[1] = Math.log(1.21361e+01);
+         logPartFn[2] = Math.log(1.16205e+02);
+         logPartFn[3] = Math.log(7.56297e+02);
+         logPartFn[4] = Math.log(1.18728e+03);
+       }
+
+      if (species == "CH"){
+         logPartFn[0] = Math.log(3.13181e+01);
+         logPartFn[1] = Math.log(1.03985e+02);
+         logPartFn[2] = Math.log(9.04412e+02);
+         logPartFn[3] = Math.log(6.99662e+03);
+         logPartFn[4] = Math.log(1.22732e+04);
+       }
+
+      if (species == "NH"){
+         logPartFn[0] = Math.log(1.76430e+01);
+         logPartFn[1] = Math.log(6.50991e+01);
+         logPartFn[2] = Math.log(5.20090e+02);
+         logPartFn[3] = Math.log(3.35774e+03);
+         logPartFn[4] = Math.log(5.85785e+03);
+       }
+
+      if (species == "OH"){
+         logPartFn[0] = Math.log(2.54704e+01);
+         logPartFn[1] = Math.log(8.07652e+01);
+         logPartFn[2] = Math.log(5.77700e+02);
+         logPartFn[3] = Math.log(3.11647e+03);
+         logPartFn[4] = Math.log(5.02698e+03);
+       }
+
+      if (species == "MgH"){
+         logPartFn[0] = Math.log(3.22349e+01);
+         logPartFn[1] = Math.log(1.24820e+02);
+         logPartFn[2] = Math.log(1.69231e+03);
+         logPartFn[3] = Math.log(1.72862e+04);
+         logPartFn[4] = Math.log(3.16394e+04);
+      }
+
+      if (species == "CaH"){
+         logPartFn[0] = Math.log(4.34133e+01);
+         logPartFn[1] = Math.log(1.69692e+02);
+         logPartFn[2] = Math.log(2.33105e+03);
+         logPartFn[3] = Math.log(2.24220e+04);
+         logPartFn[4] = Math.log(4.33139e+04);
+       }
+
+      if (species == "CN"){
+         logPartFn[0] = Math.log(9.62592e+01);
+         logPartFn[1] = Math.log(3.69706e+02);
+         logPartFn[2] = Math.log(3.65207e+03);
+         logPartFn[3] = Math.log(2.59277e+04);
+         logPartFn[4] = Math.log(4.43257e+04);
+       }
+
+      if (species == "CO"){
+         logPartFn[0] = Math.log(4.73391e+01);
+         logPartFn[1] = Math.log(1.81659e+02);
+         logPartFn[2] = Math.log(1.71706e+03);
+         logPartFn[3] = Math.log(9.67381e+03);
+         logPartFn[4] = Math.log(1.50689e+04);
+       }
+
+      if (species == "NO"){
+         logPartFn[0] = Math.log(1.38024e+02);
+         logPartFn[1] = Math.log(7.06108e+02);
+         logPartFn[2] = Math.log(8.21159e+03);
+         logPartFn[3] = Math.log(4.97309e+04);
+         logPartFn[4] = Math.log(7.94214e+04);
+       }
+
+      if (species == "FeO"){
+         logPartFn[0] = Math.log(1.85254e+03);
+         logPartFn[1] = Math.log(7.52666e+03);
+         logPartFn[2] = Math.log(1.23649e+05);
+         logPartFn[3] = Math.log(9.55089e+05);
+         logPartFn[4] = Math.log(1.58411e+06);
+       }
+
+      if (species == "SiO"){
+         logPartFn[0] = Math.log(1.25136e+02);
+         logPartFn[1] = Math.log(4.95316e+02);
+         logPartFn[2] = Math.log(6.63653e+03);
+         logPartFn[3] = Math.log(4.56577e+04);
+         logPartFn[4] = Math.log(8.57529e+04);
+       }
+
+      if (species == "CaO"){
+         logPartFn[0] = Math.log(2.03667e+02);
+         logPartFn[1] = Math.log(8.94430e+02);
+         logPartFn[2] = Math.log(2.08874e+04);
+         logPartFn[3] = Math.log(5.21424e+05);
+         logPartFn[4] = Math.log(1.08355e+06);
+       }
+
+      if (species == "TiO"){
+         logPartFn[0] = Math.log(5.04547e+02);
+         logPartFn[1] = Math.log(3.27426e+03);
+         logPartFn[2] = Math.log(6.43969e+04);
+         logPartFn[3] = Math.log(5.28755e+05);
+         logPartFn[4] = Math.log(9.61395e+05);
+       }
+
+      if (species == "VO"){
+         logPartFn[0] = Math.log(6.62935e+02);
+         logPartFn[1] = Math.log(2.70111e+03);
+         logPartFn[2] = Math.log(4.15856e+04);
+         logPartFn[3] = Math.log(3.57467e+05);
+         logPartFn[4] = Math.log(6.53298e+05);
+       }
+
+return logPartFn;
+
+   };  //end of method getMolPartFn
 
 
  var hjertingComponents = function(){
