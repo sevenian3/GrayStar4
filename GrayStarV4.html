@@ -50,7 +50,7 @@
                     handleShape: "round",
                     sliderType: "min-range",
                     value: "5780",
-                    min: "2500",
+                    min: "3200",
                     max: "50000",
                     step: "5",
                     showTooltip: "true",
@@ -75,10 +75,10 @@
                     handleSize: "24,12",
                     handleShape: "round",
                     sliderType: "min-range",
-                    value: "1.0",
-                    min: "0.1",
-                    max: "20.0",
-                    step: "0.1",
+                    value: "1.00",
+                    min: "0.10",
+                    max: "20.00",
+                    step: "0.01",
                     showTooltip: "true",
                     editableTooltip: "true"
                 });
@@ -224,7 +224,7 @@
                             <td>
                                 <span title="Surface temperature of spherical blackbody radiation emitter of equivalent bolometric surface flux, in Kelvins (K)"> 
                                     <a href="http://en.wikipedia.org/wiki/Effective_temperature" target="_blank">Effective temperature, <em>T</em><sub>eff</sub></a> <br />
-                                    (2500 - 50000) 
+                                    (3400 - 50000) 
                                     <a href="http://en.wikipedia.org/wiki/Kelvin" target="_blank">K</a>) <br />
                                     <!-- <input id="Teff" type="number" name="Teff" value=5800 size="5" min="3500" max="25000" step="25"/> -->
                                     <!-- <input id="Teff" type="range" name="Teff" value="5800" min="3500" max="25000" step="10" onchange="displayTeff()"/> -->
@@ -768,13 +768,13 @@
                        <option value = "Co">Co</option>
                        <option value = "Ni">Ni</option>
                        <option value = "TiO">TiO</option>
-                       <option value = "CO">CO</option>
+                      <!-- <option value = "CO">CO</option>
                        <option value = "CN">CN</option>
                        <option value = "CH">CH</option>
                        <option value = "C2">C2</option>
                        <option value = "H2+">H2+</option>
                        <option value = "OH">OH</option>
-                       <option value = "SiO">SiO</option>
+                       <option value = "SiO">SiO</option> -->
                     </select>Chem Eq (<span style="font-size:x-small"><em>if</em> Atmos plots <strong>ON</strong></span>)
                 <span title="Turn radiation field plots on/off">
                     <input id="showRad" type="checkbox" name="showRad" />Radiation field
@@ -821,6 +821,25 @@
         elements in the javaScript code (the js panelWidth & panelHeight parameters)
         for the scaling between CSS and JS canvas coordinates to be 1:1 -->
 
+ <!--
+// PLOT GRID PLAN as of 20 Jul 2016:
+//    Cell entries:  Plot number Plot contents
+//
+//  Col           0                 |  1                |  2
+//
+//  Row: 0        7 Whte Lght Img   |  10 Spctrm Img    |  11 Life Zn
+//
+//       1       12 Gauss Filt      |   4 Limb darkng   |   9 HRD
+//
+//       2        6 Spctrl line     |  17 Four trnsfrm  |   2 T_kin(tau)
+//
+//       3        8 Grtrn diag      |   5 SED           |   3 P(tau)
+//
+//       4       16 Ioniz Eq        |  15 kap(lambda)   |  14 kap(tau)
+//
+
+  -->
+
         <!-- Stellar disk -->
         <div id="plotSeven">
             <canvas id="plotSevenCnvs" width="450" height="350"></canvas>
@@ -839,40 +858,31 @@
         <!-- Tunable monochromatic image -->
         <div id="plotTwelve">
             <canvas id="plotTwelveCnvs" width="450" height="350"></canvas>
-        </div>        
-
-        <!-- HR DIagram -->
-        <div id="plotNine">
-            <canvas id="plotNineCnvs" width="450" height="350"></canvas>
-        </div> 
-<!--
-        <div id="plotOne" class="atmosPanel" style="display:none">
-            <canvas id="plotOneCnvs" width="450" height="350"></canvas>
         </div>
--->
-        <!-- Tkin vs log(Tau) -->
-        <div id="plotTwo" class="atmosPanel"style=" display:none">
-            <canvas id="plotTwoCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Pgas, Prad vs log(Tau) -->
-        <div id="plotThree" class="atmosPanel" style="display:none">
-            <canvas id="plotThreeCnvs" width="450" height="350"></canvas>
-        </div> 
 
         <!-- Limb darkening: I_lambda(theta) -->
         <div id="plotFour" class="radPanel" style="display:none">
             <canvas id="plotFourCnvs" width="450" height="350"></canvas>
+        </div>  
+        
+        <!-- HR DIagram -->
+        <div id="plotNine">
+            <canvas id="plotNineCnvs" width="450" height="350"></canvas>
         </div> 
-
-        <!-- SED: I_lambda, F_lambda(lambda) -->
-        <div id="plotFive" class="radPanel" style="display:none">
-            <canvas id="plotFiveCnvs" width="450" height="350"></canvas>
-        </div>         
 
         <!-- high-res spectral line -->
         <div id="plotSix" class="linePanel" style="display:none">
             <canvas id="plotSixCnvs" width="450" height="350"></canvas>
+        </div> 
+
+        <!-- Fourier transform of I(theta/(pi/2)) -->
+        <div id="plotSeventeen">
+            <canvas id="plotSeventeenCnvs" width="450" height="350"></canvas>
+        </div>        
+
+        <!-- Tkin vs log(Tau) -->
+        <div id="plotTwo" class="atmosPanel"style=" display:none">
+            <canvas id="plotTwoCnvs" width="450" height="350"></canvas>
         </div> 
 
         <!-- Grotrian diagram for high res line-->
@@ -880,9 +890,19 @@
             <canvas id="plotEightCnvs" width="450" height="350"></canvas>
         </div> 
 
-        <!-- Opacity vs depth -->
-        <div id="plotFourteen">
-            <canvas id="plotFourteenCnvs" width="450" height="350"></canvas>
+        <!-- SED: I_lambda, F_lambda(lambda) -->
+        <div id="plotFive" class="radPanel" style="display:none">
+            <canvas id="plotFiveCnvs" width="450" height="350"></canvas>
+        </div>          
+
+        <!-- Pgas, Prad vs log(Tau) -->
+        <div id="plotThree" class="atmosPanel" style="display:none">
+            <canvas id="plotThreeCnvs" width="450" height="350"></canvas>
+        </div> 
+
+        <!-- Opacity vs lambda -->
+        <div id="plotSixteen">
+            <canvas id="plotSixteenCnvs" width="450" height="350"></canvas>
         </div>        
 
         <!-- Opacity vs lambda -->
@@ -890,15 +910,16 @@
             <canvas id="plotFifteenCnvs" width="450" height="350"></canvas>
         </div>        
 
-        <!-- Opacity vs lambda -->
-        <div id="plotSixteen">
-            <canvas id="plotSixteenCnvs" width="450" height="350"></canvas>
+        <!-- Opacity vs depth -->
+        <div id="plotFourteen">
+            <canvas id="plotFourteenCnvs" width="450" height="350"></canvas>
         </div>        
 
-        <!-- Fourier transform of I(theta/(pi/2)) -->
-        <div id="plotSeventeen">
-            <canvas id="plotSeventeenCnvs" width="450" height="350"></canvas>
-        </div>        
+<!--
+        <div id="plotOne" class="atmosPanel" style="display:none">
+            <canvas id="plotOneCnvs" width="450" height="350"></canvas>
+        </div>
+-->
 
         <!-- HR DIagram -->
 

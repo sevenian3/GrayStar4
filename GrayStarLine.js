@@ -2403,7 +2403,113 @@ var logEv = Math.log(eV);
 
         return logNums;
     }; //end method stagePops2    
-    
+   
+
+// RHS of partial pressure formulation of Saha equation in standard form (N_U*P_e/N_L on LHS)
+ // Returns depth distribution of LHS: Phi(T) === N_U*P_e/N_L (David Gray notation)
+
+// Input parameters:
+// chiI - ground state ionization energy of lower stage
+// log10UwUArr, log10UwLArr - array of temperature-dependent partition function for upper and lower ionization stage
+// Also needs atsmopheric structure information:
+// numDeps
+// temp structure
+//
+// Atomic element "A" is the one whose ionization fractions are being computed
+//  Element "B" refers to array of other species with which A forms molecules "AB"
+
+    //public static double[] sahaRHS(double chiI, double[] log10UwUArr, double[] log10UwLArr,
+    //             int numDeps, double[][] temp) {
+    var sahaRHS = function(chiI, log10UwUArr, log10UwLArr,
+                  temp) {
+
+
+        var ln10 = Math.log(10.0);
+        var logE = Math.log10(Math.E); // for debug output
+        var log2pi = Math.log(2.0 * Math.PI);
+        var log2 = Math.log(2.0);
+
+
+//    var numMols = dissEArr.length;
+
+
+// Parition functions passed in are 2-element vectore with remperature-dependent base 10 log Us
+// Convert to natural logs:
+        var Ttheta, thisTemp;
+  //Default initializations:
+//We need one more stage in size of saha factor than number of stages we're actualy populating
+        var thisLogUwU = 0.0;
+        var thisLogUwL = 0.0;
+
+        var logE10 = Math.log(10.0);
+//We need one more stage in size of saha factor than number of stages we're actualy populating
+        var logUwU = [];
+        logUwU.length = 2;
+        var logUwL = [];
+        logUwL.length = 2;
+           logUwU[0] = logE10*log10UwUArr[0];
+           logUwU[1] = logE10*log10UwUArr[1];
+           logUwL[0] = logE10*log10UwLArr[0];
+           logUwL[1] = logE10*log10UwLArr[1];
+
+        //System.out.println("chiL before: " + chiL);
+        // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
+
+//atomic ionization stage Boltzmann factors:
+        var logChiI, logBoltzFacI;
+        var boltzFacI;
+           logChiI = Math.log(chiI) + logEv;
+           logBoltzFacI = logChiI  - logK;
+           boltzFacI = Math.exp(logBoltzFacI);
+
+//Extra factor of k to get k^5/2 in the P_e formulation of Saha Eq.
+        var logSahaFac = log2 + (3.0 / 2.0) * (log2pi + logMe + logK - 2.0 * logH) + logK;
+
+        //double[] logLHS = new double[numDeps];
+        var logLHS;
+
+//   For atomic ionization stages:
+        var logSaha, saha, expFac;
+
+//        for (int id = 0; id < numDeps; id++) {
+
+//
+//Determine temeprature dependenet aprtition functions Uw:
+            thisTemp = temp[0];
+            Ttheta = 5040.0 / thisTemp;
+
+
+       if (Ttheta >= 1.0){
+              thisLogUwU = logUwU[0];
+              thisLogUwL = logUwL[0];
+       }
+       if (Ttheta <= 0.5){
+              thisLogUwU = logUwU[1];
+              thisLogUwL = logUwL[1];
+       }
+       if (Ttheta > 0.5 && Ttheta < 1.0){
+              thisLogUwU = ( 0.5 * logUwU[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
+                         + ( 0.5 * logUwU[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
+              thisLogUwL = ( 0.5 * logUwL[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
+                         + ( 0.5 * logUwL[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
+       }
+
+
+   //Ionization stage Saha factors:
+
+//Need T_kin^5/2 in the P_e formulation of Saha Eq.
+               logSaha = logSahaFac - (boltzFacI /temp[0]) + (5.0 * temp[1] / 2.0) + thisLogUwU - thisLogUwL;
+              // saha = Math.exp(logSaha);
+
+                 //logLHS[id] = logSaha;
+                 logLHS = logSaha;
+ //       } //id loop
+
+        return logLHS;
+//
+    }; //end method stagePops
+
+ 
 
 //Diatomic molecular equilibrium routine that accounts for molecule formation:
  // Returns depth distribution of molecular population 

@@ -2457,7 +2457,7 @@ var logK = Math.log(k);
      var Rydberg = 1.0968e-2;  // "R" in nm^-1
      //Generate threshold wavelengths and b-f Gaunt (g_bf) helper factors up to n=10:
      var n; //principle quantum number of Bohr atom E-level
-     var numHlevs = 30;
+     var numHlevs = 10;
      var invThresh = [];
      invThresh.length = numHlevs; //also serves as g_bf helper factor
      var threshLambs = [];

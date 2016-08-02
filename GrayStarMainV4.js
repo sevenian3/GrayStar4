@@ -2287,6 +2287,41 @@ function main() {
   //   console.log("i " + i + " " + logE*guessPGas[1][i] + " " + logE*guessPe[1][i] + " " + logE*guessNe[1][i]);
  // }
 
+
+        // *********************
+   //Jul 2016: Replace the following procedure for model building with the following PSEUDOCODE:
+   //
+   // 1st guess Tk(tau), Pe(tau), Pg(tau) from rescaling reference hot or cool model above
+   // 1) Converge Pg-Pe relation for Az abundance distribution and  T_Kin(Tau)
+   //   assuming all free e^-s from single ionizations - *inner* convergence
+   // 2) Compute N_H from converged Pg-Pe relation
+   //    A_Tot = Sigma_z(A_z)
+   //         -> N_H(tau) = (Pg(tau)-Pe(tau))/{kTk(tau)A_Tot}
+   //         -> N_z(tau) = A_z * N_H(tau)
+   // 3) Obtain N_HI, N_HII, N_HeI, and N_HeII at all depths
+   // 4)Get rho(tau) = Sigma_z(m_z*N_z(tau)) and mu(tau) = rho(tau) / N(tau)
+   //    - needed for kappa in cm^2/g
+   // 5) kappa(tau) from Gray Ch. 8 sources - H, He, and e^- oapcity sources only
+   // 6) P_Tot(tau) from HSE on tau scale with kappa from 4)
+   //    - PRad(tau) from Tk(tau)
+   //    - New Pg(tau) from P_Tot(tau)-PRad(tau)
+   // 7) Iterate Pg - kappa relation to convergence - *outer* convergence
+   // 8)Get rho(tau) = Sigma_z(m_z*N_z(tau)) and mu(tau) = rho(tau) / N(tau)
+   //   and depth scale
+   //
+   //  ** Atmospheric structure converged **
+   //
+   // THEN for spectrum synthesis:
+   //
+   // 1) Separate iteration of Ne against ionization fractions fI(tau), fII, fIII, fIV, fV(tau)
+   // from Saha(Tk(tau), Pe(tau))
+   //   AND coupled molecualr equilibrium
+   //    -  LevelPops.stagePops2()
+   // 2) new Ne(tau) from Sigma_z{fI(tau) .... 5*fV(tau) * N_z}
+   // 3) Iterate
+   // 4) Temp correction??
+
+
 //One more than stage than actual number populated:
   var numStages = 4;
   var species = " "; //default initialization
@@ -2434,42 +2469,7 @@ function main() {
   newTemp[0].length = numDeps;
   newTemp[1].length = numDeps;
 
-//
-//
-//
-//Begin Pgas/Pe iteration
-    var maxZDonor = 28; //Nickel
-    for (var pIter = 0; pIter < 1; pIter++){
-//
-//
-//Get the number densities of the chemical elements at all depths
-     logNz = getNz(numDeps, temp, guessPGas, guessPe, ATot, nelemAbnd, logAz);
-     for (var i = 0 ; i < numDeps; i++){
-        logNH[i] = logNz[0][i];
-        //System.out.println("i " + i + " logNH[i] " + logE*logNH[i]);
-     }
-
-//Get mass density from chemical composition:
-     rho = massDensity2(numDeps, nelemAbnd, logNz, cname,
-                                 nMols, masterMolPops, mname, mnameA, mnameB);
-    // for (var i = 0 ; i < numDeps; i++){
-    //   console.log("i " + i + " rho " + logE*rho[1][i]);
-    // }
-
-
-//
-//  Compute ionization fractions for Ne calculation
-//  AND
-// Populate the ionization stages of all the species for spectrum synthesis:
-//stuff to save ion stage pops at tau=1:
-  var iTauOne = tauPoint(numDeps, tauRos, unity);
-//
-//  Default inializations:
-       zScaleList = 1.0; //initialization
-
-var amu = 1.66053892E-24; // atomic mass unit in g
-var logAmu = Math.log(amu);
-
+//Variables for ionization/molecular equilibrium treatment:
 //for diatomic molecules
        var logNumBArr = [];
        logNumBArr.length = numAssocMols;
@@ -2493,7 +2493,7 @@ var logAmu = Math.log(amu);
        var logMuABArr = [];
        logMuABArr.length = numAssocMols;
 
-// Arrays ofpointers into master molecule and element lists:
+// Arrays of pointers into master molecule and element lists:
    var mname_ptr = [];
    mname_ptr.length = numAssocMols;
    var specB_ptr = [];
@@ -2501,6 +2501,381 @@ var logAmu = Math.log(amu);
    var specA_ptr = 0;
    var specB2_ptr = 0;
    var mnameBtemplate = " ";
+
+//
+//We converge the Pgas - Pe relation first under the assumption that all free e^-s are from single ionizations
+// a la David Gray Ch. 9.
+// This approach separates converging ionization fractions and Ne for spectrum synthesis purposes from
+// converging the Pgas-Pe-N_H-N_He relation for computing the mean opacity for HSE
+//
+var thisTemp = [];
+thisTemp.length = 2;
+var log10UwUArr = [];
+log10UwUArr.length = 2;
+var log10UwLArr = [];
+log10UwLArr.length = 2;
+var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe, logPeNumerTerm, logPeDenomTerm;
+//Begin Pgas-kapp iteration
+
+//
+    var maxZDonor = 28; //Nickel
+    for (var pIter = 0; pIter < 3; pIter++){
+
+//  Converge Pg-Pe relation starting from intital guesses at Pg and Pe
+//  - assumes all free electrons are from single ionizations
+//  - David Gray 3rd Ed. Eq. 9.8:
+
+  for (var neIter = 0; neIter < 3; neIter++){
+    //System.out.println("iD    logE*newPe[1][iD]     logE*guessPe[1]     logE*guessPGas[1]");
+    for (var iD = 0; iD < numDeps; iD++){
+    //re-initialize accumulators:
+       thisTemp[0] = temp[0][iD];
+       thisTemp[1] = temp[1][iD];
+       peNumerator = 0.0;
+       peDenominator = 0.0;
+       for (var iElem = 0; iElem < nelemAbnd; iElem++){
+           species = cname[iElem] + "I";
+           chiI = getIonE(species);
+    //THe following is a 2-element vector of temperature-dependent partitio fns, U,
+    // that are base 10 log_10 U
+           log10UwLArr = getPartFn(species); //base 10 log_10 U
+           species = cname[iElem] + "II";
+           log10UwUArr = getPartFn(species); //base 10 log_10 U
+           logPhi = sahaRHS(chiI, log10UwUArr, log10UwLArr, thisTemp);
+           logPhiOverPe = logPhi - guessPe[1][iD];
+           logOnePlusPhiOverPe = Math.log(1.0 + Math.exp(logPhiOverPe));
+           logPeNumerTerm = logAz[iElem] + logPhiOverPe - logOnePlusPhiOverPe;
+           peNumerator = peNumerator + Math.exp(logPeNumerTerm);
+           logPeDenomTerm = logAz[iElem] + Math.log(1.0 + Math.exp(logPeNumerTerm));
+           peDenominator = peDenominator + Math.exp(logPeDenomTerm);
+       } //iElem chemical element loop
+       newPe[1][iD] = guessPGas[1][iD] + Math.log(peNumerator) - Math.log(peDenominator);
+       //System.out.format("%03d, %21.15f, %21.15f, %21.15f%n", iD, logE*newPe[1][iD], logE*guessPe[1][iD], logE*guessPGas[1][iD]);
+       guessPe[1][iD] = newPe[1][iD];
+       guessPe[0][iD] = Math.exp(guessPe[1][iD]);
+    } //iD depth loop
+
+} //end Pg_Pe iteration neIter
+
+    for (var iD = 0; iD < numDeps; iD++){
+       newNe[1][iD] = newPe[1][iD] - temp[1][iD] - logK;
+    }
+
+//
+//
+//Get the number densities of the chemical elements at all depths
+     logNz = getNz(numDeps, temp, guessPGas, guessPe, ATot, nelemAbnd, logAz);
+     for (var i = 0 ; i < numDeps; i++){
+        logNH[i] = logNz[0][i];
+        //System.out.println("i " + i + " logNH[i] " + logE*logNH[i]);
+     }
+
+//
+//  Compute ionization fractions of H & He for kappa calculation
+//
+//  Default inializations:
+       zScaleList = 1.0; //initialization
+
+var amu = 1.66053892E-24; // atomic mass unit in g
+var logAmu = Math.log(amu);
+
+//Default initialization:
+       for (var i = 0; i < numAssocMols; i++){ 
+           for (var j = 0; j < numDeps; j++){
+               logNumBArr[i][j] = -49.0; 
+           }
+           log10UwBArr[i][0] = 0.0;
+           log10UwBArr[i][1] = 0.0;
+           dissEArr[i] = 29.0;  //eV
+           for (var kk = 0; kk < 5; kk++){
+               logQwABArr[i][kk] = Math.log(300.0);
+           }
+           logMuABArr[i] = Math.log(2.0) + logAmu;  //g
+           mname_ptr[i] = 0;
+           specB_ptr[i] = 0;
+       }
+        
+       var defaultQwAB = Math.log(300.0); //for now
+    //default that applies to most cases - neutral stage (I) forms molecules
+       var specBStage = 0; //default that applies to most cases
+      
+   //For element A of main molecule being treated in *molecular* equilibrium:
+   //For safety, assign default values where possible
+       var nmrtrDissE = 15.0; //prohitively high by default
+       var nmrtrLog10UwB = [];
+       nmrtrLog10UwB.length = 2;
+       nmrtrLog10UwB[0] = 0.0;
+       nmrtrLog10UwB[1] = 0.0;
+       var nmrtrLog10UwA = 0.0;
+       var nmrtrLogQwAB = [];
+       nmrtrLogQwAB.length = 5;
+       for (var kk = 0; kk < 5; kk++){
+          nmrtrLogQwAB[kk] = Math.log(300.0);
+       }
+
+       var nmrtrLogMuAB = logAmu;
+       var nmrtrLogNumB = [];
+       nmrtrLogNumB.length = numDeps;
+       for (var i = 0; i < numDeps; i++){
+          nmrtrLogNumB[i] = 0.0;
+       }
+
+     var totalIonic;
+     var logGroundRatio = [];
+     logGroundRatio.length = numDeps;
+
+
+   //console.log(" iTau " + " logNums[iStage][iTau]");
+   //console.log(" species " + " thisChiI " + " thisUwV");
+   for (var iElem = 0; iElem < 2; iElem++){
+       //console.log("iElem " + iElem);
+       species = cname[iElem] + "I";
+       chiIArr[0] = getIonE(species);
+    //THe following is a 2-element vector of temperature-dependent partitio fns, U,
+    // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
+       log10UwAArr[0] = getPartFn(species); //base 10 log_10 U
+       //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
+       species = cname[iElem] + "II";
+       chiIArr[1] = getIonE(species);
+       log10UwAArr[1] = getPartFn(species); //base 10 log_10 U
+       //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
+       species = cname[iElem] + "III";
+       chiIArr[2] = getIonE(species);
+       log10UwAArr[2] = getPartFn(species); //base 10 log_10 U
+       //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
+       species = cname[iElem] + "IV";
+       chiIArr[3] = getIonE(species);
+       log10UwAArr[3] = getPartFn(species); //base 10 log_10 U
+       //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
+       //double logN = (eheu[iElem] - 12.0) + logNH;
+       //logNums = stagePops(logNz[iElem], guessNe, chiIArr[0],
+       //      chiIArr[1], chiIArr[2], chiIArr[3], log10UwAArr[0], log10UwAArr[1], log10UwAArr[2], log10UwAArr[3],
+       //      numDeps, temp);
+       //Find any associated moleculear species in which element A can participate:
+       //console.log("iElem " + iElem + " cname " + cname[iElem]);
+       //console.log("numAssocMols " + numAssocMols);
+       var thisNumMols = 0; //default initialization
+       for (var iMol = 0; iMol < numAssocMols; iMol++){
+          //console.log("iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
+          if (cnameMols[iElem][iMol] == "None"){
+            break;
+          }
+          thisNumMols++;
+       }
+     //console.log("thisNumMols " + thisNumMols);
+     if (thisNumMols > 0){
+       //Find pointer to molecule in master mname list for each associated molecule:
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+          for (var jj = 0; jj < nMols; jj++){
+             if (cnameMols[iElem][iMol] == mname[jj]){
+                mname_ptr[iMol] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master mnames list
+       } //iMol loop in associated molecules
+//Now find pointer to atomic species B in master cname list for each associated molecule found in master mname list!
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+          for (var jj = 0; jj < nelemAbnd; jj++){
+             if (mnameB[mname_ptr[iMol]] == cname[jj]){
+                specB_ptr[iMol] = jj; //Found it!
+                break;
+             }
+          } //jj loop in master cnames list
+       } //iMol loop in associated molecules
+
+//Now load arrays with molecular species AB and atomic species B data for method stagePops2()  
+       for (var iMol = 0; iMol < thisNumMols; iMol++){
+  //special fix for H^+_2:
+         if (mnameB[mname_ptr[iMol]] == "H2+"){
+            specBStage = 1;
+         } else {
+            specBStage = 0;
+         }
+          for (var iTau = 0; iTau < numDeps; iTau++){
+             //console.log("iMol " + iMol + " iTau " + iTau + " specB_ptr[iMol] " + specB_ptr[iMol]);
+//Note: Here's one place where ionization equilibrium iteratively couples to molecular equilibrium!
+             logNumBArr[iMol][iTau] = masterStagePops[specB_ptr[iMol]][specBStage][iTau];
+          }
+          dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
+          species = cname[specB_ptr[iMol]] + "I"; //neutral stage
+          log10UwBArr[iMol] = getPartFn(species); //base 10 log_10 U 
+          //logQwABArr[iMol] = defaultQwAB;
+          logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
+          //Compute the reduced mass, muAB, in g:
+          massA = getMass(cname[iElem]);
+          massB = getMass(cname[specB_ptr[iMol]]);
+          logMuABArr[iMol] = Math.log(massA) + Math.log(massB) - Math.log(massA + massB) + logAmu;
+       }
+   } //if thisNumMols > 0 condition
+       logNums = stagePops2(logNz[iElem], guessNe, chiIArr, log10UwAArr, 
+                     thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
+                     numDeps, temp)
+
+     for (var iStage = 0; iStage < numStages; iStage++){
+       //console.log("iStage " + iStage);
+          for (var iTau = 0; iTau < numDeps; iTau++){
+       //console.log(" " + iTau + " " + " logNz " + logE*logNz[iElem][iTau] + " " + logNums[iStage][iTau]);
+            masterStagePops[iElem][iStage][iTau] = logNums[iStage][iTau];
+ //save ion stage populations at tau = 1:
+       } //iTau loop
+       tauOneStagePops[iElem][iStage] = logNums[iStage][iTauOne];
+    } //iStage loop
+            //System.out.println("iElem " + iElem);
+            //if (iElem == 1){
+            //  for (int iTau = 0; iTau < numDeps; iTau++){
+            //   System.out.println("cname: " + cname[iElem] + " " + logE*list2LogNums[0][iTau] + " " + logE*list2LogNums[1][iTau]);
+            //  }
+            // }
+  } //iElem loop
+//
+
+
+//Get mass density from chemical composition:
+     rho = massDensity2(numDeps, nelemAbnd, logNz, cname,
+                                 nMols, masterMolPops, mname, mnameA, mnameB);
+    // for (var i = 0 ; i < numDeps; i++){
+    //   console.log("i " + i + " rho " + logE*rho[1][i]);
+    // }
+
+
+//Total number density of gas particles: nuclear species + free electrons:
+//AND
+ //Compute mean molecular weight, mmw ("mu"):
+    for (var i = 0; i < numDeps; i++){
+      Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
+    }
+    for (var i = 0; i < numDeps; i++){
+      //atomic & ionic sepies:
+      for (var j = 0; j < nelemAbnd; j++){
+         Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); 
+      }
+//      //molecular species:
+//      for (var j = 0; j < nMols; j++){
+//         Ng[i] =  Ng[i] + Math.exp(masterMolPops[j][i]); 
+//      }
+     logMmw = rho[1][i] - Math.log(Ng[i]);  // in g
+     mmw[i] = Math.exp(logMmw);
+     //console.log("i " + i + " Ng " + logE*Math.log(Ng[i]) + " rho " + logE*rho[1][i] + " mmw " + (mmw[i]/amu));
+    }
+
+
+      logKappa = kappas2(numDeps, newPe, zScale, temp, rho,
+                     numLams, lambdaScale, logAz[1],
+                     masterStagePops[0][0], masterStagePops[0][1],
+                     masterStagePops[1][0], masterStagePops[1][1], newNe, teff, logTotalFudge);
+
+      kappaRos = kapRos(numDeps, numLams, lambdaScale, logKappa, temp);
+
+//Extract the "kappa_500" monochroamtic continuum oapcity scale
+// - this means we'll try interpreting the prescribed tau grid (still called "tauRos")as the "tau500" scale 
+      var it500 = lamPoint(numLams, lambdaScale, 500.0e-7);
+      for (var i = 0; i < numDeps; i++){
+         kappa500[1][i] = logKappa[it500][i];
+         kappa500[0][i] = Math.exp(kappa500[1][i]);
+      } 
+
+        //press = Hydrostat.hydrostatic(numDeps, grav, tauRos, kappaRos, temp);
+        //pGas = hydroFormalSoln(numDeps, grav, tauRos, kappaRos, temp, guessPGas);
+        pGas = hydroFormalSoln(numDeps, grav, tauRos, kappa500, temp, guessPGas);
+        pRad = radPress(numDeps, temp);
+
+
+//Update Pgas and Pe guesses for iteration:
+        for (var iTau = 0; iTau < numDeps; iTau++){
+// Now we can update guessPGas:
+            guessPGas[0][iTau] = pGas[0][iTau];
+            guessPGas[1][iTau] = pGas[1][iTau];
+            //console.log("iTau " + iTau + " pGas[0][iTau] " + logE*pGas[1][iTau] + " newPe[0][iTau] " + logE*newPe[1][iTau]);
+        }
+
+ }  //end Pgas-kappa iteration
+
+    //console.log("teff " + teff + " temp[0][36] " + temp[0][36] + 
+     //    " masterStagePops[0][0][36]/NH " + logE*(masterStagePops[0][0][36]-logNH[36]) +
+      //   " masterStagePops[0][1][36]/NH " + logE*(masterStagePops[0][1][36]-logNH[36]) +
+      //   " masterStagePops[0][2][36]/NH " + logE*(masterStagePops[0][2][36]-logNH[36]) +
+      //   " masterStagePops[0][3][36]/NH " + logE*(masterStagePops[0][3][36]-logNH[36]));
+
+        // Then construct geometric depth scale from tau, kappa and rho
+        //var depths = depthScale(numDeps, tauRos, kappaRos, rho);
+        var depths = depthScale(numDeps, tauRos, kappa500, rho);
+        //for (var i = 0; i < numDeps; i++) {
+        //    console.log("depths[i] " + (1.0e-5 * depths[i]));
+        //}
+// console.log("logNH " + " rho[1] " + " newNe[1] " + " newPe[1] " + " kappaRos[1] " + " pGas[1] " + " depth" );
+// for (var i = 0; i < numDeps; i++){
+//    console.log(" " + logE*logNH[i] + " " + logE*rho[1][i] + " " + logE*newNe[1][i] + " " + logE*newPe[1][i] + 
+//     " " + logE*kappaRos[1][i] + " " + logE*pGas[1][i] + " " + (depths[i]/1.0e5));
+// }
+        var numTCorr = 0; //test
+
+        // updated temperature structure
+        var newTemp = [];
+        newTemp.length = 2;
+        newTemp[0] = [];
+        newTemp[1] = [];
+        newTemp[0].length = numDeps;
+        newTemp[1].length = numDeps;
+        if (ifTcorr === true) {
+//console.log(" " + logE * tauRos[1][iTau] + " " + temp[0][iTau]);
+            for (var i = 0; i < numTCorr; i++) {
+//newTemp = TCorr.tCorr(numDeps, tauRos, temp);
+                //newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappaRos);
+                newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappa500);
+                for (var iTau = 0; iTau < numDeps; iTau++) {
+//console.log(" " + logE*tauRos[1][iTau] + " " + temp[0][iTau]);
+                    temp[1][iTau] = newTemp[1][iTau];
+                    temp[0][iTau] = newTemp[0][iTau];
+                    //console.log(" " + logE*tauRos[1][iTau] + " " + temp[0][iTau]);
+                }
+            }
+        }
+
+/*
+        if (ifConvec === true) {
+//Convection:
+// Teff below which stars are convective.  
+//  - has to be finessed because Convec.convec() does not work well :-(
+            var convTeff = 6500.0;
+            var convTemp = [];
+            convTemp.length = 2;
+            convTemp[0] = [];
+            convTemp[1] = [];
+            convTemp[0].length = numDeps;
+            convTemp[1].length = numDeps;
+            if (teff < convTeff) {
+                convTemp = convec(numDeps, tauRos, temp, pGas, rho, kappaRos, kappaSun, zScale, teff, logg);
+                for (var iTau = 0; iTau < numDeps; iTau++) {
+                    temp[1][iTau] = convTemp[1][iTau];
+                    temp[0][iTau] = convTemp[0][iTau];
+                }
+
+            }
+        }
+*/
+ifTcorr = false;
+ifConvec = false;
+        if ((ifTcorr === true) || (ifConvec === true)) {
+//Recall hydrostat with updates temps            
+//Recall state withupdated Press                    
+//recall kappas withupdates rhos
+//Recall depths with re-updated kappas
+        }
+
+
+//
+// Now that the atmospheric structure is settled:
+// Separately converge the Ne-ionization-fractions-molecular equilibrium for
+// all elements and populate the ionization stages of all the species for spectrum synthesis:
+
+//stuff to save ion stage pops at tau=1:
+  var iTauOne = tauPoint(numDeps, tauRos, unity);
+//
+//  Default inializations:
+       zScaleList = 1.0; //initialization
+
+var amu = 1.66053892E-24; // atomic mass unit in g
+var logAmu = Math.log(amu);
 
 //Default initialization:
        for (var i = 0; i < numAssocMols; i++){ 
@@ -2550,7 +2925,7 @@ var logAmu = Math.log(amu);
 // Iteration *within* the outer Pe-Pgas iteration:
 //Iterate the electron densities and ionization fractions:
 //
- for (var neIter = 0; neIter < 1; neIter++){
+ for (var neIter2 = 0; neIter2 < 3; neIter2++){
 
    //console.log(" iTau " + " logNums[iStage][iTau]");
    //console.log(" species " + " thisChiI " + " thisUwV");
@@ -2845,140 +3220,10 @@ var logK = Math.log(k);
 // Update guess for iteration:
         guessNe[0][iTau] = newNe[0][iTau];
         guessNe[1][iTau] = newNe[1][iTau];
-        newPe[1][iTau] = newNe[1][iTau] + logK + temp[1][iTau];
-        newPe[0][iTau] = Math.exp(newPe[1][iTau]);
        //console.log("iTau " + iTau + " newNe " + logE*newNe[1][iTau] + " newPe " + logE*newPe[1][iTau]);
      }
 
-  } //end Ne - ionzation fraction iteration
-
-//Total number density of gas particles: nuclear species + free electrons:
-//AND
- //Compute mean molecular weight, mmw ("mu"):
-    for (var i = 0; i < numDeps; i++){
-      Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
-    }
-    for (var i = 0; i < numDeps; i++){
-      //atomic & ionic sepies:
-      for (var j = 0; j < nelemAbnd; j++){
-         Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); 
-      }
-//      //molecular species:
-//      for (var j = 0; j < nMols; j++){
-//         Ng[i] =  Ng[i] + Math.exp(masterMolPops[j][i]); 
-//      }
-     logMmw = rho[1][i] - Math.log(Ng[i]);  // in g
-     mmw[i] = Math.exp(logMmw);
-     //console.log("i " + i + " Ng " + logE*Math.log(Ng[i]) + " rho " + logE*rho[1][i] + " mmw " + (mmw[i]/amu));
-    }
-
-
-      logKappa = kappas2(numDeps, newPe, zScale, temp, rho,
-                     numLams, lambdaScale, logAz[1],
-                     masterStagePops[0][0], masterStagePops[0][1],
-                     masterStagePops[1][0], masterStagePops[1][1], newNe, teff, logTotalFudge);
-
-      kappaRos = kapRos(numDeps, numLams, lambdaScale, logKappa, temp);
-
-//Extract the "kappa_500" monochroamtic continuum oapcity scale
-// - this means we'll try interpreting the prescribed tau grid (still called "tauRos")as the "tau500" scale 
-      var it500 = lamPoint(numLams, lambdaScale, 500.0e-7);
-      for (var i = 0; i < numDeps; i++){
-         kappa500[1][i] = logKappa[it500][i];
-         kappa500[0][i] = Math.exp(kappa500[1][i]);
-      } 
-
-        //press = Hydrostat.hydrostatic(numDeps, grav, tauRos, kappaRos, temp);
-        //pGas = hydroFormalSoln(numDeps, grav, tauRos, kappaRos, temp, guessPGas);
-        pGas = hydroFormalSoln(numDeps, grav, tauRos, kappa500, temp, guessPGas);
-        pRad = radPress(numDeps, temp);
-
-
-//Update Pgas and Pe guesses for iteration:
-        for (var iTau = 0; iTau < numDeps; iTau++){
-//CHEAT to accelrate self-consistency: Scale the new Pe's by pGas/guessPGas
-//  - also helps avoid negative Nz and NH values.
-            guessPe[1][iTau] = newPe[1][iTau] + pGas[1][iTau] - guessPGas[1][iTau]; //logarithmic
-            guessPe[0][iTau] = Math.exp(guessPe[1][iTau]);
-// Now we can update guessPGas:
-            guessPGas[0][iTau] = pGas[0][iTau];
-            guessPGas[1][iTau] = pGas[1][iTau];
-            //console.log("iTau " + iTau + " pGas[0][iTau] " + logE*pGas[1][iTau] + " newPe[0][iTau] " + logE*newPe[1][iTau]);
-        }
-
- } //end Pgas/Pe iteration
-
-    //console.log("teff " + teff + " temp[0][36] " + temp[0][36] + 
-     //    " masterStagePops[0][0][36]/NH " + logE*(masterStagePops[0][0][36]-logNH[36]) +
-      //   " masterStagePops[0][1][36]/NH " + logE*(masterStagePops[0][1][36]-logNH[36]) +
-      //   " masterStagePops[0][2][36]/NH " + logE*(masterStagePops[0][2][36]-logNH[36]) +
-      //   " masterStagePops[0][3][36]/NH " + logE*(masterStagePops[0][3][36]-logNH[36]));
-
-        // Then construct geometric depth scale from tau, kappa and rho
-        //var depths = depthScale(numDeps, tauRos, kappaRos, rho);
-        var depths = depthScale(numDeps, tauRos, kappa500, rho);
-        //for (var i = 0; i < numDeps; i++) {
-        //    console.log("depths[i] " + (1.0e-5 * depths[i]));
-        //}
-// console.log("logNH " + " rho[1] " + " newNe[1] " + " newPe[1] " + " kappaRos[1] " + " pGas[1] " + " depth" );
-// for (var i = 0; i < numDeps; i++){
-//    console.log(" " + logE*logNH[i] + " " + logE*rho[1][i] + " " + logE*newNe[1][i] + " " + logE*newPe[1][i] + 
-//     " " + logE*kappaRos[1][i] + " " + logE*pGas[1][i] + " " + (depths[i]/1.0e5));
-// }
-        var numTCorr = 0; //test
-
-        // updated temperature structure
-        var newTemp = [];
-        newTemp.length = 2;
-        newTemp[0] = [];
-        newTemp[1] = [];
-        newTemp[0].length = numDeps;
-        newTemp[1].length = numDeps;
-        if (ifTcorr === true) {
-//console.log(" " + logE * tauRos[1][iTau] + " " + temp[0][iTau]);
-            for (var i = 0; i < numTCorr; i++) {
-//newTemp = TCorr.tCorr(numDeps, tauRos, temp);
-                //newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappaRos);
-                newTemp = mgTCorr(numDeps, teff, tauRos, temp, rho, kappa500);
-                for (var iTau = 0; iTau < numDeps; iTau++) {
-//console.log(" " + logE*tauRos[1][iTau] + " " + temp[0][iTau]);
-                    temp[1][iTau] = newTemp[1][iTau];
-                    temp[0][iTau] = newTemp[0][iTau];
-                    //console.log(" " + logE*tauRos[1][iTau] + " " + temp[0][iTau]);
-                }
-            }
-        }
-
-/*
-        if (ifConvec === true) {
-//Convection:
-// Teff below which stars are convective.  
-//  - has to be finessed because Convec.convec() does not work well :-(
-            var convTeff = 6500.0;
-            var convTemp = [];
-            convTemp.length = 2;
-            convTemp[0] = [];
-            convTemp[1] = [];
-            convTemp[0].length = numDeps;
-            convTemp[1].length = numDeps;
-            if (teff < convTeff) {
-                convTemp = convec(numDeps, tauRos, temp, pGas, rho, kappaRos, kappaSun, zScale, teff, logg);
-                for (var iTau = 0; iTau < numDeps; iTau++) {
-                    temp[1][iTau] = convTemp[1][iTau];
-                    temp[0][iTau] = convTemp[0][iTau];
-                }
-
-            }
-        }
-*/
-ifTcorr = false;
-ifConvec = false;
-        if ((ifTcorr === true) || (ifConvec === true)) {
-//Recall hydrostat with updates temps            
-//Recall state withupdated Press                    
-//recall kappas withupdates rhos
-//Recall depths with re-updated kappas
-        }
+  } //end Ne - ionzation fraction iteration -molecular equilibrium iteration neIter2
 
     } // end stellar struture ifLineOnly
 
@@ -5591,6 +5836,22 @@ Spectral line \n\
     var xFinesse = 0.0; //default initialization
     var yFinesse = 0.0; //default initialization
 
+// PLOT GRID PLAN as of 20 Jul 2016:
+//    Cell entries:  Plot number Plot contents 
+//
+//  Col           0                 |  1                |  2
+//
+//  Row: 0        7 Whte Lght Img   |  10 Spctrm Img    |  11 Life Zn
+//
+//       1       12 Gauss Filt      |   4 Limb darkng   |   9 HRD          
+//
+//       2        6 Spctrl line     |  17 Four trnsfrm  |   2 T_kin(tau)
+//
+//       3        8 Grtrn diag      |   5 SED           |   3 P(tau)
+//
+//       4       16 Ioniz Eq        |  15 kap(lambda)   |  14 kap(tau) 
+//      
+//
     //
 //
 //  *****   PLOT SEVEN / PLOT 7
@@ -7015,11 +7276,14 @@ Spectral line \n\
     //
     //
     // Plot four: Limb darkening
- 
+//ifShowRad = false; //For movie 
    if ((ifLineOnly === false) && (ifShowRad === true)) {
 
         var plotRow = 1;
         var plotCol = 1;
+        // For movie:
+        //var plotRow = 3;
+        //var plotCol = 1;
 //
         var minXData = 180.0 * Math.acos(cosTheta[1][0]) / Math.PI;
         var maxXData = 180.0 * Math.acos(cosTheta[1][numThetas - 1]) / Math.PI;
@@ -7129,6 +7393,7 @@ Spectral line \n\
             lastYShiftCnvs = yShiftCnvs;
         }
     }
+//ifShowRad = true; //For movie 
 
 //
 //
@@ -7138,10 +7403,15 @@ Spectral line \n\
 
 // Plot five: SED
 // 
-    if ((ifLineOnly === false) && (ifShowRad === true)) {
+    if ((ifLineOnly === false) && (ifShowRad === true)) { 
+//    //For movie:
+//    if (ifLineOnly === false) { 
 
         var plotRow = 3;
         var plotCol = 1;
+        ////For movie:
+        //var plotRow = 1;
+        //var plotCol = 1;
 //
         var minXData = 1.0e7 * masterLams[0];
         var maxXData = 1.0e7 * masterLams[numMaster - 1];
@@ -7392,7 +7662,7 @@ Spectral line \n\
                         yFinesse, RGBHex, plotFiveId, cnvsFiveCtx);
         txtPrint("<span style='font-size:xx-small'>Filter</span>",
                 xShiftDum, titleOffsetY+60, lineColor, plotFiveId);
-    }
+    } 
 
 //
 //
@@ -8442,6 +8712,7 @@ Spectral line \n\
     //
     // Plot seventeen:  Fourier (cosine) transform of Intensity profile across disk (I(theta/(pi/2)))
  
+//ifShowRad = false; //For movie 
    if ((ifLineOnly === false) && (ifShowRad === true)) {
 
         var plotRow = 2;
@@ -8582,6 +8853,7 @@ Spectral line \n\
            // lastYShift2Cnvs = yShift2Cnvs;
         }
     }
+//ifShowRad = true; //For movie 
 
 
 // Detailed model output section:
