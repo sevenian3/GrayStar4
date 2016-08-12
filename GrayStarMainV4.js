@@ -980,9 +980,9 @@ function main() {
         var lam0 = 588.995;
         settingsId[6].value = 588.995;
         $("#lambda_0").val(588.995);
-        var A12 = 6.3; // Grevesse & Sauval 98
-        settingsId[7].value = 6.3;
-        $("#A12").val(6.3);
+        var A12 = eheu[10]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[10];
+        $("#A12").val(eheu[10]);
         var logF = -0.193;
         settingsId[8].value = -0.193;
         $("#logf").val(-0.193);
@@ -1006,9 +1006,9 @@ function main() {
         var lam0 = 518.360;
         settingsId[6].value = 518.360;
         $("#lambda_0").val(518.360);
-        var A12 = 7.6; // Grevesse & Sauval 98
-        settingsId[7].value = 7.6;
-        $("#A12").val(7.6);
+        var A12 = eheu[11]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[11];
+        $("#A12").val(eheu[11]);
         var logF = -0.867;
         settingsId[8].value = -0.867;
         $("#logf").val(-0.867);
@@ -1032,9 +1032,9 @@ function main() {
         var lam0 = 393.366;
         settingsId[6].value = 393.366;
         $("#lambda_0").val(393.366);
-        var A12 = 6.34; // Grevesse & Sauval 98
-        settingsId[7].value = 6.34;
-        $("#A12").val(6.34);
+        var A12 = eheu[19]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[19];
+        $("#A12").val(eheu[19]);
         var logF = -0.166;
         settingsId[8].value = -0.166;
         $("#logf").val(-0.166);
@@ -1059,9 +1059,9 @@ function main() {
         var lam0 = 396.847;
         settingsId[6].value = 396.847;
         $("#lambda_0").val(396.847);
-        var A12 = 6.34; // Grevesse & Sauval 98
-        settingsId[7].value = 6.34;
-        $("#A12").val(6.34);
+        var A12 = eheu[19]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[19];
+        $("#A12").val(eheu[19]);
         var logF = -0.482;
         settingsId[8].value = -0.482;
         $("#logf").val(-0.482);
@@ -1086,9 +1086,9 @@ function main() {
         var lam0 = 422.673;
         settingsId[6].value = 422.673;
         $("#lambda_0").val(422.673);
-        var A12 = 6.34; // Grevesse & Sauval 98
-        settingsId[7].value = 6.34;
-        $("#A12").val(6.34);
+        var A12 = eheu[19]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[19];
+        $("#A12").val(eheu[19]);
         var logF = 0.243;
         settingsId[8].value = 0.243;
         $("#logf").val(0.243);
@@ -1112,9 +1112,9 @@ function main() {
         var lam0 = 404.581;
         settingsId[6].value = 404.581;
         $("#lambda_0").val(404.581);
-        var A12 = 7.50; // Grevesse & Sauval 98
-        settingsId[7].value = 7.50;
-        $("#A12").val(7.50);
+        var A12 = eheu[25]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[25];
+        $("#A12").val(eheu[25]);
         var logF = -0.674;
         settingsId[8].value = -0.674;
         $("#logf").val(-0.674);
@@ -1138,9 +1138,9 @@ function main() {
         var lam0 = 427.176;
         settingsId[6].value = 427.176;
         $("#lambda_0").val(427.176);
-        var A12 = 7.50; // Grevesse & Sauval 98
-        settingsId[7].value = 7.50;
-        $("#A12").val(7.50);
+        var A12 = eheu[25]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[25];
+        $("#A12").val(eheu[25]);
         var logF = -1.118;
         settingsId[8].value = -1.118;
         $("#logf").val(-1.118);
@@ -1164,9 +1164,9 @@ function main() {
         var lam0 = 438.793;
         settingsId[6].value = 438.793;
         $("#lambda_0").val(438.793);
-        var A12 = 10.93; // Grevesse & Sauval 98
-        settingsId[7].value = 10.93;
-        $("#A12").val(10.93);
+        var A12 = eheu[1]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[1];
+        $("#A12").val(eheu[1]);
         var logF = -1.364;
         settingsId[8].value = -1.364;
         $("#logf").val(-1.364);
@@ -1190,9 +1190,9 @@ function main() {
         var lam0 = 447.147;
         settingsId[6].value = 447.147;
         $("#lambda_0").val(447.147);
-        var A12 = 10.93; // Grevesse & Sauval 98
-        settingsId[7].value = 10.93;
-        $("#A12").val(10.93);
+        var A12 = eheu[1]; // Grevesse & Sauval 98
+        settingsId[7].value = eheu[1];
+        $("#A12").val(eheu[1]);
         var logF = -0.986;
         settingsId[8].value = -0.986;
         $("#logf").val(-0.986);
@@ -3606,7 +3606,8 @@ var logK = Math.log(k);
      listLamLbl[14] = " ";
      listLam0[14] = 588.995;
      listA12[14] = eheu[10]; // Grevesse & Sauval 98
-     listLogf[14] = -0.193;
+     //listLogf[14] = -0.193;
+     listLogf[14] = logE*Math.log(0.641);
      listLogAij[14] = Math.log(6.16e+07);
      listChiL[14] = 0.0;
      listMass[14] = getMass(listElement[14]);
@@ -3623,7 +3624,8 @@ var logK = Math.log(k);
      listLamLbl[15] = " ";
      listLam0[15] = 589.592; //nm
      listA12[15] = eheu[10]; // Grevesse & Sauval 98    
-     listLogf[15] = -0.495;
+     //listLogf[15] = -0.495;
+     listLogf[15] = logE*Math.log(0.320);
      listLogAij[15] = Math.log(6.14e+07);
      listChiL[15] = 0.0;
      listMass[15] = getMass(listElement[15]);
@@ -4170,6 +4172,7 @@ var logK = Math.log(k);
 
         for (var iLine = 0; iLine < numLines; iLine++) {
         //for (var iLine = 0; iLine < 1; iLine++) {
+        //console.log("iLine " + iLine);
 
             //if H or He, make sure zScale is unity:
             if ((listElement[iLine] === "H") ||
@@ -4212,6 +4215,7 @@ var logK = Math.log(k);
                  }
              iAbnd++;
           } //jj loop
+          console.log("listElement " + listElement[iLine] + " iAbnd " + iAbnd + " cname " + cname[iAbnd] + " logNums_ptr " + logNums_ptr);
           //console.log("thisUwV[0] " + thisUwV[0] + " thisUwV[1] " + thisUwV[1]);
           //console.log("listChiL " + listChiL[iLine] + " listGwL " + listGwL[iLine]);
            var listLogNums = [];
@@ -4229,6 +4233,7 @@ var logK = Math.log(k);
   //             console.log("iLine " + iLine + " iTau " + iTau + " listLogNums[] " + logE*listLogNums[0][iTau] + 
    //       " " + logE*listLogNums[1][iTau] + " " + logE*listLogNums[4][iTau] + " " + logE*listLogNums[5][iTau]);
             }
+           //console.log("masterStagePops [0]" + logE*masterStagePops[iAbnd][0][35] + " [1] " + logE*masterStagePops[iAbnd][1][35] + " listLogNums " + logE*listLogNums[0][35]); 
 
 //System.out.println("iLine " + iLine + " numNow " + numNow);
             //var listLogN = (listA12[iLine] - 12.0) + logNH;
@@ -4241,10 +4246,11 @@ var logK = Math.log(k);
            for (var iTau = 0; iTau < numDeps; iTau++){
                listLogNums[2][iTau] = numHelp[iTau];
                listLogNums[3][iTau] = -49.0; //upper E-level - not used - fake for testing with gS3 line treatment
-               if (species == "HI" && iTau == 36){
+               //if (species == "HI" && iTau == 36){
                  //console.log("iLine " + iLine + " listChiL " + listChiL[iLine] + " listLogNums[2]/NH " + logE*(listLogNums[2][iTau]-logNH[36]));  
-               }
+               //}
             }
+            //console.log("listLogNums[2] " + logE*listLogNums[2][35]);
             //console.log("listElement[i] " + listElement[iLine] + " listLam0[i] " + listLam0[iLine]);
             var listLinePoints = lineGrid(listLam0nm, listMass[iLine], xiT, numDeps, teff, listNumCore, listNumWing,
                     logGammaCol, tauRos, temp, pGas, tempSun, pGasSun);

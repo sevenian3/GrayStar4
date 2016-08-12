@@ -1260,9 +1260,10 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
             // This is a *volume* co-efficient ("alpha_lambda") in cm^-1:
             logKappaL[il][id] = logPreFac + logStimEm + logNum + Math.log(lineProf[il][id]);
 
-            //if (id == 36) {
-            //    console.log("il " + il + " logNum " + logE*logNum + " Math.log(lineProf[il][id]) " + logE*Math.log(lineProf[il][id]));
-            //    ////    console.log("logPreFac " + logPreFac + " logStimEm " + logStimEm);
+            //if (id == 35) {
+            //    console.log("il " + il + " logNum " + logE*logNum + " Math.log(lineProf[il][id]) " + logE*Math.log(lineProf[il][id])
+            //         + " logKappaL[il][id] " + logE*logKappaL[il][id]);
+                ////    console.log("logPreFac " + logPreFac + " logStimEm " + logStimEm);
             //}
 
             //console.log("LineKap: il, id: " + il + " " + id + " logPreFac " + logE*logPreFac + " logStimEm " + logE*logStimEm + 
@@ -1276,7 +1277,7 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
 //// **********************
 ////  Opacity problem #2
 ////
-////Line opacity needs to be multipied by ~e^4.0 = 55 for Fraunhofer lines in Sun to have even
+////Line opacity needs to be multipied by fudge factor ~e^4.0 = 55 for Fraunhofer lines in Sun to have even
 ////approximately the right strength - actually W_lambda is *still* to small!
 ////  - related to Opacity problem #1 (logFudgeTune in GrayStarServer3.java) - ??
 ////
