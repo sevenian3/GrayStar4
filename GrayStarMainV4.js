@@ -168,7 +168,7 @@ function main() {
     //var zScale = 1.0 * $("#zScale").val(); // linear factor
     //var zScale = 1.0 * $("#zScale").roundSlider("getValue");
     var zScaleObj = $("#zScale").data("roundSlider");
-    var logZScale = 1.0 * zScaleObj.getValue();
+    var log10ZScale = 1.0 * zScaleObj.getValue();
     //var massStar = 1.0 * $("#starMass").val(); // solar masses
     //var massStar = 1.0 * $("#starMass").roundSlider("getValue");
     var massStarObj = $("#starMass").data("roundSlider");
@@ -215,7 +215,7 @@ function main() {
 //    
     settingsId[0] = new setId("<em>T</em><sub>eff</sub>", teff);
     settingsId[1] = new setId("log <em>g</em>", logg);
-    settingsId[2] = new setId("<em>&#954</em>", logZScale);
+    settingsId[2] = new setId("<em>&#954</em>", log10ZScale);
     settingsId[3] = new setId("<em>M</em>", massStar);
     settingsId[4] = new setId("<span style='color:green'>GHEff</span>", greenHouse);
     settingsId[5] = new setId("<span style='color:green'><em>A</em></span>", albedo);
@@ -426,7 +426,7 @@ function main() {
         settingsId[1].value = 4.4;
         //$("#logg").val(4.4);
         $("#logg").roundSlider("setValue", "4.4");
-        var logZScale = 0.0;
+        var log10ZScale = 0.0;
         settingsId[2].value = 0.0;
         //$("#zScale").val(0.0);
         $("#zScale").roundSlider("setValue", "0.0");
@@ -448,7 +448,7 @@ function main() {
         settingsId[1].value = 2.0;
         //$("#logg").val(2.0);
         $("#logg").roundSlider("setValue", "2.0");
-        var logZScale = -0.5;
+        var log10ZScale = -0.5;
         settingsId[2].value = -0.5;
         //$("#zScale").val(-0.5);
         $("#zScale").roundSlider("setValue", "-0.5");
@@ -470,7 +470,7 @@ function main() {
         settingsId[1].value = 3.95;
         //$("#logg").val(3.95);
         $("#logg").roundSlider("setValue", "3.95");
-        var logZScale = -0.5;
+        var log10ZScale = -0.5;
         settingsId[2].value = -0.5;
         //$("#zScale").val(-0.5);
         $("#zScale").roundSlider("setValue", "-0.5");
@@ -492,7 +492,7 @@ function main() {
         settingsId[1].value = 3.5;
         //$("#logg").val(3.54);
         $("#logg").roundSlider("setValue", "3.5");
-        var logZScale = 0.0;
+        var log10ZScale = 0.0;
         settingsId[2].value = 0.0;
         //$("#zScale").val(0.0);
         $("#zScale").roundSlider("setValue", "0.0");
@@ -514,7 +514,7 @@ function main() {
         settingsId[1].value = 4.0;
         //$("#logg").val(4.0);
         $("#logg").roundSlider("setValue", "4.0");
-        var logZScale = 0.0;
+        var log10ZScale = 0.0;
         settingsId[2].value = 0.0;
         //$("#zScale").val(0.0);
         $("#zScale").roundSlider("setValue", "0.0");
@@ -536,7 +536,7 @@ function main() {
         settingsId[1].value = 4.2;
         //$("#logg").val(4.2);
         $("#logg").roundSlider("setValue", "4.2");
-        var logZScale = 0.0;
+        var log10ZScale = 0.0;
         settingsId[2].value = 0.0;
         //$("#zScale").val(0.0);
         $("#zScale").roundSlider("setValue", "0.0");
@@ -558,7 +558,7 @@ function main() {
         settingsId[1].value = 4.3;
         //$("#logg").val(4.33);
         $("#logg").roundSlider("setValue", "4.3");
-        var logZScale = 0.0;
+        var log10ZScale = 0.0;
         settingsId[2].value = 0.0;
         //$("#zScale").val(0.0);
         $("#zScale").roundSlider("setValue", "0.0");
@@ -915,9 +915,14 @@ function main() {
   var logE = logTen(Math.E); // for debug output
   var logE10 = Math.log(10.0);
   var ATot = 0.0;
-  var thisAz;
+  var thisAz, eheuScale;
   for (var i = 0; i < nelemAbnd; i++){
-     logAz[i] = logE10 * (eheu[i] - 12.0); //natural log
+     eheuScale = eheu[i]; //default intialization // still base 10
+     if (i > 1){  //if not H or He
+        eheuScale = eheu[i] + log10ZScale;  //stil base 10
+     }
+     //logAz[i] = logE10 * (eheu[i] - 12.0); //natural log
+     logAz[i] = logE10 * (eheuScale - 12.0); //natural log
      thisAz = Math.exp(logAz[i]);
      ATot = ATot + thisAz;
      //System.out.println("i " + i + " logAz " + logE*logAz[i]);
@@ -1321,22 +1326,22 @@ function main() {
         //$("#logg").val(5.5);
         $("#logg").roundSlider("setValue", 7.0);
     }
-    if (logZScale === null || logZScale === "") {
-        alert("logZScale must be filled out");
+    if (log10ZScale === null || log10ZScale === "") {
+        alert("log10ZScale must be filled out");
         return;
     }
     flagArr[2] = false;
-    if (logZScale < -3.0) {
+    if (log10ZScale < -3.0) {
         flagArr[2] = true;
-        logZScale = -3.0;
+        log10ZScale = -3.0;
         var logZStr = "-3.0";
         settingsId[2].value = -3.0;
         //$("#zScale").val(-2.0);
         $("#zScale").roundSlider("setValue", -3.0);
     }
-    if (logZScale > 1.0) {
+    if (log10ZScale > 1.0) {
         flagArr[2] = true;
-        logZScale = 1.0;
+        log10ZScale = 1.0;
         var zStr = "1.0";
         settingsId[2].value = 1.0;
         //$("#zScale").val(0.5);
@@ -1365,8 +1370,8 @@ function main() {
     }
 
     var grav = Math.pow(10.0, logg);
-    var zScale = Math.pow(10.0, logZScale);
-    //console.log("logZScale " + logZScale + " zScale " + zScale);
+    var zScale = Math.pow(10.0, log10ZScale);
+    //console.log("log10ZScale " + log10ZScale + " zScale " + zScale);
     //
 
     // Planetary parameters for habitable zone calculation:
@@ -1993,8 +1998,8 @@ function main() {
     var teffSun = 5778.0;
     var loggSun = 4.44;
     var gravSun = Math.pow(10.0, loggSun);
-    var logZScaleSun = 0.0;
-    var zScaleSun = Math.exp(logZScaleSun);
+    var log10ZScaleSun = 0.0;
+    var zScaleSun = Math.exp(log10ZScaleSun);
     //Solar units:
     var massSun = 1.0;
     var radiusSun = 1.0;
@@ -4215,7 +4220,7 @@ var logK = Math.log(k);
                  }
              iAbnd++;
           } //jj loop
-          console.log("listElement " + listElement[iLine] + " iAbnd " + iAbnd + " cname " + cname[iAbnd] + " logNums_ptr " + logNums_ptr);
+          //console.log("listElement " + listElement[iLine] + " iAbnd " + iAbnd + " cname " + cname[iAbnd] + " logNums_ptr " + logNums_ptr);
           //console.log("thisUwV[0] " + thisUwV[0] + " thisUwV[1] " + thisUwV[1]);
           //console.log("listChiL " + listChiL[iLine] + " listGwL " + listGwL[iLine]);
            var listLogNums = [];
