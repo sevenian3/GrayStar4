@@ -656,16 +656,18 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
             logVoigt = Math.log(hjertFn) - lnSqRtPi - logDopp;
             logStark = logStark - logF0;
             if (vAbs > 2.0){
-               //console.log("il " + il + " v[il] " + v[il] + " logVoigt " + logE*logVoigt + " logStark " + logE*logStark);
+            //if (id === 24) {
+            //   console.log("il " + il + " v[il] " + v[il] + " logVoigt " + logE*logVoigt + " logStark " + logE*logStark);
+            //}
                voigt = Math.exp(logVoigt) + Math.exp(logStark);
                logVoigt = Math.log(voigt);
             }
             logVoigt = logVoigt + 2.0 * logLam0 - logC;
             lineProf[il][id] = Math.exp(logVoigt);
-           // if (id === 20) {
-           //     console.log("lam0In " + lam0In);
-           //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
-           // }
+            //if (id === 24) {
+            //    console.log("lam0In " + lam0In);
+            //    console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
+            //}
         } // il lambda loop
 
     } //id loop

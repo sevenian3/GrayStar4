@@ -3376,9 +3376,12 @@ var logEv = Math.log(eV);
 //Carefull here - P at upper boundary can be an underestimate, but it must not be greater than value at next depth in!
 //  press[1][0] = logPTot[0];
 //  press[1][0] = guessPGas[1][0];
-   press[1][0] = Math.log(1.0e-4); //try same upper boundary as Phoenix
+//   press[1][0] = Math.log(1.0e-4); //try same upper boundary as Phoenix
 //
-   press[0][0] = Math.exp(press[1][0]);
+//   press[0][0] = Math.exp(press[1][0]);
+     press[0][0] = 0.1 * guessPGas[0][0];
+     press[1][0] = Math.log(press[0][0]);
+
 //Corresponding value of basic integrated quantity at top of atmosphere:
   logSum = 1.5 * press[1][0] + Math.log(0.666667) - logEg;
   sum[0] = Math.exp(logSum); 

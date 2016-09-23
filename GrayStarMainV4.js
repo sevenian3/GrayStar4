@@ -215,7 +215,7 @@ function main() {
 //    
     settingsId[0] = new setId("<em>T</em><sub>eff</sub>", teff);
     settingsId[1] = new setId("log <em>g</em>", logg);
-    settingsId[2] = new setId("<em>&#954</em>", log10ZScale);
+    settingsId[2] = new setId("[M/H]", log10ZScale);
     settingsId[3] = new setId("<em>M</em>", massStar);
     settingsId[4] = new setId("<span style='color:green'>GHEff</span>", greenHouse);
     settingsId[5] = new setId("<span style='color:green'><em>A</em></span>", albedo);
@@ -2564,6 +2564,7 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
 
     for (var iD = 0; iD < numDeps; iD++){
        newNe[1][iD] = newPe[1][iD] - temp[1][iD] - logK;
+       newNe[0][iD] = Math.exp(newNe[1][iD]);
     }
 
 //
@@ -2748,10 +2749,12 @@ var logAmu = Math.log(amu);
  //Compute mean molecular weight, mmw ("mu"):
     for (var i = 0; i < numDeps; i++){
       Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
+      //console.log("i " + i + " newNe[0][i] " + newNe[0][i] + " Ng[i] " + Ng[i]); 
     }
     for (var i = 0; i < numDeps; i++){
       //atomic & ionic sepies:
       for (var j = 0; j < nelemAbnd; j++){
+         //console.log("i " + i + " j " + j + " logNz[j][i] " + logNz[j][i]);
          Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); 
       }
 //      //molecular species:
@@ -5102,15 +5105,15 @@ Spectral line \n\
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins B-V photometric color index' target='_blank'>\n\
 <span style='color:blue'>B\n\
 </span>-" +
-            "<span style='color:#00FF88'>V</span></a>: " + roundNum1
+            "<span style='color:#00AA00'>V</span></a>: " + roundNum1
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins V-R photometric color index' target='_blank'>\n\
-<span style='color:#00FF88'>V\n\
+<span style='color:#00AA00'>V\n\
 </span>-" +
             "<span style='color:red'>R\n\
 </span>\n\
 </a>: " + roundNum2
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins V-I photometric color index' target='_blank'>\n\
-<span style='color:#00FF88'>V\n\
+<span style='color:#00AA00'>V\n\
 </span>-" +
             "<span style='color:red'>I\n\
 </span>\n\
