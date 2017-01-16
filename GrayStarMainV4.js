@@ -205,6 +205,14 @@ function main() {
     var diskLambda = 1.0 * $("#diskLam").val(); //nm
     var diskSigma = 1.0 * $("#diskSigma").val(); //nm
     var logKapFudge = 1.0 * $("#logKapFudge").val(); //log_10 cm^2/g mass extinction fudge
+    var macroV = 1.0 * $("#macroV").val(); // km/s
+    var rotV = 1.0 * $("#rotV").val(); // km/s
+    var rotI = 1.0 * $("#rotI").val(); // degrees
+//test    var rotV = 10.0;  //surface equatorial rotation velocity in km/s
+//test    var rotI = 90.0;  //angle of rotation axis wrt to line-of-sight in degrees
+//test    var macroV = 2.0;  //standard deviation of Gaussian macroturbulent velocity field in km/s 
+
+
 //// Temporary Defaults:
 //   var stage = 0;
 //   var chiI3 = 50.0;  //eV 
@@ -215,7 +223,7 @@ function main() {
 //    
     settingsId[0] = new setId("<em>T</em><sub>eff</sub>", teff);
     settingsId[1] = new setId("log <em>g</em>", logg);
-    settingsId[2] = new setId("[M/H]", log10ZScale);
+    settingsId[2] = new setId("<em>&#954</em>", log10ZScale);
     settingsId[3] = new setId("<em>M</em>", massStar);
     settingsId[4] = new setId("<span style='color:green'>GHEff</span>", greenHouse);
     settingsId[5] = new setId("<span style='color:green'><em>A</em></span>", albedo);
@@ -239,6 +247,9 @@ function main() {
     settingsId[23] = new setId("Disk<em>&#955</em><sub>0</sub>", diskLambda);
     settingsId[24] = new setId("&#963<sub>Filter</sub>", diskSigma);
     settingsId[25] = new setId("&#954<sub>Fudge</sub>", logKapFudge);
+    settingsId[26] = new setId("<em>v</em><sub>Macro</sub>", macroV);
+    settingsId[27] = new setId("<em>v</em><sub>Rot</sub>", rotV);
+    settingsId[28] = new setId("<em>i</em><sub>Rot</sub>", rotI);
     //
     var numPerfModes = 8;
     var switchPerf = "Fast"; //default initialization
@@ -1719,7 +1730,7 @@ function main() {
         settingsId[19].value = 100.0;
         $("#gw_L").val(100.0);
     }
-    if (xiT === null || xiT == "") {
+    if (xiT === null || xiT === "") {
         alert("xiT must be filled out");
         return;
     }
@@ -1795,6 +1806,74 @@ function main() {
         settingsId[25].value = 2.0;
         $("#logKapFudge").val(2.0);
     }
+
+
+    if (macroV === null || macroV === "") {
+        alert("macroV must be filled out");
+        return;
+    }
+    flagArr[26] = false;
+    if (macroV < 0.0) {
+        flagArr[26] = true;
+        macroV = 0.0;
+        var macroVStr = "0.0";
+        settingsId[26].value = 0.0;
+        $("#macroV").val(0.0);
+    }
+    if (macroV > 8.0) {
+        flagArr[26] = true;
+        macroV = 8.0;
+        var macroVStr = "8.0";
+        settingsId[26].value = 8.0;
+        $("#macroV").val(8.0);
+    }
+
+    if (rotV === null || rotV === "") {
+        alert("rotV must be filled out");
+        return;
+    }
+    flagArr[27] = false;
+    if (rotV < 0.0) {
+        flagArr[27] = true;
+        rotV = 0.0;
+        var rotVStr = "0.0";
+        settingsId[27].value = 0.0;
+        $("#rotV").val(0.0);
+    }
+    if (rotV > 20.0) {
+        flagArr[27] = true;
+        rotV = 20.0;
+        var rotVStr = "20.0";
+        settingsId[27].value = 20.0;
+        $("#rotV").val(20.0);
+    }
+
+    if (rotI === null || rotI === "") {
+        alert("rotI must be filled out");
+        return;
+    }
+    flagArr[28] = false;
+    if (rotI < 0.0) {
+        flagArr[28] = true;
+        rotI = 0.0;
+        var rotIStr = "0.0";
+        settingsId[28].value = 0.0;
+        $("#rotI").val(0.0);
+    }
+    if (rotI > 90.0) {
+        flagArr[28] = true;
+        rotI = 90.0;
+        var rotIStr = "90.0";
+        settingsId[28].value = 90.0;
+        $("#rotI").val(90.0);
+    }
+
+ //console.log("rotV " + rotV + " rotI " + rotI + " macroV " + macroV);
+
+//For rotation:
+  var inclntn = Math.PI * rotI / 180;  //degrees to radians
+  var vsini = rotV * Math.sin(inclntn);
+
 
 //
 //// ************************
@@ -1935,7 +2014,7 @@ function main() {
     // Begin compute code:
 
 
-    //Gray structure and Voigt line code code begins here:
+    //Atmospheric structure and Voigt line code code begins here:
     // Initial set-up:
 
     // optical depth grid
@@ -1947,6 +2026,7 @@ function main() {
     var numLams = 250;
     //var numLams = 100;
     var lamUV = 300.0;
+    //var lamUV = 100.0;
     var lamIR = 1000.0;
     var lamSetup = [lamUV * 1.0e-7, lamIR * 1.0e-7, numLams]; //Start, end wavelength (nm), number of lambdas
  
@@ -2000,6 +2080,7 @@ function main() {
     var gravSun = Math.pow(10.0, loggSun);
     var log10ZScaleSun = 0.0;
     var zScaleSun = Math.exp(log10ZScaleSun);
+
     //Solar units:
     var massSun = 1.0;
     var radiusSun = 1.0;
@@ -2008,6 +2089,13 @@ function main() {
     //var radius = Math.sqrt(massStar * gravSun / grav); // solar radii
     var logLum = 2.0 * Math.log(radius) + 4.0 * Math.log(teff / teffSun);
     var bolLum = Math.exp(logLum); // L_Bol in solar luminosities 
+
+    //cgs units:
+    var rSun = 6.955e10; // solar radii to cm
+    //console.log("radius " + radius + " rSun " + rSun + " cgsRadius " + cgsRadius);
+    var cgsRadius = radius * rSun;
+    var omegaSini = (1.0e5 * vsini) / cgsRadius; // projected rotation rate in 1/sec
+    var macroVkm = macroV * 1.0e5;  //km/s to cm/s
 
     //Composition by mass fraction - needed for opacity approximations
     //   and interior structure
@@ -2124,7 +2212,7 @@ function main() {
         var k = 1.3806488E-16; // Boltzmann constant in ergs/K
         var logK = Math.log(k);
         //console.log("teffSun " + teffSun);
-        //Gray solution
+        //// Gray solution - deprecated
         //tempSun = temperature(numDeps, teffSun, tauRos);
         //Rescaled  kinetic temeprature structure: 
         var tempSun = phxSunTemp(teffSun, numDeps, tauRos);
@@ -2176,6 +2264,25 @@ function main() {
        logKappa[i] = [];
        logKappa[i].length = numDeps;
     }
+    var logKappaHHe = [];
+    logKappaHHe.length = numLams;
+    for (var i = 0; i < numLams; i++){
+       logKappaHHe[i] = [];
+       logKappaHHe[i].length = numDeps;
+    }
+    var logKappaMetalBF = [];
+    logKappaMetalBF.length = numLams;
+    for (var i = 0; i < numLams; i++){
+       logKappaMetalBF[i] = [];
+       logKappaMetalBF[i].length = numDeps;
+    }
+    var logKappaRayl = [];
+    logKappaRayl.length = numLams;
+    for (var i = 0; i < numLams; i++){
+       logKappaRayl[i] = [];
+       logKappaRayl[i].length = numDeps;
+    }
+
     var pGas = [];
     var pRad = [];
     pGas.length = 2;
@@ -2242,7 +2349,7 @@ function main() {
 
         //console.log("normal mode - stellar structure, ifLineOnly: " + ifLineOnly);
 
-        ////Gray kinetic temeprature structure:
+        ////Gray kinetic temeprature structure: - deprecated
         //temp = temperature(numDeps, teff, tauRos);
         //Rescaled  kinetic temeprature structure: 
         //var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
@@ -2564,7 +2671,6 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
 
     for (var iD = 0; iD < numDeps; iD++){
        newNe[1][iD] = newPe[1][iD] - temp[1][iD] - logK;
-       newNe[0][iD] = Math.exp(newNe[1][iD]);
     }
 
 //
@@ -2633,7 +2739,10 @@ var logAmu = Math.log(amu);
 
    //console.log(" iTau " + " logNums[iStage][iTau]");
    //console.log(" species " + " thisChiI " + " thisUwV");
-   for (var iElem = 0; iElem < 2; iElem++){
+   ////H & He only for now - just opacity due to H, He & free e^-s
+   //for (var iElem = 0; iElem < 2; iElem++){
+   // only up to Fe - only compute opacities for elements up Fe I b-f 
+   for (var iElem = 0; iElem < 26; iElem++){
        //console.log("iElem " + iElem);
        species = cname[iElem] + "I";
        chiIArr[0] = getIonE(species);
@@ -2749,12 +2858,10 @@ var logAmu = Math.log(amu);
  //Compute mean molecular weight, mmw ("mu"):
     for (var i = 0; i < numDeps; i++){
       Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
-      //console.log("i " + i + " newNe[0][i] " + newNe[0][i] + " Ng[i] " + Ng[i]); 
     }
     for (var i = 0; i < numDeps; i++){
       //atomic & ionic sepies:
       for (var j = 0; j < nelemAbnd; j++){
-         //console.log("i " + i + " j " + j + " logNz[j][i] " + logNz[j][i]);
          Ng[i] =  Ng[i] + Math.exp(logNz[j][i]); 
       }
 //      //molecular species:
@@ -2767,10 +2874,35 @@ var logAmu = Math.log(amu);
     }
 
 
-      logKappa = kappas2(numDeps, newPe, zScale, temp, rho,
+//H & He only for now... we only compute H, He, and e^- opacity sources:
+      logKappaHHe = kappas2(numDeps, newPe, zScale, temp, rho,
                      numLams, lambdaScale, logAz[1],
                      masterStagePops[0][0], masterStagePops[0][1],
                      masterStagePops[1][0], masterStagePops[1][1], newNe, teff, logTotalFudge);
+
+//Add in metal b-f opacity from adapted Moog routines:
+      //System.out.println("Calling masterMetal from GSS...");
+      logKappaMetalBF = masterMetal(numDeps, numLams, temp, lambdaScale, masterStagePops);
+//Add in Rayleigh scattering opacity from adapted Moog routines:
+      logKappaRayl = masterRayl(numDeps, numLams, temp, lambdaScale, masterStagePops, masterMolPops);
+
+//Convert metal b-f & Rayleigh scattering oapcities to cm^2/g and sum up total opacities
+   var logKapMetalBF, logKapRayl, kapContTot;
+   //System.out.println("i     tauRos      l      lamb     kappa    kappaHHe    kappaMtl     kappaRayl    kapContTot");
+   for (var iL = 0; iL < numLams; iL++){
+       for (var iD = 0; iD < numDeps; iD++){
+          logKapMetalBF = logKappaMetalBF[iL][iD] - rho[1][iD];
+          logKapRayl = logKappaRayl[iL][iD] - rho[1][iD];
+          kapContTot = Math.exp(logKappaHHe[iL][iD]) + Math.exp(logKapMetalBF) + Math.exp(logKapRayl);
+          logKappa[iL][iD] = Math.log(kapContTot);
+         // if ( (iD%10 == 1) && (iL%10 == 0) ){
+         //    System.out.format("%03d, %21.15f, %03d, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f %n",
+         //     iD, tauRos[0][iD], iL, lambdaScale[iL], logE*logKappaHHe[iL][iD],
+         //     logE*(logKapMetalBF), logE*(logKapRayl), logE*logKappa[iL][iD]);
+         // }
+       }
+   }
+
 
       kappaRos = kapRos(numDeps, numLams, lambdaScale, logKappa, temp);
 
@@ -3249,6 +3381,24 @@ var logK = Math.log(k);
 // Number of angles, numThetas, will have to be determined after the fact
     var cosTheta = thetas();
     var numThetas = cosTheta[0].length;
+//establish a phi grid for non-axi-symmetric situations (eg. spots, in situ rotation, ...)
+    //number of phi values per quandrant of unit circle centered on sub-stellar point
+    //    in plane of sky:
+//For geometry calculations: phi = 0 is direction of positive x-axis of right-handed 
+// 2D Cartesian coord system in plane of sky with origin at sub-stellar point (phi 
+// increases CCW)
+    var numPhiPerQuad = 9;  
+    var numPhi = 4 * numPhiPerQuad; 
+    var phi = [];
+    phi.length = numPhi;
+    //Compute phi values in whole range (0 - 2pi radians):
+    var delPhi = 2.0 * Math.PI / numPhi;
+    var ii;
+    for (var i = 0; i < numPhi; i++){
+      ii = 1.0 * i;
+      phi[i] = delPhi * ii; 
+    }
+   
     // Solve formal sol of rad trans eq for outgoing surfaace I(0, theta)
 
     var lineMode;
@@ -4464,7 +4614,7 @@ var logK = Math.log(k);
             contIntensLam = formalSoln(numDeps,
                     cosTheta, lambdaScale[il], thisTau, temp, lineMode);
 
-            contFluxLam = flux2(contIntensLam, cosTheta);
+            //temp contFluxLam = flux2(contIntensLam, cosTheta);
 
             for (var it = 0; it < numThetas; it++) {
                 contIntens[il][it] = contIntensLam[it];
@@ -4474,8 +4624,8 @@ var logK = Math.log(k);
        //  }
             } //it loop - thetas
 
-            contFlux[0][il] = contFluxLam[0];
-            contFlux[1][il] = contFluxLam[1];
+            //contFlux[0][il] = contFluxLam[0];
+            //contFlux[1][il] = contFluxLam[1];
             //console.log("il " + il + " contFlux[1][il] " + logE*contFlux[1][il]);
 
 
@@ -4487,6 +4637,18 @@ var logK = Math.log(k);
                         + contFluxLam[0] * (lambda2 - lambda1);
             }
         } //il loop
+        //console.log("flux3 - first call - contFlux");
+        //console.log(" " + " cgsRadius " + (cgsRadius/1.0e5) + " omegaSini " + omegaSini + " vsini " + vsini);
+        contFlux = flux3(contIntens, lambdaScale, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
+        //console.log(" cgsRadius " + cgsRadius + " omegaSini " + omegaSini + " macroV " + macroV);
+        //console.log("il " + " lambdaScale " + " contIntens ");
+        //for (var il = 0; il < numLams; il+=10){
+        //  console.log(" " + il + " " + lambdaScale[il] + " " + contIntens[il][0] + " contFlux " + logE*contFlux[1][il]);
+       // }
+        //console.log("ip " + " phi ");
+        //for (var ip = 0; ip < numPhi; ip++){
+        //  console.log(" " + ip + " " + phi[ip]);
+       // }
 
 //int numMaster = masterLams.length;
         var logTauMaster = tauLambda(numMaster, masterLams, logMasterKaps,
@@ -4524,28 +4686,30 @@ var logK = Math.log(k);
 
             masterIntensLam = formalSoln(numDeps,
                     cosTheta, masterLams[il], thisTau, temp, lineMode);
-            masterFluxLam = flux2(masterIntensLam, cosTheta);
+            //masterFluxLam = flux2(masterIntensLam, cosTheta);
             for (var it = 0; it < numThetas; it++) {
                 masterIntens[il][it] = masterIntensLam[it];
         //if (it == 0){
          //   console.log("il " + il + " it " + it + " masterLams " + masterLams[il]  
          //      + " masterIntens[il][it] " + logE*Math.log(masterIntens[il][it]));
          //}
-                //System.out.println(" il " + il + " it " + it + " logIntens " + logE*Math.log(lineIntensLam[it]) );
             } //it loop - thetas
+        } //il loop
+            //console.log("Second flux call - masterFlux " + " cgsRadius " + cgsRadius + " omegaSini " + omegaSini + " macroV " + macroV);
+            //console.log(" " + " cgsRadius " + (cgsRadius/1.0e5) + " omegaSini " + omegaSini + " vsini " + vsini);
+            //console.log("il " + il + " masterLams[il] " + masterLams[il] + " masterFlux[1][il] " + logE * masterFlux[1][il]);
+            masterFlux = flux3(masterIntens, masterLams, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
-            //console.log("il " + il + " masterFluxLam[0] " + masterFluxLam[0] + " masterFluxLam[1] " + logE*masterFluxLam[1]);
-            masterFlux[0][il] = masterFluxLam[0];
-            masterFlux[1][il] = masterFluxLam[1];
             //System.out.println("il " + il + " masterLams[il] " + masterLams[il] + " masterFlux[1][il] " + logE * masterFlux[1][il]);
             //// Teff test - Also needed for convection module!:
+        for (var il = 1; il < numMaster; il++) {
             if (il > 1) {
                 lambda2 = masterLams[il]; // * 1.0E-7;  // convert nm to cm
                 lambda1 = masterLams[il - 1]; // * 1.0E-7;  // convert nm to cm
                 fluxSurfBol = fluxSurfBol
                         + masterFluxLam[0] * (lambda2 - lambda1);
             }
-        } //il loop
+        } 
         var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
         var logSigma = Math.log(sigma);
         logFluxSurfBol = Math.log(fluxSurfBol);
@@ -4904,9 +5068,11 @@ var logEv = Math.log(eV);
     //var numPoints = linePoints[0].length + 1; //Extra wavelength point at end for monochromatic continuum tau scale
 
     //Can't avoid Array constructor here:
-    var lineIntens = new Array(numPoints);
+    var lineIntens = [];
+    lineIntens.length = numPoints;
     for (var row = 0; row < numPoints; row++) {
-        lineIntens[row] = new Array(numThetas);
+        lineIntens[row] = [];
+        lineIntens[row].length = numThetas;
     }
 
     var lineIntensLam = [];
@@ -4942,17 +5108,15 @@ var logEv = Math.log(eV);
 
         lineIntensLam = formalSoln(numDeps,
                 cosTheta, lineLambdas[il], thisTau, temp, lineMode);
-        lineFluxLam = flux2(lineIntensLam, cosTheta);
+        //lineFluxLam = flux2(lineIntensLam, cosTheta);
         for (var it = 0; it < numThetas; it++) {
             lineIntens[il][it] = lineIntensLam[it];
             //console.log("il " + il + " it " + it + "lineIntensLam[it] " + lineIntensLam[it]);
         } //it loop - thetas
-
-        //console.log("il " + il + " linePoints[0][il] " + linePoints[0][il] + " lineLambdas[il] " + lineLambdas[il]
-        //   + " lineFluxLam[0] " + lineFluxLam[0] + " lineFluxLam[1] " + lineFluxLam[1]);
-        lineFlux[0][il] = lineFluxLam[0];
-        lineFlux[1][il] = lineFluxLam[1];
     } //il loop
+        //console.log("Third flux call - lineFlux");
+        //console.log(" " + " cgsRadius " + (cgsRadius/1.0e5) + " omegaSini " + omegaSini + " vsini " + vsini);
+        lineFlux = flux3(lineIntens, lineLambdas, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
 //Continuum rectify line spectrum:
 //
@@ -5105,15 +5269,15 @@ Spectral line \n\
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins B-V photometric color index' target='_blank'>\n\
 <span style='color:blue'>B\n\
 </span>-" +
-            "<span style='color:#00AA00'>V</span></a>: " + roundNum1
+            "<span style='color:#00FF88'>V</span></a>: " + roundNum1
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins V-R photometric color index' target='_blank'>\n\
-<span style='color:#00AA00'>V\n\
+<span style='color:#00FF88'>V\n\
 </span>-" +
             "<span style='color:red'>R\n\
 </span>\n\
 </a>: " + roundNum2
             + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins V-I photometric color index' target='_blank'>\n\
-<span style='color:#00AA00'>V\n\
+<span style='color:#00FF88'>V\n\
 </span>-" +
             "<span style='color:red'>I\n\
 </span>\n\
@@ -9183,3 +9347,5 @@ Spectral line \n\
     return;
 }
 ; //end function main()
+
+

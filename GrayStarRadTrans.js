@@ -537,8 +537,9 @@ var dBdT = function(temp, lambda) {
     return logdBdTlam;
 };
 
-// For some weird reason, JavaScript does not line the function name flux()!!! - Change to flux2()
+// For some weird reason, JavaScript does not like the function name flux()!!! - Change to flux2()
 
+//This version assumes axi-symmetry about positive z^ pointing at observer from substellar point
 var flux2 = function(intens, cosTheta) {
 
     var fluxSurfSpec = [];
@@ -567,6 +568,182 @@ var flux2 = function(intens, cosTheta) {
     fluxSurfSpec[1] = Math.log(fluxSurfSpec[0]);
     //DEBUG: fluxSurfSpec[0] = 1.0E14;
     //DEBUG: fluxSurfSpec[1] = 14.0;
+
+    return fluxSurfSpec;
+};
+
+
+//This version of flux() does not assume axi-symmetry about z^, and provides for macro-turbulent and rotational
+// broadening without post-convolution of the flux spectrum
+
+var flux3 = function(intens, lambdas, cosTheta, phi, radius, omegaSini, macroV) {
+
+    //console.log("Entering flux3");
+
+   var numLams = lambdas.length;
+
+    var fluxSurfSpec = [];
+    fluxSurfSpec.length = 2;
+    fluxSurfSpec[0] = [];
+    fluxSurfSpec[1] = [];
+    fluxSurfSpec[0].length = numLams;
+    fluxSurfSpec[1].length = numLams;
+    // returns surface flux as a 2XnumLams vector
+    //  - Row 0 linear flux (cgs units)
+    //  - Row 1 log_e flux
+    //  cosTheta is a 2xnumThetas array:
+    // row 0 is used for Gaussian quadrature weights
+    // row 1 is used for cos(theta) values
+    // Gaussian quadrature:
+    // Number of angles, numThetas, will have to be determined after the fact
+
+
+//For geometry calculations: phi = 0 is direction of positive x-axis of right-handed
+// 2D Cartesian coord system in plane of sky with origin at sub-stellar point (phi
+// increases CCW)
+
+    var numThetas = cosTheta[0].length;
+    var thisThetFctr;
+    //var numThetas = 11;
+    var numPhi = phi.length;
+    var delPhi = 2.0 * Math.PI / numPhi;
+    //console.log("delPhi " + delPhi);
+
+//macroturbulent broadening helpers:
+  var uRnd1, uRnd2, ww, arg, gRnd1, gRnd2;
+
+ //For macroturbulent broadening, we need to transform uniformly
+//generated random numbers on [0, 1] to a Gaussian distribution
+// with a mean of 0.0 and a sigma of 1.0 
+//Use the polar form of the Box-Muller transformation
+// http://www.design.caltech.edu/erik/Misc/Gaussian.html
+// Everett (Skip) Carter, Taygeta Scientific Inc.
+//// Original code in c:
+//    ww = Math.sqrt  
+//         do {
+//                 x1 = 2.0 * ranf() - 1.0;
+//                 x2 = 2.0 * ranf() - 1.0;
+//                 w = x1 * x1 + x2 * x2;
+//         } while ( w >= 1.0 );
+//
+//         w = sqrt( (-2.0 * log( w ) ) / w );
+//         y1 = x1 * w;
+//         y2 = x2 * w;
+
+
+  //helpers for rotational broadening
+    var x, opposite, theta; //, delLam;  
+    var thisIntens = [];
+    thisIntens.length = numLams;
+    var intensLam = [];
+    intensLam.length = numLams;
+
+//This might not be the smartest approach, but, for now, compute the 
+//Doppler shifted wavelength scale across the whole tiled projected disk:
+
+//   
+    //var shiftedLam = 0.0;
+    var shiftedLamV = [];
+    shiftedLamV.length = numLams;
+    var vRad = [];
+    vRad.length = numThetas;
+    for (var it = 0; it < numThetas; it++){
+       vRad[it] = [];
+       vRad[it].length = numPhi; 
+    }
+
+    var sinTheta;
+//For each (theta, phi) tile, compute the contributions to radial velocity 
+// from rotational broadening and macoturbulent broadening:
+   for (var it = 0; it < numThetas; it++){
+      //theta = Math.acos(cosTheta[1][it]);
+      //opposite = radius * Math.sin(theta);
+      //faster??
+      sinTheta = Math.sqrt( 1.0 - (cosTheta[1][it]*cosTheta[1][it]) );
+      opposite = radius * sinTheta;
+      for (var ip = 0; ip < numPhi; ip++){
+         
+// x-position of each (theta, phi) point:
+         x = opposite * Math.cos(phi[ip]);
+         vRad[it][ip] = x * omegaSini; // should be in cm/s   
+         //console.log("it " + it + " ip " + ip + " x " + (x/1.0e5) + " vRad " + (vRad[it][ip]/1.0e5));
+        
+ //For macroturbulent broadening, we need to transform uniformly
+//generated random numbers on [0, 1] to a Gaussian distribution
+// with a mean of 0.0 and a sigma of 1.0 
+//Use the polar form of the Box-Muller transformation
+// http://www.design.caltech.edu/erik/Misc/Gaussian.html
+// Everett (Skip) Carter, Taygeta Scientific Inc.
+
+  //initialization that guarantees at least one cycle of the while loop
+  ww = 2.0; 
+
+//cycle through pairs of uniform random numbers until we get a 
+//ww value that is less than unity
+  while (ww >= 1.0){
+    // range [0, 1]
+    uRnd1 = Math.random(); 
+    uRnd2 = Math.random();
+    // range [-1, 1]
+    uRnd1 = (2.0 * uRnd1) - 1.0;
+    uRnd2 = (2.0 * uRnd2) - 1.0;
+    ww = (uRnd1 * uRnd1) + (uRnd2 * uRnd2);
+  } 
+
+// We have a valid ww value - transform the uniform random numbers
+// to Gaussian random numbers with sigma = macroturbulent velocity broadening
+    arg = (-2.0 * Math.log(ww)) / ww;
+    gRnd1 = macroV * arg * uRnd1;
+    //gRnd2 = macroV * arg * uRnd2; //not needed?
+
+    //console.log("gRnd1 " + gRnd1);
+
+    vRad[it][ip] = vRad[it][ip] + gRnd1; // should be in cm/s   
+
+      } //ip loop - phi 
+   } //it loop - theta
+
+    var flx = [];
+    flx.length = numLams;
+ //Inititalize flux acumulator:
+    for (var il = 0; il < numLams; il++){
+      flx[il] = 0.0;
+    } 
+    for (var it = 0; it < numThetas; it++) {
+
+        //flx = flx + ( intens[it] * cosTheta[1][it] * cosTheta[0][it] ); //axi-symmetric version
+        //non-axi-symmetric version:
+        thisThetFctr = cosTheta[1][it] * cosTheta[0][it];
+        //console.log("it " + it + " cosTheta[1] " + cosTheta[1][it] + " cosTheta[0] " + cosTheta[0][it]);
+        //console.log("thisThetFctr " + thisThetFctr);
+        for (var il = 0; il < numLams; il++){
+           intensLam[il] = intens[il][it];
+        }
+        for (var ip = 0; ip < numPhi; ip++){
+           for (var il = 0; il < numLams; il++){
+              //delLam = lambdas[il] * vRad[it][ip] / c;
+              //shiftedLamV[il] = lambdas[il] + delLam; 
+              shiftedLamV[il] = lambdas[il] * ( (vRad[it][ip]/c) + 1.0 );     
+              //shiftedLamV[il] = shiftedLam;
+              //console.log("ip " + ip + " il " + il + " delLam " + delLam + " shiftedLam " + shiftedLam + " shiftedLamV " + shiftedLamV[il]);
+           }
+          // for (var il = 0; il < numLams; il++){
+          //    intensLam[il] = intens[il][it];
+          // }
+           thisIntens = interpolV(intensLam, shiftedLamV, lambdas);     
+           //flx = flx + ( intens[it] * thisThetFctr * delPhi ); 
+           for (var il = 0; il < numLams; il++){
+              flx[il] = flx[il] + ( thisIntens[il] * thisThetFctr * delPhi ); 
+              //console.log("il " + il + " thisIntens " + thisIntens[il] + " flx " + flx[il]);
+           }
+        } //ip - phi loop
+    }  // it - theta loop
+
+    //fluxSurfSpec[0] = 2.0 * Math.PI * flx; //axi-symmetric version
+    for (var il = 0; il < numLams; il++){
+       fluxSurfSpec[0][il] = flx[il]; // non-axi-symmetric version
+       fluxSurfSpec[1][il] = Math.log(fluxSurfSpec[0][il]);
+    }
 
     return fluxSurfSpec;
 };

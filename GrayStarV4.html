@@ -476,6 +476,31 @@
                                     <input id="gammaCol" type="number" name="gammaCol" value=0.0 size="3"/>
                                 </span>
                             </td>
+                            <td>
+                                <span title="Macroturbulent broadening">
+                                  <a href="https://en.wikipedia.org/wiki/Turbulence" target="_blank">
+                                    <em>v</em><sub>Macro</sub> (0 - 8 km s<sup>-1</sup>) <br />
+                                  </a>
+                                    <input id="macroV" type="number" name="macroV" value="2.0" min="0.0" max="8.0" step="0.5" size="4"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="Equatorial surface rotational velocity">
+                                  <a href="https://en.wikipedia.org/wiki/Stellar_rotation" target="_blank">
+                                    <em>v</em><sub>Rot</sub> (0 - 20 km s<sup>-1</sup>) <br />
+                                  </a>
+                                    <input id="rotV" type="number" name="rotV" value="2.0" min="0.0" max="20.0" step="0.5" size="5"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span title="Rotational axis inclination wrt line-of-sight">
+                                  <a href="https://en.wikipedia.org/wiki/Stellar_rotation" target="_blank">
+                                    <em>i</em><sub>Rot</sub> (0 - 90 <sup>o</sup>) <br />
+                                  </a>
+                                    <input id="rotI" type="number" name="rotI" value="90.0" min="0.0" max="90.0" step="1.0" size="4"/>
+                                </span>
+                            </td>
+
                         </tr>
                     </table>
                 </fieldset> 
