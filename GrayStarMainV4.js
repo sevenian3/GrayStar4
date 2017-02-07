@@ -157,7 +157,10 @@ function main() {
     //1st version of each is of JQuery-ui round sliders not available
     //var teff = 1.0 * $("#Teff").val(); // K
     //var teff = 1.0 * $("#Teff").roundSlider("getValue");
-    //Sigh - IE needs it this way...
+    // jquery-ui round sliders -->
+    //Round sliders Copyright (c) 2015-2016, Soundar
+    //      http://roundsliderui.com/
+      
     var teffObj = $("#Teff").data("roundSlider");
     var teff = 1.0 * teffObj.getValue();
     //console.log("Teff read: " + teff);
@@ -431,6 +434,7 @@ function main() {
         var teff = 5780.0;
         settingsId[0].value = 5780.0;
         //First version is if there's no JQuery-UI round sliders
+        //
         //$("#Teff").val(5780.0);
         $("#Teff").roundSlider("setValue", "5780.0");
         var logg = 4.4;
@@ -2671,6 +2675,7 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
 
     for (var iD = 0; iD < numDeps; iD++){
        newNe[1][iD] = newPe[1][iD] - temp[1][iD] - logK;
+       newNe[0][iD] = Math.exp(newNe[1][iD]);
     }
 
 //
@@ -2858,6 +2863,7 @@ var logAmu = Math.log(amu);
  //Compute mean molecular weight, mmw ("mu"):
     for (var i = 0; i < numDeps; i++){
       Ng[i] =  newNe[0][i]; //initialize accumulation with Ne
+      //console.log("i " + i + " Ng=newNe " + logE*Math.log(Ng[i]));
     }
     for (var i = 0; i < numDeps; i++){
       //atomic & ionic sepies:
@@ -5482,7 +5488,8 @@ Spectral line \n\
 
 //Background color of panels - a gray tone will accentuate most colors:
 // 24 bit RGB color in hexadecimal notation:
-    var wColor = "#F0F0F0";  
+    var wDefaultColor = "#F0F0F0"; //default value 
+    var wDiskColor = wDefaultColor; //needed to finesse background colour of white light image 
 
     var charToPx = 4; // width of typical character font in pixels - CAUTION: finesse!
 
@@ -6043,10 +6050,17 @@ Spectral line \n\
         var plotRow = 0;
         var plotCol = 0;
 
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotSevenId, cnvsSevenId);
+//background color needs to be finessed so that white-ish stars will stand out:
+       if (teff > 6000.0){
+  //hotter white or blue-white star - darken the background (default background in #F0F0F0
+           wDiskColor = "#808080";  
+       } else {
+           wDiskColor = wDefaultColor;
+       }
+        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotSevenId, cnvsSevenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSevenCtx.fillStyle = wColor;
+        cnvsSevenCtx.fillStyle = wDiskColor;
         cnvsSevenCtx.fillRect(0, 0, panelWidth, panelHeight);
 
         var thet1, thet2;
@@ -6130,10 +6144,10 @@ Spectral line \n\
 //        radiusPx = Math.ceil(radiusPx);
         var thet1, thet2;
         var thet3;
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotTwelveId, cnvsTwelveId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTwelveId, cnvsTwelveId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsTwelveCtx.fillStyle = wColor;
+        cnvsTwelveCtx.fillStyle = wDefaultColor;
         cnvsTwelveCtx.fillRect(0, 0, panelWidth, panelHeight);
         // Add title annotation:
 
@@ -6257,10 +6271,10 @@ Spectral line \n\
 
         
         var fineness = "normal";
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotTenId, cnvsTenId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTenId, cnvsTenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsTenCtx.fillStyle = wColor;
+        cnvsTenCtx.fillStyle = wDefaultColor;
         cnvsTenCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -6505,14 +6519,14 @@ Spectral line \n\
         ggI = saveRGB[1];
         bbI = saveRGB[2];
         var starRGBHex = "rgb(" + rrI + "," + ggI + "," + bbI + ")";
-        var colors = ["#0000FF", "#00FF88", "#FF0000", wColor, starRGBHex];
+        var colors = ["#0000FF", "#00FF88", "#FF0000", wDefaultColor, starRGBHex];
         var numZone = radii.length;
         //var titleYPos = xLowerYOffset - yRange + 40;
-        //var cnvsCtx = washer(xOffset - xRange / 2, yOffset, wColor, plotElevenId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotElevenId, cnvsElevenId);
+        //var cnvsCtx = washer(xOffset - xRange / 2, yOffset, wDefaultColor, plotElevenId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotElevenId, cnvsElevenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsElevenCtx.fillStyle = wColor;
+        cnvsElevenCtx.fillStyle = wDefaultColor;
         cnvsElevenCtx.fillRect(0, 0, panelWidth, panelHeight);
         // Add title annotation:
 
@@ -6594,10 +6608,10 @@ Spectral line \n\
      <em>L</em><sub>Sun</sub></a></span> ";
         //
         var fineness = "fine";
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotNineId, cnvsNineId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotNineId, cnvsNineId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsNineCtx.fillStyle = wColor;
+        cnvsNineCtx.fillStyle = wDefaultColor;
         cnvsNineCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -7067,10 +7081,10 @@ Spectral line \n\
         var yAxisName = "<em>T</em><sub>Kin</sub> (K)";
         var fineness = "normal";
 
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotTwoId, cnvsTwoId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTwoId, cnvsTwoId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsTwoCtx.fillStyle = wColor;
+        cnvsTwoCtx.fillStyle = wDefaultColor;
         cnvsTwoCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -7289,14 +7303,14 @@ Spectral line \n\
         var maxYData = logE * logPTot[numDeps - 1];
         var yAxisName = "Log<sub>10</sub> <em>P</em> <br />(dynes <br />cm<sup>-2</sup>)";
         //console.log("minYData " + minYData + " maxYData " + maxYData);
-        //washer(xRange, xOffset, yRange, yOffset, wColor, plotThreeId);
+        //washer(xRange, xOffset, yRange, yOffset, wDefaultColor, plotThreeId);
 
         var fineness = "normal";
-        //var cnvsCtx = washer(plotRow, plotCol, wColor, plotThreeId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotThreeId, cnvsThreeId);
+        //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotThreeId, cnvsId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotThreeId, cnvsThreeId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsThreeCtx.fillStyle = wColor;
+        cnvsThreeCtx.fillStyle = wDefaultColor;
         cnvsThreeCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -7473,10 +7487,10 @@ Spectral line \n\
 
         var fineness = "normal";
 //
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotFourId, cnvsFourId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFourId, cnvsFourId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFourCtx.fillStyle = wColor;
+        cnvsFourCtx.fillStyle = wDefaultColor;
         cnvsFourCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -7609,14 +7623,14 @@ Spectral line \n\
         //var minYData = 12.0;
         //var maxYData = logE * masterFlux[1][iLamMax];
         //var yAxisName = "<span title='Monochromatic surface flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'>Log<sub>10</sub> <em>F</em><sub>&#955</sub> <br /> ergs s<sup>-1</sup> cm<sup>-3</sup></a></span>";
-        //(xRange, xOffset, yRange, yOffset, wColor, plotFiveId);
+        //(xRange, xOffset, yRange, yOffset, wDefaultColor, plotFiveId);
 
         var fineness = "coarse";
-        //var cnvsCtx = washer(plotRow, plotCol, wColor, plotFiveId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotFiveId, cnvsFiveId);
+        //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsFiveId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFiveCtx.fillStyle = wColor;
+        cnvsFiveCtx.fillStyle = wDefaultColor;
         cnvsFiveCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -7909,10 +7923,10 @@ Spectral line \n\
         var yAxisName = "<span title='Continuum normalized flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'><em>F</em><sub>&#955</sub>/<br /><em>F</em><sup>C</sup><sub>&#955 0</sub></a></span>";
 
         var fineness = "fine";
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotSixId, cnvsSixId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSixId, cnvsSixId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSixCtx.fillStyle = wColor;
+        cnvsSixCtx.fillStyle = wDefaultColor;
         cnvsSixCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -8125,14 +8139,14 @@ Spectral line \n\
         var maxYData = chiI1+chiI2;
 
         var yAxisName = "<span title='Atomic excitation energy'><a href='http://en.wikipedia.org/wiki/Excited_state' target='_blank'>Excitation<br /> E</a> (<a href='http://en.wikipedia.org/wiki/Electronvolt' target='_blank'>eV</a>)</span>";
-        //(xRange, xOffset, yRange, yOffset, wColor, plotEightId);
+        //(xRange, xOffset, yRange, yOffset, wDefaultColor, plotEightId);
 
         var fineness = "coarse";
-        //var cnvsCtx = washer(plotRow, plotCol, wColor, plotEightId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotEightId, cnvsEightId);
+        //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotEightId, cnvsId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotEightId, cnvsEightId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsEightCtx.fillStyle = wColor;
+        cnvsEightCtx.fillStyle = wDefaultColor;
         cnvsEightCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -8284,10 +8298,10 @@ Spectral line \n\
         var yAxisName = "Log<sub>10</sub> <em>&#954<sub>&#955</sub></em> <br />(cm<sup>2</sup> g<sup>-1</sup>)";
 
         var fineness = "normal";
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotFourteenId, cnvsFourteenId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFourteenId, cnvsFourteenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFourteenCtx.fillStyle = wColor;
+        cnvsFourteenCtx.fillStyle = wDefaultColor;
         cnvsFourteenCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -8493,14 +8507,14 @@ Spectral line \n\
         //var minYData = 12.0;
         //var maxYData = logE * masterFlux[1][iLamMax];
         //var yAxisName = "<span title='Monochromatic surface flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'>Log<sub>10</sub> <em>F</em><sub>&#955</sub> <br /> ergs s<sup>-1</sup> cm<sup>-3</sup></a></span>";
-        //(xRange, xOffset, yRange, yOffset, wColor, plotFiveId);
+        //(xRange, xOffset, yRange, yOffset, wDefaultColor, plotFiveId);
 
         var fineness = "coarse";
-        //var cnvsCtx = washer(plotRow, plotCol, wColor, plotFiveId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotFifteenId, cnvsFifteenId);
+        //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFifteenId, cnvsFifteenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFifteenCtx.fillStyle = wColor;
+        cnvsFifteenCtx.fillStyle = wDefaultColor;
         cnvsFifteenCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -8737,12 +8751,12 @@ Spectral line \n\
         var yAxisName = "Log<sub>10</sub> <em>N</em> <br />(cm<sup>-3</sup>)";
 
         var fineness = "normal";
-        //var cnvsCtx = washer(xOffset, yOffset, wColor, plotOneId, cnvsId);
-        //var cnvsCtx = washer(plotRow, plotCol, wColor, plotOneId, cnvsOneId);
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotSixteenId, cnvsSixteenId);
+        //var cnvsCtx = washer(xOffset, yOffset, wDefaultColor, plotOneId, cnvsId);
+        //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotOneId, cnvsOneId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSixteenId, cnvsSixteenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSixteenCtx.fillStyle = wColor;
+        cnvsSixteenCtx.fillStyle = wDefaultColor;
         cnvsSixteenCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -8911,10 +8925,10 @@ Spectral line \n\
 
         var fineness = "normal";
 //
-        var panelOrigin = washer(plotRow, plotCol, wColor, plotSeventeenId, cnvsSeventeenId);
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSeventeenId, cnvsSeventeenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSeventeenCtx.fillStyle = wColor;
+        cnvsSeventeenCtx.fillStyle = wDefaultColor;
         cnvsSeventeenCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -9091,24 +9105,26 @@ Spectral line \n\
 
     if (ifPrintAtmos == true) {
 
-        txtPrint("Vertical atmospheric structure", 10, yOffsetT, txtColor, printModelId);
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
+        txtPrint("Vertical atmospheric structure", 10, yOffsetT + lineHeight, txtColor, printModelId);
         //Column headings:
 
         var xTab = 190;
-        txtPrint("i", 10, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> depth (cm)", 10 + 2 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>T</em><sub>Kin</sub> (K)", 10 + 3 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>P</em><sub>Gas</sub> (dynes cm<sup>-2</sup>)", 10 + 4 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>P</em><sub>Rad</sub> (dynes cm<sup>-2</sup>)", 10 + 5 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#961</em> (g cm<sup>-3</sup>)", 10 + 6 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>N</em><sub>e</sub> (cm<sup>-3</sup>)", 10 + 7 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#956</em> (g)", 10 + 8 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#954</em><sub>Ros</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 9 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#954</em><sub>500</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 10 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("i", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> depth (cm)", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>T</em><sub>Kin</sub> (K)", 10 + 3 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>P</em><sub>Gas</sub> (dynes cm<sup>-2</sup>)", 10 + 4 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>P</em><sub>Rad</sub> (dynes cm<sup>-2</sup>)", 10 + 5 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#961</em> (g cm<sup>-3</sup>)", 10 + 6 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>N</em><sub>e</sub> (cm<sup>-3</sup>)", 10 + 7 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#956</em> (g)", 10 + 8 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#954</em><sub>Ros</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 9 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#954</em><sub>500</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 10 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
 
         for (var i = 0; i < numDeps; i++) {
-            yTab = yOffsetT + vOffset + i * lineHeight;
+            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
             numPrint(i, 10, yTab, txtColor, printModelId);
             value = logE * tauRos[1][i];
             //value = tauRos[0][i];
@@ -9154,14 +9170,16 @@ Spectral line \n\
 
     if (ifPrintSED == true) {
 
-        txtPrint("Monochromatic surface flux spectral energy distribution (SED)", 10, yOffsetT, txtColor, printModelId);
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
+        txtPrint("Monochromatic surface flux spectral energy distribution (SED)", 10, yOffsetT + lineHeight, txtColor, printModelId);
         //Column headings:
 
         var xTab = 190;
-        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>F</em><sub>&#955</sub> (ergs s<sup>-1</sup> cm<sup>-2</sup> cm<sup>-1</sup>)", 10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>F</em><sub>&#955</sub> (ergs s<sup>-1</sup> cm<sup>-2</sup> cm<sup>-1</sup>)", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         for (var i = 0; i < numMaster; i++) {
-            yTab = yOffsetT + vOffset + i * lineHeight;
+            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
             value = logE * Math.log(masterLams[i]);
             value = value.toPrecision(9);
             numPrint(value, 10, yTab, txtColor, printModelId);
@@ -9174,20 +9192,22 @@ Spectral line \n\
 
     if (ifPrintIntens == true) {
 
-        txtPrint("Monochromatic specific intensity distribution", 10, yOffsetT, txtColor, printModelId);
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
+        txtPrint("Monochromatic specific intensity distribution", 10, yOffsetT + lineHeight, txtColor, printModelId);
         //Column headings:
 
         var xTab = 100;
-        txtPrint("log<sub>10</sub><em>&#955</em> (cm)", 10, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub><em>&#955</em> (cm)", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub><em>I</em><sub>&#955</sub>(<em>&#952</em>) (ergs s<sup>-1</sup> cm<sup>-2</sup> cm<sup>-1</sup> steradian<sup>-1</sup>)",
-                10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+                10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         for (var j = 0; j < numThetas; j += 2) {
             value = cosTheta[1][j].toPrecision(5);
             txtPrint("cos <em>&#952</em>=" + value, 10 + (j + 1) * xTab, yOffsetT + 3 * lineHeight, txtColor, printModelId);
         }
 
         for (var i = 0; i < numMaster; i++) {
-            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
+            yTab = yOffsetT + vOffset + (i+2) * lineHeight;
             value = logE * Math.log(masterLams[i]);
             value = value.toPrecision(9);
             numPrint(value, 10, yTab, txtColor, printModelId);
@@ -9202,15 +9222,17 @@ Spectral line \n\
 
     if (ifPrintLine == true) {
 
-        txtPrint("Monochromatic line flux and atomic <em>E</em>-level populations", 10, yOffsetT, txtColor, printModelId);
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
+        txtPrint("Monochromatic line flux and atomic <em>E</em>-level populations", 10, yOffsetT + lineHeight, txtColor, printModelId);
         var xTab = 190;
         //Column headings:
 
-        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>F</em><sub>&#955</sub> (ergs s<sup>-1</sup> cm<sup>-2</sup> cm<sup>-1</sup>)",
-                10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+                10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         for (var i = 0; i < numPoints; i++) {
-            yTab = yOffsetT + vOffset + i * lineHeight;
+            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
             value = logE * Math.log(lineLambdas[i]);
             value = value.toPrecision(9);
             numPrint(value, 10, yTab, txtColor, printModelId);
@@ -9230,10 +9252,10 @@ Spectral line \n\
         var yRightTickValStr = ["<em>&#967</em><sub>I</sub>", "<em>&#967</em><sub>II</sub>", "<span style='color:red'><em>&#967</em><sub>l</sub></span>", "<em>&#967</em><sub>u</sub>", "<em>&#967</em><sub>III</sub>"];
         //Column headings:
         txtPrint("log<sub>10</sub> <em>N</em><sub>i</sub> (cm<sup>-3</sup>)", 10, atomOffset + yOffsetT, txtColor, printModelId);
-        txtPrint("i", 10, atomOffset + yOffsetT + 2 * lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Ross</sub>", 10 + xTab, atomOffset + yOffsetT + 2 * lineHeight, txtColor, printModelId);
+        txtPrint("i", 10, atomOffset + yOffsetT + 3 * lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Ross</sub>", 10 + xTab, atomOffset + yOffsetT + 3 * lineHeight, txtColor, printModelId);
         for (var j = 0; j < 5; j++) {
-            yTab = atomOffset + yOffsetT + 2 * lineHeight;
+            yTab = atomOffset + yOffsetT + 3 * lineHeight;
             value = yRightTickValStr[j];
             txtPrint(value, 400 + j * xTab, yTab, txtColor, printModelId);
             value = yData[j].toPrecision(5);
@@ -9242,7 +9264,7 @@ Spectral line \n\
         }
 
         for (var i = 0; i < numDeps; i++) {
-            yTab = atomOffset + yOffsetT + (i + 4) * lineHeight;
+            yTab = atomOffset + yOffsetT + (i + 5) * lineHeight;
             numPrint(i, 10, yTab, txtColor, printModelId);
             value = logE * tauRos[1][i];
             value = value.toPrecision(5);
@@ -9257,14 +9279,16 @@ Spectral line \n\
 
     if (ifPrintLDC == true) {
 
-        txtPrint("Linear monochromatic continuum limb darkening coefficients (LCD)", 10, yOffsetT, txtColor, printModelId);
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
+        txtPrint("Linear monochromatic continuum limb darkening coefficients (LCD)", 10, yOffsetT + lineHeight, txtColor, printModelId);
         //Column headings:
 
         var xTab = 190;
-        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("LDC", 10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#955</em> (cm)", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("LDC", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         for (var i = 0; i < numLams; i++) {
-            yTab = yOffsetT + vOffset + i * lineHeight;
+            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
             value = logE * Math.log(lambdaScale[i]);
             value = value.toPrecision(9);
             numPrint(value, 10, yTab, txtColor, printModelId);
@@ -9298,22 +9322,24 @@ Spectral line \n\
              } 
          }
 
+        var modelBanner = "Model: Teff " + teff + " K, log(g) " + logg + " log cm/s/s, [A/H] " + zScale + ", mass " + massStar + " M_Sun";
+        txtPrint(modelBanner, 10, yOffsetT, txtColor, printModelId);  
         txtPrint("Chemical equilibrium population for " + ionEqElement + " (cm<sup>-3</sup>)",
-                   10, yOffsetT, txtColor, printModelId);
+                   10, yOffsetT + lineHeight, txtColor, printModelId);
         //Column headings:
         var xTab = 190;
-        txtPrint("i", 10, yOffsetT + lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + lineHeight, txtColor, printModelId);
+        txtPrint("i", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         if (ifMolPlot != true){
-           txtPrint("log<sub>10</sub> <em>N</em><sub>I</sub>", 10 + 2 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-           txtPrint("log<sub>10</sub> <em>N</em><sub>II</sub>", 10 + 3 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
-           txtPrint("log<sub>10</sub> <em>N</em><sub>III</sub>", 10 + 4 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>I</sub>", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>II</sub>", 10 + 3 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>III</sub>", 10 + 4 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         } else {
-           txtPrint("log<sub>10</sub> <em>N</em><sub>Mol</sub>", 10 + 2 * xTab, yOffsetT + lineHeight, txtColor, printModelId);
+           txtPrint("log<sub>10</sub> <em>N</em><sub>Mol</sub>", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         }   
 
         for (var i = 0; i < numDeps; i++) {
-            yTab = yOffsetT + vOffset + i * lineHeight;
+            yTab = yOffsetT + vOffset + (i+1) * lineHeight;
             numPrint(i, 10, yTab, txtColor, printModelId);
             value = logE * tauRos[1][i];
             value = value.toPrecision(5);
@@ -9345,7 +9371,5 @@ Spectral line \n\
 // 
 //
     return;
-}
-; //end function main()
-
+}; //end function main()
 
