@@ -1606,7 +1606,7 @@ var masterLambda = function(numLams, numMaster, numNow, masterLams, numPoints, l
         if (nextCntPtr < numNow) {
             //System.out.println("nextCntPtr " + nextCntPtr + " lambdaScale[nextCntPtr] " + lambdaScale[nextCntPtr]);
             //System.out.println("nextLinePtr " + nextLinePtr + " lineLambdas[nextLinePtr] " + lineLambdas[nextLinePtr]);
-            if ((masterLams[nextCntPtr] < listLineLambdas[nextLinePtr])
+            if ((masterLams[nextCntPtr] <= listLineLambdas[nextLinePtr])
                     || (nextLinePtr >= numPoints - 1)) {
                 //Next point is a continuum point:
                 masterLamsOut[iL] = masterLams[nextCntPtr];
@@ -1637,7 +1637,6 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
 
     var logMasterKapsOut = [];
     logMasterKapsOut.length = numTot;
-    //Must use Array constructor here:
     for (var i = 0; i < numTot; i++) {
         logMasterKapsOut[i] = [];
         logMasterKapsOut[i].length = numDeps;
@@ -1797,8 +1796,8 @@ var logEv = Math.log(eV);
             thisLogUw = logUw[1];
         }
         if (Ttheta > 0.5 && Ttheta < 1.0){
-            thisLogUw = 0.5 * logUw[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUw[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+            thisLogUw = logUw[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUw[0] * (1.0 - Ttheta)/(1.0 - 0.5);
         }
 
                 //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
@@ -1968,7 +1967,7 @@ var logEv = Math.log(eV);
             //Row 1 of Ne is log_e Ne in cm^-3
             logNe = Ne[1][id];
 
-//Determine temeprature dependenet aprtition functions Uw:
+//Determine temperature dependent partition functions Uw:
     Ttheta = 5040.0 / temp[0][id];
 
        if (Ttheta >= 1.0){
@@ -1984,14 +1983,14 @@ var logEv = Math.log(eV);
            thisLogUw4 = logUw4[1];
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
-           thisLogUw1 = 0.5 * logUw1[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUw1[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           thisLogUw2 = 0.5 * logUw2[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUw2[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           thisLogUw3 = 0.5 * logUw3[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUw3[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           thisLogUw4 = 0.5 * logUw4[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUw4[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw1 = logUw1[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUw1[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw2 = logUw2[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUw2[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw3 = logUw3[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUw3[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUw4 = logUw4[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUw4[0] * (1.0 - Ttheta)/(1.0 - 0.5);
        }
        //System.out.println("thisLogUw1, ... thisLogUw4 " + logE*thisLogUw1 + " " + logE*thisLogUw2 + " " + logE*thisLogUw3 + " " + logE*thisLogUw4);
        var thisLogUw5 = 0.0; //ionization stage V partition fn, U = 1.0
@@ -2293,27 +2292,27 @@ var logEv = Math.log(eV);
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
            for (var iStg = 0; iStg < numStages; iStg++){
-              thisLogUw[iStg] = 0.5 * logUw[iStg][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                              + 0.5 * logUw[iStg][0] * (1.0 - Ttheta)/(1.0 - 0.5);
+              thisLogUw[iStg] = logUw[iStg][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                              + logUw[iStg][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
            for (var iMol = 0; iMol < numMols; iMol++){
-              thisLogUwB[iMol] = 0.5 * logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                               + 0.5 * logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
+              thisLogUwB[iMol] = logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                               + logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
        }
          thisLogUw[numStages] = 0.0;
       for (var iMol = 0; iMol < numMols; iMol++){
          if (thisTemp < 3000.0){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
-                        + ( 0.5 * logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+            thisLogQwAB = ( logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                        + ( logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
          }
          if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
-                        + ( 0.5 * logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+            thisLogQwAB = ( logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                        + ( logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
          }
          if ( thisTemp > 8000.0 ){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
-                        + ( 0.5 * logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+            thisLogQwAB = ( logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                        + ( logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
          }
       } // iMol loop
 
@@ -2477,7 +2476,7 @@ var logEv = Math.log(eV);
 //        for (int id = 0; id < numDeps; id++) {
 
 //
-//Determine temeprature dependenet aprtition functions Uw:
+//Determine temperature dependent partition functions Uw:
             thisTemp = temp[0];
             Ttheta = 5040.0 / thisTemp;
 
@@ -2491,10 +2490,10 @@ var logEv = Math.log(eV);
               thisLogUwL = logUwL[1];
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
-              thisLogUwU = ( 0.5 * logUwU[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
-                         + ( 0.5 * logUwU[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
-              thisLogUwL = ( 0.5 * logUwL[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
-                         + ( 0.5 * logUwL[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
+              thisLogUwU = ( logUwU[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
+                         + ( logUwU[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
+              thisLogUwL = ( logUwL[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
+                         + ( logUwL[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
        }
 
 
@@ -2537,7 +2536,8 @@ var logEv = Math.log(eV);
          //    thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
           //           logGroundRatio, numDeps, temp)
 
- //console.log("Line: nmrtrLog10UwB[0] " + nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + nmrtrLog10UwB[1]);
+        var logE = logTen(Math.E); // for debug output
+ //console.log("Line: nmrtrLog10UwB[0] " + logE*nmrtrLog10UwB[0] + " nmrtrLog10UwB[1] " + logE*nmrtrLog10UwB[1]);
 
 var c = 2.9979249E+10; // light speed in vaccuum in cm/s
 var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
@@ -2565,7 +2565,6 @@ var logEv = Math.log(eV);
 
 
         var ln10 = Math.log(10.0);
-        var logE = logTen(Math.E); // for debug output
         var log2pi = Math.log(2.0 * Math.PI);
         var log2 = Math.log(2.0);
 
@@ -2665,7 +2664,7 @@ var logEv = Math.log(eV);
 
             //// reduce or enhance number density by over-all Rosseland opcity scale parameter
 
-//Determine temeprature dependenet aprtition functions Uw:
+//Determine temperature dependent partition functions Uw:
             thisTemp = temp[0][id];
             Ttheta = 5040.0 / thisTemp;
 
@@ -2684,39 +2683,39 @@ var logEv = Math.log(eV);
            }
        }
        if (Ttheta > 0.5 && Ttheta < 1.0){
-           thisLogUwA = 0.5 * logUwA[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + 0.5 * logUwA[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           nmrtrThisLogUwB = 0.5 * nmrtrLogUwB[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                           + 0.5 * nmrtrLogUwB[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           thisLogUwA = logUwA[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                      + logUwA[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+           nmrtrThisLogUwB = nmrtrLogUwB[1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                           + nmrtrLogUwB[0] * (1.0 - Ttheta)/(1.0 - 0.5);
            for (var iMol = 0; iMol < numMolsB; iMol++){
-              thisLogUwB[iMol] = 0.5 * logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                               + 0.5 * logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
+              thisLogUwB[iMol] = logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
+                               + logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
            }
        }
       for (var iMol = 0; iMol < numMolsB; iMol++){
          if (thisTemp < 3000.0){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
-                        + ( 0.5 * logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+            thisLogQwAB = ( logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                        + ( logQwABArr[iMol][2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
          }
          if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
-                        + ( 0.5 * logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+            thisLogQwAB = ( logQwABArr[iMol][2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                        + ( logQwABArr[iMol][3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
          }
          if ( thisTemp > 8000.0 ){
-            thisLogQwAB = ( 0.5 * logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
-                        + ( 0.5 * logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+            thisLogQwAB = ( logQwABArr[iMol][3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                        + ( logQwABArr[iMol][4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
          }
          if (thisTemp < 3000.0){
-            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
-                             + ( 0.5 * nmrtrLogQwAB[2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
+            nmrtrThisLogQwAB = ( nmrtrLogQwAB[1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
+                             + ( nmrtrLogQwAB[2] * (thisTemp - 500.0)/(3000.0 - 500.0) );
          }
          if ( (thisTemp >= 3000.0) && (thisTemp <= 8000.0) ){
-            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
-                             + ( 0.5 * nmrtrLogQwAB[3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
+            nmrtrThisLogQwAB = ( nmrtrLogQwAB[2] * (8000.0 - thisTemp)/(8000.0 - 3000.0) )
+                             + ( nmrtrLogQwAB[3] * (thisTemp - 3000.0)/(8000.0 - 3000.0) );
          }
          if ( thisTemp > 8000.0 ){
-            nmrtrThisLogQwAB = ( 0.5 * nmrtrLogQwAB[3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
-                             + ( 0.5 * nmrtrLogQwAB[4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
+            nmrtrThisLogQwAB = ( nmrtrLogQwAB[3] * (10000.0 - thisTemp)/(10000.0 - 8000.0) )
+                             + ( nmrtrLogQwAB[4] * (thisTemp - 8000.0)/(10000.0 - 8000.0) );
          }
       } //iMol loop
 
@@ -2724,19 +2723,19 @@ var logEv = Math.log(eV);
 // for molecule formation:
 
    //Ionization stage Saha factors: 
-//          if (id == 24){
-//console.log("id " + id + " nmrtrLogNumB[id] " + logE*nmrtrLogNumB[id] + " pp nmrtB " + (logE*(nmrtrLogNumB[id]+temp[1][id]+logK)) + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + logE*nmrtrLogQwAB);             
+//          if (id == 16){
+//console.log("id " + id + " nmrtrLogNumB[id] " + logE*nmrtrLogNumB[id] + " pp nmrtB " + (logE*(nmrtrLogNumB[id]+temp[1][id]+logK)) + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + logE*nmrtrThisLogQwAB);             
 //   }
                nmrtrLogSahaMol = nmrtrLogMolSahaFac - nmrtrLogNumB[id] - (nmrtrBoltzFacIAB / temp[0][id]) + (3.0 * temp[1][id] / 2.0) + nmrtrThisLogUwB + thisLogUwA - nmrtrThisLogQwAB;
                nmrtrLogInvSahaMol = -1.0 * nmrtrLogSahaMol;
                //nmrtrInvSahaMol = Math.exp(nmrtrLogSahaMol);
-     //     if (id == 24){
-     //         console.log("nmrtrLogInvSahaMol " + logE*nmrtrLogInvSahaMol);
-     //     }
-          //if (id == 36){
+          //if (id == 16){
+          //    console.log("nmrtrLogInvSahaMol " + logE*nmrtrLogInvSahaMol);
+          //}
+          //if (id == 16){
           //     console.log("nmrtrBoltzFacIAB " + nmrtrBoltzFacIAB + " nmrtrThisLogUwB " + logE*nmrtrThisLogUwB + " thisLogUwA " + logE*thisLogUwA + " nmrtrLogQwAB " + nmrtrLogQwAB);   
-          //     console.log("nmrtrLogSahaMol " + logE*nmrtrLogSahaMol + " nmrtrInvSahaMol " + nmrtrInvSahaMol);
-         // }
+          //     console.log("nmrtrLogSahaMol " + logE*nmrtrLogSahaMol); // + " nmrtrInvSahaMol " + nmrtrInvSahaMol);
+          //}
 
 //Molecular Saha factors:
          for (var iMol = 0; iMol < numMolsB; iMol++){
@@ -2746,10 +2745,10 @@ var logEv = Math.log(eV);
              logSahaMol[iMol] = -1.0 * logSahaMol[iMol];
              invSahaMol[iMol] = Math.exp(logSahaMol[iMol]);
              //TEST invSahaMol[iMol] = 1.0e-99; //test
-          //if (id == 36){
-              //console.log("iMol " + iMol + " boltzFacIAB[iMol] " + boltzFacIAB[iMol] + " thisLogUwB[iMol] " + logE*thisLogUwB[iMol] + " logQwAB[iMol] " + logE*logQwAB[iMol] + " logNumB[iMol][id] " + logE*logNumB[iMol][id] + " logMolSahaFac[iMol] " + logE*logMolSahaFac[iMol]);   
-              //console.log("iMol " + iMol + " logSahaMol " + logE*logSahaMol[iMol] + " invSahaMol[iMol] " + invSahaMol[iMol]);
-          //}
+         // if (id == 16){
+         //     console.log("iMol " + iMol + " boltzFacIAB[iMol] " + boltzFacIAB[iMol] + " thisLogUwB[iMol] " + logE*thisLogUwB[iMol] + " logQwAB[iMol] " + logE*thisLogQwAB + " logNumB[iMol][id] " + logE*logNumB[iMol][id] + " logMolSahaFac[iMol] " + logE*logMolSahaFac[iMol]);   
+         //     console.log("iMol " + iMol + " logSahaMol " + logE*logSahaMol[iMol] + " invSahaMol[iMol] " + invSahaMol[iMol]);
+         // }
          }
 
 //Compute log of denominator is ionization fraction, f_stage 
@@ -2758,36 +2757,335 @@ var logEv = Math.log(eV);
             var denominator = Math.exp(logGroundRatio[id]); //default initialization - ratio of total atomic particles in all ionization stages to number in ground state 
 //molecular contribution
            for (var iMol = 0; iMol < numMolsB; iMol++){
-      //    if (id == 24){
-      //        console.log("iMol " + iMol + " invSahaMol " + invSahaMol[iMol] + " denominator " + denominator);
-      //    } 
+         // if (id == 16){
+         //     console.log("iMol " + iMol + " invSahaMol " + invSahaMol[iMol] + " denominator " + denominator);
+         // } 
               denominator = denominator + invSahaMol[iMol];
            }
 // 
             var logDenominator = Math.log(denominator); 
-      //    if (id == 24){
-      //      console.log("id " + id + " logGroundRatio " + logE*logGroundRatio[id] + " logDenominator " + logE*logDenominator);
-      //    }  
-          //if (id == 36){
-          //     console.log("logDenominator " + logE*logDenominator);
+         // if (id == 16){
+         //   console.log("id " + id + " logGroundRatio " + logE*logGroundRatio[id] + " logDenominator " + logE*logDenominator);
+         // }  
+         // if (id == 16){
+         //      console.log("logDenominator " + logE*logDenominator);
          // }
             //var logDenominator = Math.log( 1.0 + saha21 + (saha32 * saha21) + (saha43 * saha32 * saha21) + (saha54 * saha43 * saha32 * saha21) );
 
           logMolFrac[id] = nmrtrLogInvSahaMol - logDenominator;
-      //    if (id == 24){
-      //         console.log("id " + id + " logMolFrac[id] " + logE*logMolFrac[id]);
-      //    }
-
-            //if (id == 36) {
-            //    System.out.println("logSaha21 " + logE*logSaha21 + " logSaha32 " + logE*logSaha32);
-            //    System.out.println("IonFracII " + Math.exp(logIonFracII) + " IonFracI " + Math.exp(logIonFracI) + " logNe " + logE*logNe);
-            //}
-            //System.out.println("LevelPops: id, ionFracI, ionFracII: " + id + " " + Math.exp(logIonFracI) + " " + Math.exp(logIonFracII) );
-                //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
+         // if (id == 16){
+         //      console.log("id " + id + " logMolFrac[id] " + logE*logMolFrac[id]);
+         // }
 
             //logNums[id] = logNum[id] + logMolFrac;
         } //id loop
 
         return logMolFrac;
     }; //end method molPops    
+
+
+ /**
+ * Collection of methods for computing molecular band opacity in the
+ * Just-overlapping-line approximation (JOLA)
+ * Just-overlapping line approximation treats molecular ro-vibrational bands as pseudo-continuum
+ * opacity sources by "smearing" out the individual rotational fine-structure lines
+ *See 1982A&A...113..173Z, Zeidler & Koestler, 1982
+ */
+
+    var jolaGrid = function(jolaLambda, jolaNumPoints){
+
+     //Try linear wavelength sampling of JOLA band for now...
+
+      var jolaPoints = [];
+      jolaPoints.length = jolaNumPoints;
+
+      var iLambD = 0.0;
+      var deltaLamb = (jolaLambda[1] - jolaLambda[0]) / jolaNumPoints;
+
+      for (var iL = 0; iL < jolaNumPoints; iL++){
+         iLambD = 1.0*iL;
+         jolaPoints[iL] = jolaLambda[0] + iLambD*deltaLamb; //nm
+        // console.log("iL: " + iL + " jolaPoints " + jolaPoints[iL]);
+      }
+
+      return jolaPoints; //nm
+
+    }; //end method jolaGrid
+
+//
+//JOLA profile for P (Delta J = 1) and R (Delta J = 1) branches
+//Equation 19 from Zeidler & Koestler
+    var jolaProfilePR = function(omega0, logf, vibConst,
+                    jolaPoints, alphP, alphR, numDeps, temp) {
+
+        var log10E = logTen(Math.E);
+
+          var numPoints = jolaPoints.length;
+ // derivative of rotational-line oscillator strength with respect to frequency
+          var dfBydw = [];
+          dfBydw.length = numPoints;
+          for (var ii = 0; ii < numPoints; ii++){
+             dfBydw[ii] = [];
+             dfBydw[ii].length = numDeps;
+          }
+          var fvv = Math.exp(logf);
+
+          var logHcBbyK = logH + logC + Math.log(vibConst[0]) - logK;
+
+ //System.out.println("omega0 " + omega0 + " logf " + log10E*logf + " vibConst " + vibConst[0] + " " + vibConst[1] + " alphP " + alphP + " alphR " + alphR);
+
+          var Bsum = vibConst[1] + vibConst[0];
+          var Bdiff = vibConst[1] - vibConst[0];
+
+//value of J-related "m" at band-head:
+          var mH = -1.0 * Bsum / (2.0*Bdiff); //Eq. 14
+//Frequency (or wavenumber??) at band head:
+          var wH = ( -1.0 * Bdiff * mH*mH ) + omega0; //Eq. 15  
+          //System.out.println("1.0/wH " + 1.0/wH + " 1.0/omega0 " + 1.0/omega0);
+
+          var mTheta1 = 1.0; //R branch?
+          var mTheta2 = 1.0; //P branch?
+
+          var m1, m2; // related to J, for R & P branches, respectively
+          var alpha1 = 1.0;
+          var alpha2 = 1.0;
+
+ //value of m is closely related to rotational quantum number J,
+ //Near band origin, frequency, w, range should correspond to -1 <= m <= 1 - ???:
+          //double wMin = Useful.c / (1.0e-7*jolaPoints[numPoints-1]); //first frequency omega
+          //double wMax = Useful.c / (1.0e-7*jolaPoints[0]); //last frequency omega
+          //double deltaW = 0.02;
+          var w, logW, m1Fctr, m2Fctr, mHelp, wMinuswHOverBDiff;
+          var denom1, denom2, m1Term, m2Term;
+          var help1, logHcBbyKt, hcBbyKt;
+
+//Outer loop over frequency omega 
+         // for (int iW = -1; iW <= 1; iW++){
+          for (var iW = numPoints-1; iW >= 0; iW--){
+
+             //dW = 1.0 * iW; 
+             //w = wMin + (dW*deltaW); 
+             //logW = Useful.logC - Math.log(1.0e-7*jolaPoints[iW]); //if w is freq in Hz
+             logW = 0.0 - Math.log(1.0e-7*jolaPoints[iW]); //if w is waveno in cm^-1 
+             w = Math.exp(logW);
+             //System.out.println("logW " + log10E*logW);
+             //I have no idea if this is right...
+             wMinuswHOverBDiff = (w - wH) / Bdiff;
+             mHelp = Math.sqrt(Math.abs(wMinuswHOverBDiff));  //Eq. 17
+             m1 = mH + mHelp;
+             m2 = mH - mHelp; //Eq. 18
+             //System.out.println("mH " + mH + " m1 " + m1 + " m2 " + m2);
+             m1Fctr = (m1*m1 - m1);
+             m2Fctr = (m2*m2 - m2);
+//The following association between the sign of m1 or m2 and whether 
+//it's the P or the R branch might be backwards:
+             if (m1 < 0){
+               alpha1 = alphP;
+             }
+             if (m1 >= 0){
+               alpha1 = alphR;
+             }
+             if (m2 < 0){
+               alpha2 = alphP;
+             }
+             if (m2 >= 0){
+               alpha2 = alphR;
+             }
+
+             denom1 = Math.abs(Bsum + 2.0*m1*Bdiff);
+             denom2 = Math.abs(Bsum + 2.0*m2*Bdiff);
+
+             for (var iD = 0; iD < numDeps; iD++){
+
+               if (wMinuswHOverBDiff > 0){
+                 logHcBbyKt = logHcBbyK - temp[1][iD];
+                 hcBbyKt = Math.exp(logHcBbyKt);
+
+                 help1 = -1.0 * hcBbyKt * m1Fctr;
+                 m1Term = alpha1 * mTheta1 * Math.exp(help1) / denom1;
+
+                 help1 = -1.0 * hcBbyKt * m2Fctr;
+                 m2Term = alpha2 * mTheta2 * Math.exp(help1) / denom2;
+
+//Can this be used like a differential cross-section (once converted to sigma)?  
+                 //console.log("fvv " + fvv + " hcBbyKt " + hcBbyKt + " m1Term " + m1Term + " m2Term " + m2Term); 
+                 dfBydw[iW][iD] = fvv * hcBbyKt * ( m1Term + m2Term );  // Eq. 19     
+               } else {
+                 dfBydw[iW][iD] = 0.0;
+               }
+               //if (iD%10 == 1){
+               //  console.log("PR iD " + iD + " iW " + iW + " dfBydw " + dfBydw[iW][iD]);
+               //}
+
+             } //iD - depth loop 
+
+          } //iW - frequency loop
+
+       return dfBydw;
+
+    }; //end method jolaProfilePR 
+//
+
+//JOLA profile for Q (Delta J = 0) branch
+//Equation 24 from Zeidler & Koestler
+    var jolaProfileQ = function(omega0, logf, vibConst,
+                     jolaPoints, alphQ, numDeps, temp){
+
+          var numPoints = jolaPoints.length;
+ // derivative of rotational-line oscillator strength with respect to frequency
+          var dfBydw = [];
+          dfBydw.length = numPoints;
+          for (var ii = 0; ii < numPoints; ii++){
+             dfBydw[ii] = [];
+             dfBydw[ii].length = numDeps;
+          }
+          var fvv = Math.exp(logf);
+          var logHcBbyK = logH + logC + Math.log(vibConst[0]) - logK;
+
+          var Bsum = vibConst[1] + vibConst[0];
+          var Bdiff = vibConst[1] - vibConst[0];
+
+          var mQ; // related to J, for R & P branches, respectively
+
+ //value of m is closely related to rotational quantum number J,
+ //Near band origin, frequency, w, range should correspond to -1 <= m <= 1 - ???:
+    //      double wMin = Useful.c / (1.0e-7*lambda[1]); //first frequency omega
+     //     double wMax = Useful.c / (1.0e-7*lambda[0]); //last frequency omega
+      //    double deltaW = 0.02;
+          var w, logW, mQFctr, mHelp;
+          var denom, mQTerm, wMinusw0OverBDiff;
+          var help1, logHcBbyKt, hcBbyKt;
+
+//Outer loop over frequency omega 
+          //for (int iW = -1; iW <= 1; iW++){
+          for (var iW = numPoints-1; iW >= 0; iW--){
+
+             //dW = 1.0 * iW; 
+             //w = wMin + (dW*deltaW); 
+             //logW = Useful.logC - Math.log(1.0e-7*jolaPoints[iW]); //if w is freq in Hz
+             logW = 0.0 - Math.log(1.0e-7*jolaPoints[iW]); //if w is waveno in cm^-1 
+             w = Math.exp(logW);
+
+             //I have no idea if this is right...
+             wMinusw0OverBDiff = (w - omega0) / Bdiff;
+             mHelp = 0.25 + Math.abs(wMinusw0OverBDiff);
+             mHelp = Math.sqrt(mHelp);  //Eq. 17
+             mQ = -0.5 + mHelp;
+             mQFctr = (mQ*mQ - mQ);
+             denom = Math.abs(Bdiff);
+
+             for (var iD = 0; iD < numDeps; iD++){
+
+               if (wMinusw0OverBDiff > 0){
+
+                 logHcBbyKt = logHcBbyK - temp[1][iD];
+                 hcBbyKt = Math.exp(logHcBbyKt);
+
+                 help1 = -1.0 * hcBbyKt * mQFctr;
+                 mQTerm = Math.exp(help1) / denom;
+
+
+//Can this be used like a differential cross-section (once converted to sigma)?  
+                 //System.out.println("alphQ " + alphQ + " fvv " + " logHcBbyKt " + logHcBbyKt + " mQTerm " + mQTerm);
+                 dfBydw[iW][iD] = alphQ * fvv * hcBbyKt * mQTerm;  // Eq. 24      
+
+               } else {
+
+                  dfBydw[iW][iD] = 0.0;
+
+               }
+
+               //if (iD%10 == 1){
+                 //System.out.println("Q iD " + iD + " iW " + iW + " dfBydw " + dfBydw[iW][iD]);
+               //}
+
+             } //iD - depth loop 
+
+          } //iW - frequency loop
+
+       return dfBydw;
+
+
+    }; //end method jolaProfileQ 
+  //
+
+    var jolaKap = function(jolaLogNums, dfBydw, jolaPoints,
+                     numDeps, temp, rho){
+
+      var log10E = logTen(Math.E);
+
+      var numPoints = jolaPoints.length;
+
+      var logKappaJola = [];
+      logKappaJola.length = numPoints;
+      for (var ii = 0; ii < numPoints; ii++){
+          logKappaJola[ii] = [];
+          logKappaJola[ii].length = numDeps;
+      }
+//Initialize this carefully:
+
+     for (var iD = 0; iD < numDeps; iD++){
+       for (var iW = 0; iW < numPoints; iW++){
+          logKappaJola[iW][iD] = -999.0;
+       }
+     }
+
+      var stimEmExp, stimEmLogExp, stimEmLogExpHelp, stimEm;
+      var freq, lastFreq, w, lastW, deltaW, thisDeltaF;
+      var logSigma = -999.0;
+      var logFreq = logC - Math.log(1.0e-7 * jolaPoints[0]);
+      var logW = 0.0 - Math.log(1.0e-7 * jolaPoints[0]); //if w is waveno in cm^-1
+      //lastFreq = Math.exp(logFreq); 
+      lastW = Math.exp(logW);
+
+//try accumulating oscillator strenth, f, across band - assumes f = 0 at first (largest) lambda- ??
+     var thisF = 0.0;
+
+//loop in order of *increasing* wavenumber
+      for (var iW = numPoints-1; iW >=1; iW--){
+
+//df/dv is a differential oscillator strength in *frequency* space:
+        logFreq = logC - Math.log(1.0e-7*jolaPoints[iW]);
+        freq = Math.exp(logFreq);
+        logW = 0.0 - Math.log(1.0e-7 * jolaPoints[iW]); //if w is waveno in cm^-1
+        w = Math.exp(logW); //if w is waveno in cm^-1
+        //deltaW = Math.abs(freq - lastFreq);
+        deltaW = Math.abs(w - lastW);
+
+//For LTE stimulated emission correction:
+        stimEmLogExpHelp = logH + logFreq - logK;
+
+        for (var iD = 0; iD < numDeps; iD++){
+
+          thisDeltaF = deltaW * dfBydw[iW][iD];
+          if (thisDeltaF > 0.0){
+            thisF += thisDeltaF;
+            logSigma = Math.log(thisF) + Math.log(Math.PI) + 2.0*logEe - logMe - logC;
+          } else {
+            logSigma = -999.0;
+          }
+
+// LTE stimulated emission correction:
+          stimEmLogExp = stimEmLogExpHelp - temp[1][iD];
+          stimEmExp = -1.0 * Math.exp(stimEmLogExp);
+          stimEm = ( 1.0 - Math.exp(stimEmExp) );
+
+//extinction coefficient in cm^2 g^-1:
+          logKappaJola[iW][iD] = logSigma + jolaLogNums[iD] - rho[1][iD] + Math.log(stimEm);
+          //logKappaJola[iW][iD] = -999.0; 
+          //if (iD%10 == 1){
+          //  console.log("iD " + iD + " iW " + iW + " logFreq " + log10E*logFreq + " logW " + log10E*logW + " logStimEm " + log10E*Math.log(stimEm));
+          //  console.log("iD " + iD + " iW " + iW + " thisDeltaF " + thisDeltaF + " logSigma " + log10E*logSigma + " jolaLogNums " + log10E*jolaLogNums[iD] + " rho " + log10E*rho[1][iD] + " logKappaJola " + log10E*logKappaJola[iW][iD]);
+          //} 
+
+        } //iD loop - depths
+
+          lastFreq = freq;
+      } //iW loop - wavelength
+
+      return logKappaJola;
+
+    }; //end method jolaKap
+
+
     

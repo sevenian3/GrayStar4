@@ -3512,7 +3512,7 @@ var h = 6.62606957E-27; //Planck's constant in ergs sec
 var logC = Math.log(c);
 var logK = Math.log(k);
 var logH = Math.log(h);
-         //var logE = Math.log10(Math.E);
+         var logE = Math.log10(Math.E);
 
          var masterBF = [];
          masterBF.length = numLams;
@@ -3638,6 +3638,8 @@ var logH = Math.log(h);
             }  
             logGroundPopsC1[iD] = stagePops[5][0][iD] - logStatWC1; 
             logGroundPopsMg1[iD] = stagePops[11][0][iD] - logStatWMg1; 
+            //console.log("iD " + iD + " stagePops[11][0] " + logE*(stagePops[11][0][iD]+temp[1][iD]+logK));
+           // console.log("iD " + iD + " stagePops[11][0] " + Math.exp(stagePops[11][0][iD]+temp[1][iD]+logK));
             logGroundPopsMg2[iD] = stagePops[11][1][iD] - logStatWMg2; 
             logGroundPopsAl1[iD] = stagePops[12][0][iD] - logStatWAl1; 
             logGroundPopsSi1[iD] = stagePops[13][0][iD] - logStatWSi1; 
@@ -3699,7 +3701,8 @@ var logH = Math.log(h);
                stimEmExp = -1.0 * Math.exp(stimEmLogExp);
                stimEm = ( 1.0 - Math.exp(stimEmExp) ); //LTE correction for stimulated emission  
 
-               kapBF = aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD] ;
+               //kapBF = aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD] ;
+               kapBF = aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD]; // + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD];  //debug
                masterBF[iL][iD] = Math.log(kapBF) + Math.log(stimEm);
              //  if ( (iD%10 == 0) && (iL%10 == 0) ) {
              //    System.out.format("%03d, %03d, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %n", 

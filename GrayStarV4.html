@@ -98,6 +98,19 @@
                     showTooltip: "true",
                     editableTooltip: "true"
                 });
+                $("#AtmPress").roundSlider({
+                    radius: "45",
+                    width: "10",
+                    handleSize: "24,12",
+                    handleShape: "round",
+                    sliderType: "min-range",
+                    value: "105.0",
+                    min: "5.0",
+                    max: "6800.0",
+                    step: "5.0",
+                    showTooltip: "true",
+                    editableTooltip: "true"
+                });
                 $("#GHTemp").roundSlider({
                     radius: "45",
                     width: "10",
@@ -230,7 +243,7 @@
                             <td>
                                 <span title="Surface temperature of spherical blackbody radiation emitter of equivalent bolometric surface flux, in Kelvins (K)"> 
                                     <a href="http://en.wikipedia.org/wiki/Effective_temperature" target="_blank">Effective temperature, <em>T</em><sub>eff</sub></a> <br />
-                                    (3400 - 50000) 
+                                    (3200 - 50000) 
                                     <a href="http://en.wikipedia.org/wiki/Kelvin" target="_blank">K</a>) <br />
                                     <!-- <input id="Teff" type="number" name="Teff" value=5800 size="5" min="3500" max="25000" step="25"/> -->
                                     <!-- <input id="Teff" type="range" name="Teff" value="5800" min="3500" max="25000" step="10" onchange="displayTeff()"/> -->
@@ -299,6 +312,13 @@
                     </legend> 
                     <table>
                         <tr>
+                            <td>
+                                <span title="Atmospheric pressure at surface ('sea level'), in kiloPascals (kPa) - affects steam line"> 
+                                    <a href="https://en.wikipedia.org/wiki/Atmospheric_pressure" target="_blank">Surf pressure </a> <br />
+                                    (5 - 6800 <a href="https://en.wikipedia.org/wiki/Pascal_(unit)" target="_blank">kPa</a>) <br />
+                                    <div id="AtmPress"></div>
+                                </span>
+                            </td>
                             <td>
                                 <span title="Boost in planetary surface temperature caused by planet's atmosphere, in Kelvins (K)"> 
                                     <a href="https://en.wikipedia.org/wiki/Greenhouse_effect" target="_blank">Greenhouse effect, <em>&#916T</em></a> <br />
@@ -713,12 +733,30 @@
                                 <span title="Mixing-length superadiabitc convection: ONLY works well for solar-type stars">
                                     <input id="convec" type="checkbox" name="convec" />Convection (dangerous!)
                                 </span>
-                            </td> -->
-                            <td>
+                            </td> -->  
+                            <td> 
                                 <span style="color:indigo" title="Stores atmospheric structure if ONLY re-computing line - faster.">
                                     <input id="lineOnly" type="checkbox" name="lineOnly" />ONLY update spectral line 
                                 </span>
-                            </td>                           
+                            </td>  
+                            <td>
+                                 <span title="Number of outer HSE (Pgas) - EOS - Opacity iterations">
+                                    No. HSE-EOS-Opac iters
+                                    <input id="nOuterIter" type="number" name="nOuterIter" value="8" size="3" min="5" max="12" step="1" />
+                                 </span> 
+                            </td>
+                            <td>
+                                 <span title="Number of inner Pe - ionization equilibrium - molecular equilibrium iterations">
+                                    No. Pe-IonEquil-MolecEquil iters
+                                    <input id="nInnerIter" type="number" name="nInnerIter" value="8" size="3" min="5" max="12" step="1" />
+                                 </span> 
+                            </td> 
+                            <td>
+                                 <span title="Include Titanium oxide molecular band opacity">
+                                    TiO bands (C<sup>3</sup>&#916-X<sup>3</sup>&#916, c<sup>1</sup>&#934-a<sup>1</sup>&#916, A<sup>3</sup>&#934-X<sup>3</sup>&#934)
+                                    <input id="ifTiO" type="checkbox" name="ifTiO" checked="checked" />
+                                 </span>
+                            </td>
                         </tr>
                     </table>
                 </fieldset> 
@@ -753,8 +791,8 @@
             <fieldset>
               <legend>Narrow band Gaussian filter</legend>
             <span title="Wavelength (nm)">
-                <em>&#955</em> (360 - 900 nm)
-                <input id="diskLam" type="number" name="diskLambda" value=500.0 size="4" min="360.0" max="900.0" step="0.01"/>
+                <em>&#955</em> (270 - 2550 nm)
+                <input id="diskLam" type="number" name="diskLambda" value=500.0 size="4" min="270.0" max="2550.0" step="0.01"/>
             </span>
             <span title="RMS deviation (&#963) (nm) (especially useful near spectral lines)">
                  <em>&#963</em> (0.01 - 10 nm)
@@ -881,6 +919,11 @@
             <canvas id="plotTwelveCnvs" width="450" height="350"></canvas>
         </div>
 
+        <!-- SED: I_lambda, F_lambda(lambda) -->
+        <div id="plotFive" class="radPanel">
+            <canvas id="plotFiveCnvs" width="450" height="350"></canvas>
+        </div>          
+
         <!-- Limb darkening: I_lambda(theta) -->
         <div id="plotFour" class="radPanel" style="display:none">
             <canvas id="plotFourCnvs" width="450" height="350"></canvas>
@@ -910,11 +953,6 @@
         <div id="plotEight" class="linePanel" style="display:none">
             <canvas id="plotEightCnvs" width="450" height="350"></canvas>
         </div> 
-
-        <!-- SED: I_lambda, F_lambda(lambda) -->
-        <div id="plotFive" class="radPanel" style="display:none">
-            <canvas id="plotFiveCnvs" width="450" height="350"></canvas>
-        </div>          
 
         <!-- Pgas, Prad vs log(Tau) -->
         <div id="plotThree" class="atmosPanel" style="display:none">

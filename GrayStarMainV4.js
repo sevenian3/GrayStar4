@@ -1,7 +1,7 @@
 /*
  * The openStar project: stellar atmospheres and spectra
  *
- * grayStar
+ * GrayStar
  * V3.0, May 2015
  * JQuery version
  * 
@@ -142,7 +142,7 @@ function main() {
     //console.log(" atmosSettingsId[0].name " + atmosSettingsId[0].name + " atmosSettingsId[0].value " + atmosSettingsId[0].value);
 //JQuery:  Independent of order of switches in HTML file?
 // Stellar atmospheric parameters
-    var numInputs = 26;
+    var numInputs = 30;
 //Make settingsId object array by hand:
 // setId() is an object constructor
     function setId(nameIn, valueIn) {
@@ -179,6 +179,8 @@ function main() {
 // Planetary parameters for habitable zone calculation
     //var greenHouse = 1.0 * $("#GHTemp").val(); // Delta T_Surf boost K
     //var greenHouse = 1.0 * $("#GHTemp").roundSlider("getValue");
+    var atmosPressObj = $("#AtmPress").data("roundSlider");
+    var atmosPress = 1.0 * atmosPressObj.getValue();
     var greenHouseObj = $("#GHTemp").data("roundSlider");
     var greenHouse = 1.0 * greenHouseObj.getValue();
     //var albedo = 1.0 * $("#Albedo").val(); //unitless reflectivity
@@ -211,9 +213,14 @@ function main() {
     var macroV = 1.0 * $("#macroV").val(); // km/s
     var rotV = 1.0 * $("#rotV").val(); // km/s
     var rotI = 1.0 * $("#rotI").val(); // degrees
+    var nOuterIter = $("#nOuterIter").val(); //number of outer HSE-EOS-Opacity iterations
+    var nInnerIter = $("#nInnerIter").val(); //number of inner Pe-(ion. fraction) iterations
 //test    var rotV = 10.0;  //surface equatorial rotation velocity in km/s
 //test    var rotI = 90.0;  //angle of rotation axis wrt to line-of-sight in degrees
 //test    var macroV = 2.0;  //standard deviation of Gaussian macroturbulent velocity field in km/s 
+
+   // var nOuterIter = 12;
+   // var nInnerIter = 12;
 
 
 //// Temporary Defaults:
@@ -253,6 +260,7 @@ function main() {
     settingsId[26] = new setId("<em>v</em><sub>Macro</sub>", macroV);
     settingsId[27] = new setId("<em>v</em><sub>Rot</sub>", rotV);
     settingsId[28] = new setId("<em>i</em><sub>Rot</sub>", rotI);
+    settingsId[29] = new setId("<span style='color:green'>AtmP</span>", atmosPress);
     //
     var numPerfModes = 8;
     var switchPerf = "Fast"; //default initialization
@@ -291,6 +299,8 @@ function main() {
     var ifPrintLine = false;
     var ifPrintChem = false;
     //
+    var ifTiO = 0;
+
     //
 
 //
@@ -343,6 +353,11 @@ function main() {
             ifScatt = true; // checkbox
         }
     }
+
+    if ($("#ifTiO").is(":checked")) {
+        ifTiO = 1; // checkbox
+    }
+
 
     // Display options:
     if ($("#showAtmos").is(":checked")) {
@@ -600,6 +615,10 @@ function main() {
     }
 
     if (switchPlanet === "Earth") {
+        var AtmPress = 101.3;
+        settingsId[29].value = 101.3;
+        //$("#AtmPress").val(101.3);
+        $("#AtmPress").roundSlider("setValue", "100.0");
         var GHTemp = 20.0;
         settingsId[4].value = 20.0;
         //$("#GHTemp").val(20.0);
@@ -674,6 +693,7 @@ function main() {
 
     var numDeps = 48;
   var nelemAbnd = 40;
+  var numStages = 7;
 //  var nome = [];
 //  nome.length = nelemAbnd;
   var eheu = []; 
@@ -685,6 +705,28 @@ function main() {
   for (var i = 0 ; i < nelemAbnd; i++){
      logNz[i] = [];
      logNz[i].length = numDeps;
+  }
+    var logNH = []; 
+    logNH.length = numDeps;
+//One more than stage than actual number populated:
+  var masterStagePops = [];
+  masterStagePops.length = nelemAbnd;
+  for (var i = 0; i < nelemAbnd; i++){
+     masterStagePops[i] = [];
+     masterStagePops[i].length = numStages;
+     for (var j = 0; j < numStages; j++){
+        masterStagePops[i][j] = [];
+        masterStagePops[i][j].length = numDeps;
+     }
+  }
+//Default initialization of  masterStagePops - now necessary for iterative coupling of ionization
+// and molecular equilibria
+  for (var i = 0; i < nelemAbnd; i++){
+     for (var j = 0; j < numStages; j++){
+        for (var k = 0; k < numDeps; k++){
+           masterStagePops[i][j][k] = -49.0; //logarithmic!
+        }
+     }
   }
   var cname = [];
   cname.length = nelemAbnd;
@@ -922,10 +964,33 @@ function main() {
   mnameA[17] = "V"; 
   mnameB[17] = "O";  */
 
-//Testing:
-//  mname[0] = "N2";
-//  mnameA[0] = "N"; 
-//  mnameB[0] = "N"; 
+
+//Set up for molecules with JOLA bands:
+   var jolaTeff = 5000.0;
+   //var jolaTeff = 1500.0; //test
+   var numJola = 3; //for now
+   //var numJola = 2; // test
+   var jolaSpecies = []; // molecule name
+   jolaSpecies.length = numJola;
+   var jolaSystem = []; //band system
+   jolaSystem.length = numJola;
+   var jolaDeltaLambda = []; //band system
+   jolaDeltaLambda.length = numJola;
+
+   if (teff <= jolaTeff){
+
+     jolaSpecies[0] = "TiO"; // molecule name
+     jolaSystem[0] = "TiO_C3Delta_X3Delta"; //band system //DeltaLambda=0
+     jolaDeltaLambda[0] = 0;
+     jolaSpecies[1] = "TiO"; // molecule name
+     jolaSystem[1] = "TiO_c1Phi_a1Delta"; //band system //DeltaLambda=1
+     jolaDeltaLambda[1] = 1;
+     jolaSpecies[2] = "TiO"; // molecule name
+     jolaSystem[2] = "TiO_A3Phi_X3Phi"; //band system //DeltaLambda=0
+     jolaDeltaLambda[2] = 0;
+
+   }
+
 
   var logE = logTen(Math.E); // for debug output
   var logE10 = Math.log(10.0);
@@ -1391,9 +1456,26 @@ function main() {
 
     // Planetary parameters for habitable zone calculation:
     //
-    if (greenHouse === null || greenHouse === "") {
-        alert("greenHouse must be filled out");
+    if (atmosPress === null || atmosPress === "") {
+        alert("atmosPress must be filled out");
         return;
+    }
+    flagArr[29] = false;
+    if (atmosPress < 10.0) {
+        flagArr[29] = true;
+        atmosPress = 10.0;
+        var atmosPressStr = "10.0";
+        settingsId[29].value = 10.0;
+        //$("#AtmPress").val(10.0);
+        $("#AtmPress").roundSlider("setValue", 10.0);
+    }
+    if (atmosPress > 6800.0) {
+        flagArr[29] = true;
+        atmosPress = 6800.0;
+        var atmosPressStr = "6800.0";
+        settingsId[29].value = 6800.0;
+        //$("#AtmPress").val(6800.0);
+        $("#AtmPress").roundSlider("setValue", 6800.0);
     }
     flagArr[4] = false;
     if (greenHouse < 0.0) {
@@ -1427,7 +1509,7 @@ function main() {
     }
     if (albedo > 1.0) {
         flagArr[5] = true;
-        greenHouse = 1.0;
+        albedo = 1.0;
         var albedoStr = "1.0";
         settingsId[5].value = 1.0;
         //$("#Albedo").val(1.0);
@@ -1872,6 +1954,47 @@ function main() {
         $("#rotI").val(90.0);
     }
 
+    if (nOuterIter === null || nOuterIter === "") {
+        alert("nOuterIter must be filled out");
+        return;
+    }
+    //flagArr[28] = false;
+    if (nOuterIter < 5) {
+        //flagArr[28] = true;
+        nOuterIter = 5;
+        var nOuterIterStr = "5";
+        //settingsId[28].value = 0.0;
+        $("#nOuterIter").val(5);
+    }
+    if (nOuterIter > 12) {
+        //flagArr[28] = true;
+        nOuterIter = 12;
+        var nOuterIterStr = "12";
+        //settingsId[28].value = 90.0;
+        $("#nOuterIter").val(12);
+    }
+
+    if (nInnerIter === null || nInnerIter === "") {
+        alert("nInnerIter must be filled out");
+        return;
+    }
+    //flagArr[28] = false;
+    if (nInnerIter < 5) {
+        //flagArr[28] = true;
+        nInnerIter = 5;
+        var nInnerIterStr = "5";
+        //settingsId[28].value = 0.0;
+        $("#nInnerIter").val(5);
+    }
+    if (nInnerIter > 12) {
+        //flagArr[28] = true;
+        nInnerIter = 12;
+        var nInnerIterStr = "12";
+        //settingsId[28].value = 90.0;
+        $("#nInnerIter").val(12);
+    }
+
+
  //console.log("rotV " + rotV + " rotI " + rotI + " macroV " + macroV);
 
 //For rotation:
@@ -1996,7 +2119,7 @@ function main() {
 
     if (ifShowRad === false) {
         plotFourId.style.display = "none";
-        plotFiveId.style.display = "none";
+       // plotFiveId.style.display = "none";
     }
     if (ifShowLine === false) {
         plotSixId.style.display = "none";
@@ -2027,11 +2150,12 @@ function main() {
     var log10MaxDepth = 2.0;
     //var numThetas = 10; // Guess
 
-    var numLams = 250;
-    //var numLams = 100;
-    var lamUV = 300.0;
-    //var lamUV = 100.0;
-    var lamIR = 1000.0;
+    //var numLams = 250;
+    var numLams = 350;
+    //var lamUV = 300.0;
+    var lamUV = 260.0;
+    //var lamIR = 1000.0;
+    var lamIR = 2600.0;
     var lamSetup = [lamUV * 1.0e-7, lamIR * 1.0e-7, numLams]; //Start, end wavelength (nm), number of lambdas
  
     var lambdaScale = lamgrid(numLams, lamSetup); //nm
@@ -2168,6 +2292,7 @@ function main() {
     NeSun[0].length = numDeps;
     NeSun[1].length = numDeps;
     //
+  var numStages = 4;
 
     if (ifLineOnly === true) {
 
@@ -2251,11 +2376,7 @@ function main() {
     temp[0].length = numDeps;
     temp[1].length = numDeps;
     var depths = [];
-    depths.length = 2;
-    depths[0] = [];
-    depths[1] = [];
-    depths[0].length = numDeps;
-    depths[1].length = numDeps;
+    depths.length = numDeps;
     //var kappa = [];
     //kappa.length = 2;
     //kappa[0] = [];
@@ -2311,7 +2432,44 @@ function main() {
     Ne[1] = [];
     Ne[0].length = numDeps;
     Ne[1].length = numDeps;
+    var logNH = []; 
+    logNH.length = numDeps;
+    var thisLogN = [];
+    thisLogN.length = numDeps;
+    var newNe = [];
+    newNe.length = 2;
+    newNe[0] = [];
+    newNe[1] = [];
+    newNe[0].length = numDeps;
+    newNe[1].length = numDeps;
+  var kappaRos = [];
+  kappaRos.length = 2;
+  kappaRos[0] = [];
+  kappaRos[1] = [];
+  kappaRos[0].length = numDeps;
+  kappaRos[1].length = numDeps;
+  var kappa500 = [];
+  kappa500.length = 2;
+  kappa500[0] = [];
+  kappa500[1] = [];
+  kappa500[0].length = numDeps;
+  kappa500[1].length = numDeps;
 
+  var chiIArr = [];
+  chiIArr.length = numStages;
+  var log10UwAArr = [];
+  log10UwAArr.length = numStages;
+  for (var i = 0; i < numStages; i++){
+    log10UwAArr[i] = [];
+    log10UwAArr[i].length = 2;
+    log10UwAArr[i][0] = 0.0; //default initialization - logarithmic
+    log10UwAArr[i][1] = 0.0; //default initialization - logarithmic
+  }
+// This holds 2-element temperature-dependent base 10 logarithmic parition fn:
+        var thisUwV = []; 
+        thisUwV.length = 2;
+         thisUwV[0] = 0.0; //default initialization
+         thisUwV[1] = 0.0;
 //
     if (ifLineOnly === true) {
 
@@ -2326,8 +2484,7 @@ function main() {
             temp[1][i] = Number(sessionStorage.getItem(storeName));
             temp[0][i] = Math.exp(temp[1][i]);
             storeName = "depth" + String(i);
-            depths[1][i] = Number(sessionStorage.getItem(storeName));
-            depths[0][i] = Math.exp(temp[1][i]);
+            depths[i] = Number(sessionStorage.getItem(storeName));
 //console.log("  *****  Getting logKappa from memory ******");
             for (var iL = 0; iL < numLams; iL++){
                storeName = "kapp" + String(iL) + "_" + String(i);
@@ -2347,6 +2504,17 @@ function main() {
             storeName = "Ne" + String(i);
             Ne[1][i] = Number(sessionStorage.getItem(storeName));
             Ne[0][i] = Math.exp(Ne[1][i]);
+            storeName = "newNe" + String(i);
+            newNe[1][i] = Number(sessionStorage.getItem(storeName));
+            newNe[0][i] = Math.exp(newNe[1][i]);
+            storeName = "logNH" + String(i);
+            logNH[i] = Number(sessionStorage.getItem(storeName));
+            storeName = "kappaRos" + String(i);
+            kappaRos[1][i] = Number(sessionStorage.getItem(storeName));
+            kappaRos[0][i] = Math.exp(kappaRos[1][i]);
+            storeName = "kappa500" + String(i);
+            kappa500[1][i] = Number(sessionStorage.getItem(storeName));
+            kappa500[0][i] = Math.exp(kappa500[1][i]);
         }
 
     } else {
@@ -2398,6 +2566,23 @@ function main() {
             guessNe = phx10kRefNe(numDeps, temp, guessPe);
         }
 
+      logNz = getNz(numDeps, temp, guessPGas, guessPe, ATot, nelemAbnd, logAz);
+      for (var i = 0 ; i < numDeps; i++){ 
+         logNH[i] = logNz[0][i];
+  //set the initial guess H^+ number density to the e^-1 number density
+         masterStagePops[0][1][i] = guessPe[1][i]; //iElem = 0: H; iStage = 1: II
+         //System.out.println("i " + i + " logNH[i] " + logE*logNH[i]);
+      } 
+ 
+ //Load the total no. density of each element into the nuetral stage slots of the masterStagePops array as a first guess at "species B" neutral
+ //populations for the molecular Saha eq. - Reasonable first guess at low temp where molecuales form
+ 
+    for (var iElem = 0; iElem < nelemAbnd; iElem++){
+       for (var iD = 0; iD < numDeps; iD++){
+          masterStagePops[iElem][0][iD] = logNz[iElem][iD];
+       }
+    }
+ 
   //console.log("guessPGas[1] " + " guessPe[1][i] " + " guessNe[1][i]");
   //for (var i = 0; i < numDeps; i++){
   //   console.log("i " + i + " " + logE*guessPGas[1][i] + " " + logE*guessPe[1][i] + " " + logE*guessNe[1][i]);
@@ -2439,29 +2624,7 @@ function main() {
 
 
 //One more than stage than actual number populated:
-  var numStages = 4;
   var species = " "; //default initialization
-  var logNH = []; 
-  logNH.length = numDeps;
-  var masterStagePops = [];
-  masterStagePops.length = nelemAbnd;
-  for (var i = 0; i < nelemAbnd; i++){
-     masterStagePops[i] = [];
-     masterStagePops[i].length = numStages;
-     for (var j = 0; j < numStages; j++){
-        masterStagePops[i][j] = [];
-        masterStagePops[i][j].length = numDeps;
-     }
-  }
-//Default initialization of  masterStagePops - now necessary for iterative coupling of ionization
-// and molecular equilibria
-  for (var i = 0; i < nelemAbnd; i++){
-     for (var j = 0; j < numStages; j++){
-        for (var k = 0; k < numDeps; k++){
-           masterStagePops[i][j][k] = -49.0; //logarithmic!
-        }
-     }
-  }
   var tauOneStagePops = [];
   tauOneStagePops.length = nelemAbnd;
   for (var i = 0; i < nelemAbnd; i++){
@@ -2470,14 +2633,6 @@ function main() {
   }
   var unity = 1.0;
   var zScaleList = 1.0; //initialization
-  var log10UwAArr = [];
-  log10UwAArr.length = numStages;
-  for (var i = 0; i < numStages; i++){
-    log10UwAArr[i] = [];
-    log10UwAArr[i].length = 2;
-    log10UwAArr[i][0] = 0.0; //default initialization - logarithmic
-    log10UwAArr[i][1] = 0.0; //default initialization - logarithmic
-  }
 //  var thisUw1V = []; 
 //  thisUw1V.length = 2;
 //  var thisUw2V = []; 
@@ -2487,8 +2642,6 @@ function main() {
 //  var thisUw4V = [];*/ 
 //  thisUw4V.length = 2;
 //
-  var chiIArr = [];
-  chiIArr.length = numStages;
 // //Ground state ionization E - Stage I (eV)
 //  var thisChiI1;
 // //Ground state ionization E - Stage II (eV)
@@ -2520,12 +2673,6 @@ function main() {
   var thisQwAB;
   var thisDissE;
 //
-  var newNe = [];
-  newNe.length = 2;
-  newNe[0] = [];
-  newNe[1] = [];
-  newNe[0].length = numDeps;
-  newNe[1].length = numDeps;
   var newPe = [];
   newPe.length = 2;
   newPe[0] = [];
@@ -2552,32 +2699,6 @@ function main() {
   //var mmw = []; 
   //mmw.length = numDeps;
   var logMmw;
-  var kappaRos = [];
-  kappaRos.length = 2;
-  kappaRos[0] = [];
-  kappaRos[1] = [];
-  kappaRos[0].length = numDeps;
-  kappaRos[1].length = numDeps;
-  var kappa500 = [];
-  kappa500.length = 2;
-  kappa500[0] = [];
-  kappa500[1] = [];
-  kappa500[0].length = numDeps;
-  kappa500[1].length = numDeps;
-  var pGas = [];
-  pGas.length = 2;
-  pGas[0] = [];
-  pGas[1] = [];
-  pGas[0].length = numDeps;
-  pGas[1].length = numDeps;
-  var pRad = [];
-  pRad.length = 2;
-  pRad[0] = [];
-  pRad[1] = [];
-  pRad[0].length = numDeps;
-  pRad[1].length = numDeps;
-  var depths = []; 
-  depths.length = numDeps;
   var newTemp = [];
   newTemp.length = 2;
   newTemp[0] = [];
@@ -2635,13 +2756,13 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
 
 //
     var maxZDonor = 28; //Nickel
-    for (var pIter = 0; pIter < 3; pIter++){
+    for (var pIter = 0; pIter < nOuterIter; pIter++){
 
 //  Converge Pg-Pe relation starting from intital guesses at Pg and Pe
 //  - assumes all free electrons are from single ionizations
 //  - David Gray 3rd Ed. Eq. 9.8:
 
-  for (var neIter = 0; neIter < 3; neIter++){
+  for (var neIter = 0; neIter < nInnerIter; neIter++){
     //System.out.println("iD    logE*newPe[1][iD]     logE*guessPe[1]     logE*guessPGas[1]");
     for (var iD = 0; iD < numDeps; iD++){
     //re-initialize accumulators:
@@ -2774,15 +2895,17 @@ var logAmu = Math.log(amu);
        //Find any associated moleculear species in which element A can participate:
        //console.log("iElem " + iElem + " cname " + cname[iElem]);
        //console.log("numAssocMols " + numAssocMols);
+    //numAssocMols = 0; //Diagnostic 
        var thisNumMols = 0; //default initialization
        for (var iMol = 0; iMol < numAssocMols; iMol++){
-          //console.log("iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
+          //console.log("iElem " + iElem + " iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
           if (cnameMols[iElem][iMol] == "None"){
             break;
           }
           thisNumMols++;
        }
-     //console.log("thisNumMols " + thisNumMols);
+    // console.log("iElem " + iElem + " iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
+    // console.log("thisNumMols " + thisNumMols);
      if (thisNumMols > 0){
        //Find pointer to molecule in master mname list for each associated molecule:
        for (var iMol = 0; iMol < thisNumMols; iMol++){
@@ -2793,6 +2916,7 @@ var logAmu = Math.log(amu);
              }
           } //jj loop in master mnames list
        } //iMol loop in associated molecules
+   //console.log("iMol " + iMol + " mname_ptr " + mname_ptr[iMol] + " mname[mname_ptr] " + mname[mname_ptr[iMol]]);
 //Now find pointer to atomic species B in master cname list for each associated molecule found in master mname list!
        for (var iMol = 0; iMol < thisNumMols; iMol++){
           for (var jj = 0; jj < nelemAbnd; jj++){
@@ -2802,7 +2926,7 @@ var logAmu = Math.log(amu);
              }
           } //jj loop in master cnames list
        } //iMol loop in associated molecules
-
+     // console.log("specB_ptr " + specB_ptr + " cname[specB_ptr] " + cname[specB_ptr[iMol]]);
 //Now load arrays with molecular species AB and atomic species B data for method stagePops2()  
        for (var iMol = 0; iMol < thisNumMols; iMol++){
   //special fix for H^+_2:
@@ -2827,6 +2951,7 @@ var logAmu = Math.log(amu);
           logMuABArr[iMol] = Math.log(massA) + Math.log(massB) - Math.log(massA + massB) + logAmu;
        }
    } //if thisNumMols > 0 condition
+      // console.log("numAssocMols " + numAssocMols);
        logNums = stagePops2(logNz[iElem], guessNe, chiIArr, log10UwAArr, 
                      thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
                      numDeps, temp)
@@ -2899,7 +3024,8 @@ var logAmu = Math.log(amu);
        for (var iD = 0; iD < numDeps; iD++){
           logKapMetalBF = logKappaMetalBF[iL][iD] - rho[1][iD];
           logKapRayl = logKappaRayl[iL][iD] - rho[1][iD];
-          kapContTot = Math.exp(logKappaHHe[iL][iD]) + Math.exp(logKapMetalBF) + Math.exp(logKapRayl);
+          //kapContTot = Math.exp(logKappaHHe[iL][iD]) + Math.exp(logKapMetalBF) + Math.exp(logKapRayl);
+          kapContTot = Math.exp(logKappaHHe[iL][iD]) + Math.exp(logKapMetalBF) + Math.exp(logKapRayl); //debug
           logKappa[iL][iD] = Math.log(kapContTot);
          // if ( (iD%10 == 1) && (iL%10 == 0) ){
          //    System.out.format("%03d, %21.15f, %03d, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f %n",
@@ -3071,7 +3197,8 @@ var logAmu = Math.log(amu);
 // Iteration *within* the outer Pe-Pgas iteration:
 //Iterate the electron densities and ionization fractions:
 //
- for (var neIter2 = 0; neIter2 < 3; neIter2++){
+ //for (var neIter2 = 0; neIter2 < 3; neIter2++){
+ for (var neIter2 = 0; neIter2 < nInnerIter; neIter2++){
 
    //console.log(" iTau " + " logNums[iStage][iTau]");
    //console.log(" species " + " thisChiI " + " thisUwV");
@@ -3316,6 +3443,7 @@ var logK = Math.log(k);
    //
    //Compute total population of particle in atomic ionic stages over number in ground ionization stage
    //for master denominator so we don't have to re-compue it:
+         //console.log("MAIN: iTau      nmrtrLogNumB      logNumBArr[0]      logGroundRatio    masterStagePops[specA_ptr][0]");
          for (var iTau = 0; iTau < numDeps; iTau++){
            //initialization: 
            totalIonic = 0.0;  
@@ -3324,9 +3452,16 @@ var logK = Math.log(k);
            }
            logGroundRatio[iTau] = Math.log(totalIonic) - masterStagePops[specA_ptr][0][iTau];    
         // if (mname[iMol] == "TiO"){
-         //   console.log("logtotalIonic " + logE*Math.log(totalIonic) + " logGroundRatio " + logE*logGroundRatio[iTau] + " pp totalionic " + 
-          //        (logE*(Math.log(totalIonic)+temp[1][iTau]+logK)) );
-        // }
+        //  if (iTau%10 == 5){
+       //console.log(" " + iTau + " " + logE*nmrtrLogNumB[iTau] + " " + logE*logNumBArr[0][iTau] + " " + logE*logGroundRatio[iTau] + " " + logE*masterStagePops[specA_ptr][0][iTau]);
+       //console.log("MAIN: nmrtrDissE " + nmrtrDissE + " log10UwA " + log10UwA[0] + " " + log10UwA[1] + " nmrtrLog10UwB " +
+       //     nmrtrLog10UwB[0] + " " + nmrtrLog10UwB[1] + " nmrtrLog10QwAB[2] " + logE*nmrtrLogQwAB[2] + " nmrtrLogMuAB " + logE*nmrtrLogMuAB
+       //     + " thisNumMols " + thisNumMols + " dissEArr " + dissEArr[0] + " log10UwBArr " + log10UwBArr[0][0] + " " + log10UwBArr[0][1] + " log10QwABArr " +
+       //     logE*logQwABArr[0][2] + " logMuABArr " + logE*logMuABArr[0]);
+       //     console.log("logtotalIonic " + logE*Math.log(totalIonic) + " logGroundRatio " + logE*logGroundRatio[iTau] + " pp totalionic " + 
+       //           (logE*(Math.log(totalIonic)+temp[1][iTau]+logK)) );
+       //     }
+       //    }
          }
        logNumFracAB = molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB, 
                      thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
@@ -3335,14 +3470,23 @@ var logK = Math.log(k);
 //Load molecules into master molecular population array:
 var k = 1.3806488E-16; // Boltzmann constant in ergs/K
 var logK = Math.log(k);
+ //console.log("cname[specA_ptr] " + cname[specA_ptr] + " cname[specB2_ptr] " + cname[specB2_ptr]);
+ //console.log("iTau      temp     logNz[specA_ptr]    logNz[specB2_ptr]    logppMol    logNumFracAB");
       for (var iTau = 0; iTau < numDeps; iTau++){
          masterMolPops[iMol][iTau] = logNz[specA_ptr][iTau] + logNumFracAB[iTau];
+        //  if (iTau%10 == 5){
+        //  console.log(" " + iTau + " " + temp[0][iTau] + " " +
+        //  logE*(logNz[specA_ptr][iTau]+logK+temp[1][iTau]) + " " +
+        //  logE*(logNz[specB2_ptr][iTau]+logK+temp[1][iTau]) + " " +
+        //  logE*(masterMolPops[iMol][iTau]+logK+temp[1][iTau]) + " " +
+        //  logE*logNumFracAB[iTau] );
+        //  }
         // if (mname[iMol] == "TiO"){
         //  if (iTau == 24){
-            //console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " masterMolPops " + logE*masterMolPops[iMol][iTau]
-            //   + " pp " + (logE*(masterMolPops[iMol][iTau]+temp[1][iTau]+logK))
-            //   + " ppA " + (logE*(logNz[specA_ptr][iTau]+temp[1][iTau]+logK)) 
-            //   + " logNumFracAB " + logE*logNumFracAB[iTau]);
+        //    console.log(" " + iTau + " tau " + tauRos[0][iTau] + " temp " + temp[0][iTau] + " pe " + (logE*(newNe[1][iTau]+temp[1][iTau]+logK))  + " masterMolPops " + logE*masterMolPops[iMol][iTau]
+        //       + " pp " + (logE*(masterMolPops[iMol][iTau]+temp[1][iTau]+logK))
+        //       + " ppA " + (logE*(logNz[specA_ptr][iTau]+temp[1][iTau]+logK)) 
+        //       + " logNumFracAB " + logE*logNumFracAB[iTau]);
        //     }
        // }
       }
@@ -3428,6 +3572,85 @@ var logK = Math.log(k);
     var minLambda = 30.0; //nm
     var maxLambda = 1.0e6; //nm
 
+// JOLA molecular bands here:
+// Just-overlapping line approximation treats molecular ro-vibrational bands as pseudo-continuum
+//opacity sources by "smearing" out the individual rotational fine-structure lines
+//See 1982A&A...113..173Z, Zeidler & Koester, 1982
+
+
+        var jolaOmega0;  //band origin ?? //Hz OR waveno in cm^-1 ??
+        //double[] jolaLogF; //total vibrational band oscillator strength (f_v'v")
+        var jolaRSqu; //needed for total vibrational band oscillator strength (f_v'v")
+        var jolaB = []; // B' value of upper vibational state (energy in cm^-1)??
+        jolaB.length = 2; 
+        var jolaLambda = [];
+        jolaLambda.length = 2;
+        var jolaAlphP = 0.0; // alpha_P - weight of P branch (Delta J = -1)
+        var jolaAlphR = 0.0; // alpha_R - weight of R branch (Delta J = 1)
+        var jolaAlphQ = 0.0; // alpha_Q - weight of Q branch (Delta J = 0)
+//Allen's Astrophysical quantities, 4th Ed., 4.12.2 - 4.13.1:
+// Electronic transition moment, Re
+//"Line strength", S = |R_e|^2*q_v'v" or just |R_e|^2 (R_00 is for the band head)
+//Section 4.4.2 - for atoms or molecules:
+// then: gf = (8pi^2m_e*nu/3he^2) * S
+//
+// ^48Ti^16O systems: Table 4.18, p. 91
+//  C^3Delta - X^3Delta ("alpha system") (Delta Lambda = 0??, p. 84 - no Q branch??)
+//  c^1Phi - a^1Delta ("beta system") (Delta Lambda = 1??, p. 84)
+//  A^3Phi - X^3Phi ("gamma system") (Delta Lambda = 0??, p. 84 - no Q branch??)
+// //
+// Rotational & vibrational constants for TiO states:, p. 87, Table 4.17
+// C^3Delta, X^3Delta a^1Delta, -- No "c^1Phi" - ??
+//
+//General TiO molecular rotational & vibrational constants - Table 3.12, p. 47
+
+//Zeidler & Koester 1982 p. 175, Sect vi):
+//If Q branch (deltaLambda = +/-1): alpP = alpR = 0.25, alpQ = 0.5
+//If NO Q branch (deltaLambda = 0): alpP = alpR = 0.5, alpQ = 0.0
+
+  //number of wavelength point sampling a JOLA band
+  var jolaNumPoints = 100;
+  //var jolaNumPoints = 10;  //test
+
+// branch weights for transitions of DeltaLambda = +/- 1
+  var jolaAlphP_DL1 = 0.25;
+  var jolaAlphR_DL1 = 0.25;
+  var jolaAlphQ_DL1 = 0.5;
+// branch weights for transitions of DeltaLambda = 0
+  var jolaAlphP_DL0 = 0.5;
+  var jolaAlphR_DL0 = 0.5;
+  var jolaAlphQ_DL0 = 0.0; //no Q branch in this case
+
+  var jolaS; //line strength
+  var jolaLogF; //line strength
+
+
+   var logSTofHelp = Math.log(8.0/3.0) + 2.0*Math.log(Math.PI) + logMe - logH - 2.0*logEe;
+  //Hand-tuned for now - Maybe this is the "script S" factor in Allen 4th Ed., p. 88 (S = |R|^2*q_v'v"*scriptS)
+   var jolaQuantumS = 1.0; //default for multiplicative factor
+   var logNumJola = [];
+   logNumJola.length = numDeps;
+   var jolaProfPR = []; // For unified P & R branch
+   jolaProfPR.length = jolaNumPoints;
+   for (var ii = 0; ii < jolaNumPoints; ii++){
+      jolaProfPR[ii] = [];
+      jolaProfPR[ii].length = numDeps;
+   }
+   var jolaProfQ = []; //For Q branch
+   jolaProfQ.length = jolaNumPoints;
+   for (var ii = 0; ii < jolaNumPoints; ii++){
+      jolaProfQ[ii] = [];
+      jolaProfQ[ii].length = numDeps;
+   }
+//Differential cross-section - the main "product" of the JOLA approximation:
+   var dfBydv = [];
+   dfBydv.length = jolaNumPoints;
+   for (var ii = 0; ii < jolaNumPoints; ii++){
+      dfBydv[ii] = [];
+      dfBydv[ii].length = numDeps;
+   }
+
+
 //
 //Line list:
     var maxNumLines = 18;
@@ -3480,36 +3703,6 @@ var logK = Math.log(k);
     listStage.length = maxNumLines;
     var InvCmToEv = 1.23984e-4;
 
-//Molecular lines:
-    var maxNumMolLines = 1;
-    var numMolLines = maxNumMolLines; //default intialization
-    var molListName = [];
-    molListName.length = maxNumMolLines;
-    var molListMol = [];
-    molListMol.length = maxNumMolLines;
-    var molListLamLbl = [];
-    molListLamLbl.length = maxNumMolLines;
-    var molListLam0 = [];
-    molListLam0.length = maxNumMolLines;
-    var molListLog10gf = [];
-    molListLog10gf.length = maxNumMolLines;
-    var molListLogGammaRad = [];
-    molListLogGammaRad.length = maxNumMolLines;
-    var molListDissE = [];
-    molListDissE.length = maxNumMolLines;
-    var molListChiL = [];
-    molListChiL.length = maxNumMolLines;
-    var molListMass = [];
-    molListMass.length = maxNumMolLines;
-    var molListLogGammaCol = [];
-    molListLogGammaCol.length = maxNumMolLines;
-    var molListGwL = [];
-    molListGwL.length = maxNumMolLines;
-    var molListSystem = []; 
-    molListSystem.length = maxNumMolLines;
-    var molListBranch = [];
-    molListBranch.length = maxNumMolLines;
-     
     //
     //Atomic Data sources:
     //http://www.nist.gov/pml/data/asd.cfm
@@ -3527,7 +3720,6 @@ var logK = Math.log(k);
   if (teff <= F0Vtemp){ 
 
     numLines = 17; 
-    numMolLines = 0;
         
     //CaII K
     listName[0] = "CaIIHK";
@@ -3815,143 +4007,6 @@ var logK = Math.log(k);
      listGwL[16] = 8.0; // 2n^2
      listStage[16] = 0;
   
-  if (teff < 4500.0){ 
-//Molecules: 
-     numMolLines = 6;
-
- // Lines from the TiO "beta system": c^1Phi - a^1Delta (p. 90, Tab 4.18, Allen's Astrophys Quant. 4th Ed.)
- // Data from Bertrand Plez (Laboratoire Univers et Particules de Montpellier.) 
- // http://www.pages-perso-bertrand-plez.univ-montp2.fr/ 
-
-//     molListName[0] = "TiO c-a Q";
-//     molListMol[0] = "TiO";
-//     molListLamLbl[0] = " ";
-//     molListLam0[0] = 593.738; //nm
-//     molListLog10gf[0] = logTen(2.045422E-01);
-//     molListLogGammaRad[0] = Math.log(3.806587E+07);
-//     molListDissE[0] = getDissE(molListMol[0]);
-//     molListChiL[0] = 4492.9569 * InvCmToEv;  //cm^-1
-//     molListMass[0] = getMolMass(molListMol[0]);
-//     molListLogGammaCol[0] = 0.0;
-//     //molListGwQAB[0] = 1.0;
-//     molListGwL[0] = 1.0;
-//     molListSystem[0] = "a-c";
-//     molListBranch[0] = "Q";
-
-     molListName[0] = "TiO";
-     molListMol[0] = "TiO";
-     molListLamLbl[0] = "c-a Q";
-     molListLam0[0] = 533.86777; //nm
-     molListLog10gf[0] = logTen(1.033235E+00);
-     molListLogGammaRad[0] = Math.log(3.560040E+07);
-     molListDissE[0] = getDissE(molListMol[0]);
-     molListChiL[0] = 3909.5091 * InvCmToEv;  //cm^-1
-     molListMass[0] = getMolMass(molListMol[0]);
-     molListLogGammaCol[0] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[0] = 1.0;
-     molListSystem[0] = "a-c";
-     molListBranch[0] = "Q";
-
-
-     molListName[1] = " ";
-     molListMol[1] = "TiO";
-     molListLamLbl[1] = " ";
-     molListLam0[1] = 533.9297; //nm
-     molListLog10gf[1] = logTen(1.106996E+00);
-     molListLogGammaRad[1] = Math.log(3.556368E+07);
-     molListDissE[1] = getDissE(molListMol[1]);
-     molListChiL[1] = 3974.7805 * InvCmToEv;  //cm^-1
-     molListMass[1] = getMolMass(molListMol[1]);
-     molListLogGammaCol[1] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[1] = 1.0;
-     molListSystem[1] = "a-c";
-     molListBranch[1] = "Q";
-
-
-     molListName[2] = "TiO";
-     molListMol[2] = "TiO";
-     molListLamLbl[2] = "c-a R";
-     molListLam0[2] = 559.77068; //nm
-     molListLog10gf[2] = logTen(6.036916E+00);
-     molListLogGammaRad[2] = Math.log(3.681594E+07);
-     molListDissE[2] = getDissE(molListMol[2]);
-     molListChiL[2] = 3974.7805 * InvCmToEv;  //cm^-1
-     molListMass[2] = getMolMass(molListMol[2]);
-     molListLogGammaCol[2] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[2] = 1.0;
-     molListSystem[2] = "a-c";
-     molListBranch[2] = "Q";
-
-
-
-     molListName[3] = "TiO";
-     molListMol[3] = "TiO";
-     molListLamLbl[3] = "c-a Q";
-     molListLam0[3] = 560.7943; //nm
-     molListLog10gf[3] = logTen(9.843258E+00);
-     molListLogGammaRad[3] = Math.log(3.685389E+07);
-     molListDissE[3] = getDissE(molListMol[3]);
-     molListChiL[3] = 3941.6120 * InvCmToEv;  //cm^-1
-     molListMass[3] = getMolMass(molListMol[3]);
-     molListLogGammaCol[3] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[3] = 1.0;
-     molListSystem[3] = "a-c";
-     molListBranch[3] = "Q";
-
-
- //    molListName[3] = " ";
- //    molListMol[3] = "TiO";
- //    molListLamLbl[3] = " ";
- //    molListLam0[3] = 560.8227; //nm
- //    molListLog10gf[3] = logTen(1.016761E+01);
- //    molListLogGammaRad[3] = Math.log(3.683481E+07);
- //    molListDissE[3] = getDissE(molListMol[3]);
- //    molListChiL[3] = 3974.7805 * InvCmToEv;  //cm^-1
- //    molListMass[3] = getMolMass(molListMol[3]);
- //    molListLogGammaCol[3] = 0.0;
- //    //molListGwQAB[0] = 1.0;
- //    molListGwL[3] = 1.0;
- //    molListSystem[3] = "a-c";
- //    molListBranch[3] = "Q";
- 
-
-     molListName[4] = " ";
-     molListMol[4] = "TiO";
-     molListLamLbl[4] = " ";
-     molListLam0[4] = 560.8284; //nm
-     molListLog10gf[4] = logTen(1.028223E+00);
-     molListLogGammaRad[4] = Math.log(4.262805E+07);
-     molListDissE[4] = getDissE(molListMol[4]);
-     molListChiL[4] = 3454.2620 * InvCmToEv;  //cm^-1
-     molListMass[4] = getMolMass(molListMol[4]);
-     molListLogGammaCol[4] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[4] = 1.0;
-     molListSystem[4] = "a-c";
-     molListBranch[4] = "Q";
-
-
-     molListName[5] = "TiO ";
-     molListMol[5] = "TiO";
-     molListLamLbl[5] = "c-a P ";
-     molListLam0[5] = 561.83943; //nm
-     molListLog10gf[5] = logTen(4.254094E+00);
-     molListLogGammaRad[5] = Math.log(3.685389E+07);
-     molListDissE[5] = getDissE(molListMol[5]);
-     molListChiL[5] = 3974.7805 * InvCmToEv;  //cm^-1
-     molListMass[5] = getMolMass(molListMol[5]);
-     molListLogGammaCol[5] = 0.0;
-     //molListGwQAB[0] = 1.0;
-     molListGwL[5] = 1.0;
-     molListSystem[5] = "a-c";
-     molListBranch[5] = "Q";
-
-} //molecular teff condition 
- 
 
   } //end late-type star line list
 
@@ -4158,7 +4213,6 @@ var logK = Math.log(k);
      listStage[11] = 0;
 
 
-     numMolLines = 0;
     
   } //end early-type star line list
 
@@ -4169,7 +4223,9 @@ var logK = Math.log(k);
 //   **** END line list
 //
 //
-//
+// Get parameters for power-law expansion of Hjerting function for the Voigt profile
+// approximation:
+        var hjertComp = hjertingComponents();
     //if Hydrogen or Helium, zScale should be unity for these purposes:
     var zScaleList = 1.0; //initialization
 
@@ -4181,16 +4237,20 @@ var logK = Math.log(k);
     //int numWing = 0;  //debug
     var listNumPoints = 2 * (listNumCore + listNumWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
 
-    var molListNumCore = 5; //per wing
-    var molListNumWing = 10; // half-core
     //int numWing = 0;  //debug
-    var molListNumPoints = 2 * (molListNumCore + molListNumWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
 
     //default initializations:
 
     //var numMaster = numLams + (numLines * listNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays 
-    var numMaster = numLams + (numLines * listNumPoints) //total size (number of wavelengths) of master lambda & total kappa arrays 
-                            + (numMolLines * molListNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays 
+        var numMaster;
+        if (ifTiO == 1){
+            numMaster = numLams + (numLines * listNumPoints) + (numJola * jolaNumPoints); // + (numSedLines * sedNumPoints); //total size (number of wavelengths) of master lambda & total kappa arrays
+            //console.log("ifTiO == 1 branch, numMaster = " + numMaster);
+        } else {
+            numMaster = numLams + (numLines * listNumPoints);
+            //console.log("ifTiO != 1 branch, numMaster = " + numMaster);
+        }
+ 
     var masterLams = [];
     masterLams.length = numMaster;
     var masterIntens = [];
@@ -4314,19 +4374,13 @@ var logK = Math.log(k);
 
 
 //Stuff for the the Teff recovery test:
-        var lambda1, lambda2, fluxSurfBol, logFluxSurfBol, listLam0nm, molListLam0nm;
+        var lambda1, lambda2, fluxSurfBol, logFluxSurfBol, listLam0nm;
         fluxSurfBol = 0;
 
-// This holds 2-element temperature-dependent base 10 logarithmic parition fn:
-        var thisUwV = []; 
-        thisUwV.length = 2;
-         thisUwV[0] = 0.0; //default initialization
-         thisUwV[1] = 0.0;
 
 //
              //Get the components for the power series expansion approximation of the Hjerting function
              // for treating Voigt profiles:
-        var hjertComp = hjertingComponents();
         var listLineProf = [];
         listLineProf.length = listNumPoints;
         for (var i = 0; i < listNumPoints; i++){
@@ -4334,6 +4388,11 @@ var logK = Math.log(k);
            listLineProf[i].length = numDeps;
         }
 
+
+//Begin numLines loop:
+  
+  var doLines = 1;   //diagnostic
+  if (doLines == 1){   //diagnostic
         for (var iLine = 0; iLine < numLines; iLine++) {
         //for (var iLine = 0; iLine < 1; iLine++) {
         //console.log("iLine " + iLine);
@@ -4459,117 +4518,144 @@ var logK = Math.log(k);
                 }
             }
         } //numLines loop
+      } //end if doLines condition - diagnostic
 
-//
-//Molecular partition fn
-        var thisQwVAB = []; 
-        thisQwVAB.length = 2;
-         thisQwVAB[0] = 0.0; //default initialization
-         thisQwVAB[1] = 0.0;
+ if (teff <= jolaTeff){
+//Begin loop over JOLA bands - isert JOLA oapcity into opacity spectum...
+   var helpJolaSum = 0.0;
 
-        var molListLineProf = [];
-        molListLineProf.length = molListNumPoints;
-        for (var i = 0; i < molListNumPoints; i++){
-           molListLineProf[i] = [];
-           molListLineProf[i].length = numDeps;
+ if (ifTiO == 1){
+
+   for (var iJola = 0; iJola < numJola; iJola++){
+
+      //Find species in molecule set:
+      for (var iMol = 0; iMol < nMols; iMol++){
+        if (mname[iMol] == jolaSpecies[iJola]){
+          //console.log("mname " + mname[iMol]);
+          for (var iTau= 0; iTau < numDeps; iTau++){
+             logNumJola[iTau] = masterMolPops[iMol][iTau];
+             //var logTiOpp = logNumJola[iTau] + temp[1][iTau] + logK;
+             //console.log("TiO pp " + logE*logTiOpp);
+          }
         }
-    
-        var molListLogf;
+      }
 
-        for (var iMolLine = 0; iMolLine < numMolLines; iMolLine++) {
-        //for (var iMolLine = 0; iMolLine < 1; iMolLine++) {
+        jolaOmega0 = getOrigin(jolaSystem[iJola]);  //band origin ?? //Freq in Hz OR waveno in cm^-1 ??
+        jolaRSqu = getSqTransMoment(jolaSystem[iJola]); //needed for total vibrational band oscillator strength (f_v'v")
+        jolaB = getRotConst(jolaSystem[iJola]); // B' and b" values of upper and lower vibational state
+        jolaLambda = getWaveRange(jolaSystem[iJola]); //approx wavelength range of band
+        //console.log("System " + jolaSystem[iJola] + " Lambda " + jolaLambda[0] + " " + jolaLambda[1]);
+        //Line strength factor from Allen's 4th Ed., p. 88, "script S":
+        jolaQuantumS = getQuantumS(jolaSystem[iJola]);
 
-          var logE10 = Math.log(10.0);
-          zScaleList = zScale;
-          var iMol = 0; //initialization
-          var logMolNums_ptr = 0; //needed??
-          for (var jj = 0; jj < nMols; jj++){
-             if (molListMol[iMolLine] == mname[jj]){
-                  species = mname[jj];
-//Fake molecular partition fn - for now...
-                thisQwVAB = [0.0, 0.0]; //base 10 log_10 U
-                 break;   //we found it
-                 }
-             iMol++;
-          } //jj loop
-   //console.log("species " + species);
-          //console.log("thisUwV[0] " + thisUwV[0] + " thisUwV[1] " + thisUwV[1]);
-          //console.log("molListChiL " + molListChiL[iMolLine] + " molListGwL " + molListGwL[iMolLine]);
-           var molListLogNums = [];
-           molListLogNums.length = 2;
-           molListLogNums[0] = [];
-           molListLogNums[1] = [];
-           molListLogNums[0].length = numDeps;
-           molListLogNums[1].length = numDeps;
-//
-            for (var iTau = 0; iTau < numDeps; iTau++){
-               molListLogNums[0][iTau] = masterMolPops[iMol][iTau];
-               //molListLogNums[6][iTau] = masterStagePops[iMol][4][iTau];
-               //console.log("iMolLine " + iMolLine + " iTau " + iTau + " molListLogNums[] " + logE*molListLogNums[iTau]);
+//Compute line strength, S, Allen, p. 88:
+        jolaS = jolaRSqu * jolaQuantumS; //may not be this simple (need q?)
+//Compute logf , Allen, p. 61 Section 4.4.2 - for atoms or molecules - assumes g=1 so logGf = logF:
+        //jolaLogF = logSTofHelp + Math.log(jolaOmega0) + Math.log(jolaS); //if omega0 is a freq in Hz
+        //Gives wrong result?? jolaLogF = logSTofHelp + logC + Math.log(jolaOmega0) + Math.log(jolaS); //if omega0 is a waveno in cm^-1
+        var checkgf = 303.8*jolaS/(10.0*jolaLambda[0]); //"Numerical relation", Allen 4th, p. 62 - lambda in A
+        //System.out.println("jolaLogF " + logE*jolaLogF + " log checkgf " + Math.log10(checkgf) + " jolaOmega0 " + jolaOmega0[iJola]);
+        jolaLogF = Math.log(checkgf); //better??
+        //console.log("jolaLogF " + jolaLogF);
+        //jolaLogF = -999.0; //test
+
+        if (jolaDeltaLambda[iJola] == 0){
+           jolaAlphP = jolaAlphP_DL0; // alpha_P - weight of P branch (Delta J = 1)
+           jolaAlphR = jolaAlphR_DL0; // alpha_R - weight of R branch (Delta J = -1)
+           jolaAlphQ = jolaAlphQ_DL0; // alpha_Q - weight of Q branch (Delta J = 0)
+        }
+        if (jolaDeltaLambda[iJola] != 0){
+           jolaAlphP = jolaAlphP_DL1; // alpha_P - weight of P branch (Delta J = 1)
+           jolaAlphR = jolaAlphR_DL1; // alpha_R - weight of R branch (Delta J = -1)
+           jolaAlphQ = jolaAlphQ_DL1; // alpha_Q - weight of Q branch (Delta J = 0)
+        }
+
+//console.log("jolaOmega0 " + jolaOmega0 + " jolaRSqu " + jolaRSqu + " jolaB " + jolaB[0] + " " + jolaB[1] + " jolaLambda " + jolaLambda[0] + " " + jolaLambda[1] + " jolaQuantumS " + jolaQuantumS + " jolaS " + jolaS + " jolaLogF " + jolaLogF + " jolaAlphP " + jolaAlphP + " jolaAlphR " + jolaAlphR);
+
+        var jolaPoints = jolaGrid(jolaLambda, jolaNumPoints);
+
+//This sequence of methods might not be the best way, but it's based on the procedure for atomic lines
+// Put in JOLA bands:
+
+//P & R brnaches in every case:
+        dfBydv = jolaProfilePR(jolaOmega0, jolaLogF, jolaB,
+                                     jolaPoints, jolaAlphP, jolaAlphR, numDeps, temp);
+
+        var jolaLogKappaL = jolaKap(logNumJola, dfBydv, jolaPoints,
+                  numDeps, temp, rho);
+
+       // for (var iW = 0; iW < jolaNumPoints; iW++){
+       //    for (var iD = 0; iD < numDeps; iD++){
+       //       if (iD%10 == 1){
+       //          console.log("iW " + iW + " iD " + iD + " jolaLogKappaL " + jolaLogKappaL[iW][iD]);
+       //       }
+       //    }
+       // }
+//Q branch if DeltaLambda not equal to 0
+        // if (jolaDeltaLambda[iJola] != 0){
+         //   dfBydv = jolaProfileQ(jolaOmega0, jolaLogF, jolaB,
+          //                            jolaPoints, jolaAlphQ, numDeps, temp);
+ //
+         //   var jolaLogKappaQL = jolaKap(logNumJola, dfBydv, jolaPoints,
+           //        numDeps, temp, rho);
+          //  //Now add it to the P & R branch opacity:
+          //  for (var iW = 0; iW < jolaNumPoints; iW++){
+           //    for (var iD = 0; iD < numDeps; iD++){
+            // //   //  if (iD%10 == 1){
+             // //       //System.out.println("iW " + iW + " iD " + iD + " jolaLogKappaL " + jolaLogKappaL[iW][iD]);
+              // //  // }
+              //     helpJolaSum = Math.exp(jolaLogKappaL[iW][iD]) + Math.exp(jolaLogKappaQL[iW][iD]);
+              //     jolaLogKappaL[iW][iD] = Math.log(helpJolaSum);
+           //    } //iD loop
+          //  } //iW loop
+       //  }
+
+            var jolaLambdas = [];
+            jolaLambdas.length = jolaNumPoints;
+            for (var il = 0; il < jolaNumPoints; il++) {
+                // // lineProf[gaussLine_ptr[iLine]][*] is DeltaLambda from line centre in cm
+                jolaLambdas[il] = 1.0e-7 * jolaPoints[il];
             }
+            //System.out.println("iJola " + iJola);
+         //   for (var ll = 0; ll < jolaNumPoints; ll++){
+          //     console.log("ll " + ll + " jolaLambdas " + jolaLambdas[ll]);
+          //  }
 
-//System.out.println("iMolLine " + iMolLine + " numNow " + numNow);
-            //var molListLogN = (molListA12[iMolLine] - 12.0) + logNH;
-            molListLam0nm = molListLam0[iMolLine] * 1.0e-7; // nm to cm
-//console.log("iMolLine " + iMolLine + " molListLam0nm " + molListLam0nm + " molListChiL " + molListChiL[iMolLine] +
-// " thisQwVAB[] " + thisQwVAB[0] + " " + thisQwVAB[1] + " molListGwL " + molListGwL[iMolLine]);  
-            var numHelp = levelPops(molListLam0nm, molListLogNums[0], molListChiL[iMolLine], thisQwVAB,
-                     molListGwL[iMolLine], numDeps, temp);
-
-           for (var iTau = 0; iTau < numDeps; iTau++){
-//Fudge - molecular dissociation routine return results 4 base 10 orders of magnitude too small...
-               //molListLogNums[1][iTau] = logE10*4.0 + numHelp[iTau];
-               molListLogNums[1][iTau] = numHelp[iTau];
-               //console.log("molListMol[i] " + molListMol[iMolLine] + " molListLogNums[iTau] " + logE*molListLogNums[iTau]);
-            }
-            var molListLinePoints = lineGrid(molListLam0nm, molListMass[iMolLine], xiT, numDeps, teff, molListNumCore, molListNumWing,
-                    molListLogGammaCol[iMol], tauRos, temp, pGas, tempSun, pGasSun);
-            // Gaussian + Lorentzian approximation to profile (voigt()):
-            //var molListLineProf = voigt(molListLinePoints, molListLam0nm, molListLogGammaCol[iMolLine],
-            //        numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun);
-            // // Real Voigt fn profile (voigt2()):   
-            molListLineProf = voigt(molListLinePoints, molListLam0nm, molListLogGammaRad[iMolLine], molListLogGammaCol[iMolLine],
-                    numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
-           
-            molListLogf = logE10 * molListLog10gf[iMolLine]; 
-            //console.log("molListLam0nm " + molListLam0nm + " molListLogf " + molListLogf + " zScaleList " + zScaleList);
-            var molListLogKappaL = lineKap(molListLam0nm, molListLogNums[1], molListLogf, molListLinePoints, molListLineProf,
-                    numDeps, zScaleList, tauRos, temp, rho);
-            //int molListNumPoints = molListLinePoints[0].length; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
-            var molListLineLambdas = [];
-            molListLineLambdas.length = molListNumPoints;
-            for (var il = 0; il < molListNumPoints; il++) {
-// // lineProf[iMolLine][*] is DeltaLambda from line centre in cm
-// if (il === molListNumPoints - 1) {
-//    molListLineLambdas[il] = molListLam0nm; // Extra row for line centre continuum taus scale
-// } else {
-//lineLambdas[il] = (1.0E7 * linePoints[iMolLine][il]) + lam0; //convert to nm
-                molListLineLambdas[il] = molListLinePoints[0][il] + molListLam0nm;
-                //console.log("il " + il + " molListLinePoints[0][il] " + molListLinePoints[0][il] 
-                //                  + " molListLineLambdas[il] " + molListLineLambdas[il] 
-                //                  + " molListLineProf " + molListLineProf[il][24]
-                //                  + " molListLogKappaL " + logE*molListLogKappaL[il][24]);
-                // }
-            }
-
-    
-
-            var masterLamsOut = masterLambda(numLams, numMaster, numNow, masterLams, molListNumPoints, molListLineLambdas);
-            var logMasterKapsOut = masterKappa(numDeps, numLams, numMaster, numNow, masterLams, masterLamsOut, logMasterKaps, molListNumPoints, molListLineLambdas, molListLogKappaL);
-            numNow = numNow + molListNumPoints;
+            var masterLamsOut = masterLambda(numLams, numMaster, numNow, masterLams, jolaNumPoints, jolaLambdas);
+            var logMasterKapsOut = masterKappa(numDeps, numLams, numMaster, numNow, masterLams, masterLamsOut, logMasterKaps, jolaNumPoints, jolaLambdas, jolaLogKappaL);
+            numNow = numNow + jolaNumPoints;
+            //console.log("iJola " + iJola + " numNow " + numNow);
             //update masterLams and logMasterKaps:
             for (var iL = 0; iL < numNow; iL++) {
                 masterLams[iL] = masterLamsOut[iL];
                 for (var iD = 0; iD < numDeps; iD++) {
-//Still need to put in multi-Gray levels here:
+                    //Still need to put in multi-Gray levels here:
                     logMasterKaps[iL][iD] = logMasterKapsOut[iL][iD];
-                    //if (iD === 36) {
-                    //console.log("iL " + iL + "iD " + iD + " masterLams[iL] " + masterLams[iL] + " logMasterKaps[iL][iD] " + logMasterKaps[iL][iD]);
+                    //if (iL%50 == 5){
+                    // if (iD%5 == 1){
+                    //   console.log("iL " + iL + " masterLams " + masterLams[iL] + " logMasterKaps " + logE*logMasterKaps[iL][iD]);
+                    // }
                     //}
-                }
-            }
+                } //iD loop
+            } //iL loop
 
-        } //numMolLines loop
+    } //iJola JOLA band loop
+
+  } //ifTiO condition
+
+ } //jolaTeff condition
+
+////Diagnostic:
+//       for (var iL = 0; iL < numNow; iL++) {
+//           for (var iD = 0; iD < numDeps; iD++) {
+//               if (iL%50 == 5){
+//               if (iD%5 == 1){
+//               console.log("iL " + iL + " masterLams " + masterLams[iL] + " logMasterKaps " + logE*logMasterKaps[iL][iD]);
+//                  }
+//             }
+//          }
+//       }
+
 
  //  for (var iL = 0; iL < numMaster; iL++) {
  //     console.log("iL " + iL + " masterLams[iL] " + masterLams[iL]);
@@ -4693,12 +4779,13 @@ var logK = Math.log(k);
             masterIntensLam = formalSoln(numDeps,
                     cosTheta, masterLams[il], thisTau, temp, lineMode);
             //masterFluxLam = flux2(masterIntensLam, cosTheta);
+            //console.log("numThetas " + numThetas);
             for (var it = 0; it < numThetas; it++) {
                 masterIntens[il][it] = masterIntensLam[it];
-        //if (it == 0){
-         //   console.log("il " + il + " it " + it + " masterLams " + masterLams[il]  
-         //      + " masterIntens[il][it] " + logE*Math.log(masterIntens[il][it]));
-         //}
+        //if (it%2 == 0){
+        //    console.log("il " + il + " it " + it + " masterLams " + masterLams[il]  
+        //       + " masterIntens[il][it] " + logE*Math.log(masterIntens[il][it]));
+        // }
             } //it loop - thetas
         } //il loop
             //console.log("Second flux call - masterFlux " + " cgsRadius " + cgsRadius + " omegaSini " + omegaSini + " macroV " + macroV);
@@ -4732,7 +4819,7 @@ var logK = Math.log(k);
     ldc = ldCoeffs(numLams, lambdaScale, numThetas, cosTheta, contIntens);
 
         //logFluxSurfBol = Math.log(fluxSurfBol);
-        //logTeffFlux = (logFluxSurfBol - Useful.logSigma()) / 4.0;
+        //logTeffFlux = (logFluxSurfBol - logSigma()) / 4.0;
         //teffFlux = Math.exp(logTeffFlux);
 
 
@@ -4787,7 +4874,7 @@ var logK = Math.log(k);
             storeValue = String(temp[1][i]);
             sessionStorage.setItem(storeName, storeValue);
             storeName = "depth" + String(i);
-            storeValue = String(depths[1][i]);
+            storeValue = String(depths[i]);
             sessionStorage.setItem(storeName, storeValue);
             for (var iL = 0; iL < numLams; iL++){
                storeName = "kapp" + String(iL) + "_" + String(i);
@@ -4810,6 +4897,18 @@ var logK = Math.log(k);
             sessionStorage.setItem(storeName, storeValue);
             storeName = "Ne" + String(i);
             storeValue = String(Ne[1][i]);
+            sessionStorage.setItem(storeName, storeValue);
+            storeName = "newNe" + String(i);
+            storeValue = String(newNe[1][i]);
+            sessionStorage.setItem(storeName, storeValue);
+            storeName = "logNH" + String(i);
+            storeValue = String(logNH[i]);
+            sessionStorage.setItem(storeName, storeValue);
+            storeName = "kappaRos" + String(i);
+            storeValue = String(kappaRos[1][i]);
+            sessionStorage.setItem(storeName, storeValue);
+            storeName = "kappa500" + String(i);
+            storeValue = String(kappa500[1][i]);
             sessionStorage.setItem(storeName, storeValue);
         }
 
@@ -4947,8 +5046,6 @@ var logEv = Math.log(eV);
       logNums[i] = [];
       logNums[i].length = numDeps;
    }
-   var thisLogN = [];
-   thisLogN.length = numDeps;
    //console.log("A12 " + A12);
    for (var i = 0; i < numDeps; i++){
       thisLogN[i] = logE10*(A12 - 12.0) + logNH[i];
@@ -5073,7 +5170,6 @@ var logEv = Math.log(eV);
     // Initial set to put lambda and tau arrays into form that formalsoln expects
     //var numPoints = linePoints[0].length + 1; //Extra wavelength point at end for monochromatic continuum tau scale
 
-    //Can't avoid Array constructor here:
     var lineIntens = [];
     lineIntens.length = numPoints;
     for (var row = 0; row < numPoints; row++) {
@@ -6310,6 +6406,13 @@ Spectral line \n\
         txtPrint("<span style='font-size:normal; color:blue'><a href='https://en.wikipedia.org/wiki/Visible_spectrum' target='_blank'>\n\
      Visual spectrum</a></span>",
                 titleOffsetX, titleOffsetY, lineColor, plotTenId);
+
+     var TiOString = "Off";
+     if (ifTiO == 1){
+        TiOString = "On";
+     }
+     txtPrint("TiO bands: " + TiOString, titleOffsetX + 400, titleOffsetY+35, lineColor, plotTenId);
+
         var xShift, zShift, xShiftDum, zLevel;
         var RGBHex; //, r255, g255, b255;
         var rangeXData = 1.0e7 * (masterLams[ilLam1] - masterLams[ilLam0]);
@@ -6413,50 +6516,84 @@ Spectral line \n\
 
         }
 
+//Label TiO band origins:
+//Set up for molecules with JOLA bands:
+   var jolaTeff = 5000.0;
+   var numJola = 2; //for now
+   var jolaSpecies = [];
+   jolaSpecies.length = numJola; // molecule name
+   var jolaSystem = []
+   jolaSystem.length = numJola; //band system
+   var jolaLabel = []
+   jolaLabel.length = numJola; //band system
 
-    //Now label molecular lines:
-    //
-        var iCount = 0;
-        for (var i = 0; i < numMolLines; i++) {
+   jolaSpecies[0] = "TiO"; // molecule name
+   jolaSystem[0] = "TiO_C3Delta_X3Delta"; //band system //DeltaLambda=0
+   jolaLabel[0] = "TiO C<sup>3</sup>&#916-X<sup>3</sup>&#916"; //band system //DeltaLambda=0
+   jolaSpecies[1] = "TiO"; // molecule name
+   jolaSystem[1] = "TiO_c1Phi_a1Delta"; //band system //DeltaLambda=1
+   jolaLabel[1] = "TiO c<sup>1</sup>&#934-a<sup>1</sup>&#916"; //band system //DeltaLambda=1
+   //jolaSpecies[2] = "TiO"; // molecule name
+   //jolaSystem[2] = "TiO_A3Phi_X3Phi"; //band system //DeltaLambda=0
+   //jolaLabel[2] = "TiO A<sup>3</sup>&#934_X<sup>3</sup>&#934"; //band system //DeltaLambda=0
+   RGBHex = colHex(50 , 50, 255);
+   if (ifTiO == 1){
+   if (teff <= jolaTeff){
 
-            if ((iCount % 4) === 0) {
+        for (var i = 0; i < numJola; i++) {
+
+            if ((i % 4) === 0) {
+                yPos = thisYPos - 5;
+                barHeight = 30;
+                barFinesse = 60;
+            } else if ((i % 4) === 1) {
+                yPos = thisYPos - 15;
+                barHeight = 10;
+                barFinesse = 80;
+            } else if ((i % 4) === 2) {
                 yPos = thisYPos - 25;
-                barHeight = 20;
-            } else if ((iCount % 4) === 1) {
-                yPos = thisYPos + 85;
-                barHeight = 20;
-            } else if ((iCount % 4) === 2) {
-                yPos = thisYPos - 45;
-                barHeight = 50;
+                barHeight = 30;
+                barFinesse = 60;
             } else {
-                yPos = thisYPos + 105;
-                barHeight = 50;
+                yPos = thisYPos + 35;
+                barHeight = 10;
+                barFinesse = 80;
             }
 
-            xPos = xAxisLength * (molListLam0[i] - minXData) / (maxXData - minXData);
-            xPos = xAxisXCnvs + xPos - 5; // finesse
-            //console.log("xPos " + xPos + " xLabelYOffset " + xLabelYOffset);
+            var jolaOmega0 = getOrigin(jolaSystem[i]);
+            var lambda0 = 1.0e7 / jolaOmega0;
+            //console.log("lambda0 " + lambda0);
+            xPos = xAxisLength * (lambda0 - minXData) / (maxXData - minXData);
+            xPos = xPos - 5; // finesse
+            //xPos = xAxisXCnvs + xPos - 5; // finesse
 
-            nameLbl = "<span style='font-size: xx-small'>" + molListName[i] + "</span>";
-            lamLblNum = molListLam0[i].toPrecision(4);
+            nameLbl = "<span style='font-size: xx-small'>" + jolaLabel[i] + "</span>";
+            //lamLblNum = listLams[i].toPrecision(6);
             //lamLblStr = lamLblNum.toString(10);
             //lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
-            lamLbl = "<span style='font-size: xx-small'>" + molListLamLbl[i] + "</span>";
-            txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
-            txtPrint(lamLbl, xPos, yPos + 10, RGBHex, plotTenId);
-            //Make the tick label, Teff:
-
-            //cnvsTenCtx.fillStyle = lineColor;
-            //cnvsTenCtx.font="normal normal normal 8pt arial";
-            //cnvsTenCtx.fillText(listName[i], xPos, yPos);
-            //cnvsTenCtx.fillText(lamLblStr, xPos, yPos+10);
-
-            if (molListName[i] != " "){
-               iCount++;
-            }
-
+            //RGBHex = colHex(r255, g255, b255);
+            txtPrint(nameLbl, xPos + xAxisXCnvs, (yPos - 10), RGBHex, plotTenId);
+            //txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
+            //txtPrint(lamLbl, xPos + xAxisXCnvs, yPos, RGBHex, plotTenId);
+            //xShiftDum = YBar(lambda0, minXData, maxXData, thisXAxisLength, barWidth, barHeight,
+            //        barFinesse, RGBHex, plotTenId, cnvsTenCtx);
         }
+     } //jolaTeff condition
+   } // ifTiO condition
 
+
+           //monochromatic disk lambda
+            var barFinesse = yAxisYCnvs;
+            barHeight = 108;
+            barWidth = 2;
+            RGBHex = "#FF0000";
+            if ( (diskLambda > 380.0) && (diskLambda < 680.0) ){
+                 xShiftDum = YBar(diskLambda, minXData, maxXData, 
+                               barWidth, barHeight,
+                               barFinesse-60, RGBHex, plotTenId, cnvsTenCtx);
+                 txtPrint("<span style='font-size:xx-small'>Filter</span>",
+                       xShiftDum, yAxisYCnvs, RGBHex, plotTenId);
+            }
 
 
     } //end PLOT TEN
@@ -6473,10 +6610,21 @@ Spectral line \n\
         var plotRow = 0;
         var plotCol = 2;
 
+//background color needs to be finessed so that white-ish stars will stand out:
+       if (teff > 6000.0){
+  //hotter white or blue-white star - darken the background (default background in #F0F0F0
+           wDiskColor = "#808080";  
+       } else {
+           wDiskColor = wDefaultColor;
+       }
+
         // Calculation of steam line and ice line:
 
         //Assuming liquid salt-free water at one atmospheric pGasressure is necessary:
-        var steamTemp = 373.0; // K = 100 C
+        //var atmosPres = 101.0;  // test - kPa
+        var steamTemp = waterPhase(atmosPress);
+        //console.log("steamTemp " + steamTemp);
+        //var steamTemp = 373.0; // K = 100 C
         var iceTemp = 273.0; //K = 0 C
 
         steamTemp = steamTemp - greenHouse;
@@ -6484,6 +6632,7 @@ Spectral line \n\
         var logSteamLine, logIceLine;
         var au = 1.4960e13; // 1 AU in cm
         var rSun = 6.955e10; // solar radii to cm
+        var log1AULine = logAu - logRSun; // 1 AU in solar radii
         //Steam line:
         //Set steamTemp equal to planetary surface temp and find distance that balances stellar irradiance 
         //absorbed by planetary cross-section with planet's bolometric thermal emission:
@@ -6495,6 +6644,7 @@ Spectral line \n\
         var steamLineAU = Math.exp(logSteamLine) * rSun / au;
         iceLineAU = iceLineAU.toPrecision(3);
         steamLineAU = steamLineAU.toPrecision(3);
+        var steamTempRound = steamTemp.toPrecision(3);
 
         // Convert solar radii to pixels:
 
@@ -6512,21 +6662,49 @@ Spectral line \n\
         radiusPxSteam = Math.ceil(radiusPxSteam);
         var radiusPxIce = logScale * logTen(radiusScale * radius * Math.exp(logIceLine));
         radiusPxIce = Math.ceil(radiusPxIce);
-        // Key raii in order of *DECREASING* size (important!):
-        var radii = [radiusPxIce + 2, radiusPxIce, radiusPxSteam, radiusPxSteam - 2, radiusPx];
-        //
+        var radiusPx1AU = logScale * logTen(radiusScale * radius * Math.exp(log1AULine));
+        radiusPx1AU = Math.ceil(radiusPx1AU);
+        // Key radii in order of *DECREASING* size (important!):
+        var numZone = 7;
+        var radii = [];
+        radii.length = numZone;
         rrI = saveRGB[0];
         ggI = saveRGB[1];
         bbI = saveRGB[2];
         var starRGBHex = "rgb(" + rrI + "," + ggI + "," + bbI + ")";
-        var colors = ["#0000FF", "#00FF88", "#FF0000", wDefaultColor, starRGBHex];
-        var numZone = radii.length;
+        var colors = [];
+        colors.length = numZone;
+        if (radiusPx1AU > (radiusPxIce + 3)){
+           radii = [radiusPx1AU+1, radiusPx1AU, radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#000000", wDiskColor, "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPxIce) && (radiusPx1AU < (radiusPxIce + 3)) ){
+           radii = [radiusPxIce + 3, radiusPx1AU, radiusPx1AU-1, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#000000", "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPxSteam) && (radiusPx1AU < radiusPxIce) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPx1AU+1, radiusPx1AU, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#00FF88", "#000000", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= (radiusPxSteam - 3)) && (radiusPx1AU < radiusPxSteam) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPx1AU+1, radiusPx1AU, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#00FF88", "#FF0000", "#000000", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPx) && (radiusPx1AU < (radiusPxSteam - 3)) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx1AU, radiusPx1AU-1,  radiusPx];
+           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, "#000000", wDiskColor, starRGBHex];
+        }
+        if (radiusPx1AU <= radiusPx){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx, radiusPx1AU, radiusPx1AU-1];
+           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex, "#000000", starRGBHex];
+        }
+        //
         //var titleYPos = xLowerYOffset - yRange + 40;
-        //var cnvsCtx = washer(xOffset - xRange / 2, yOffset, wDefaultColor, plotElevenId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotElevenId, cnvsElevenId);
+        //var cnvsCtx = washer(xOffset - xRange / 2, yOffset, wDiskColor, plotElevenId);
+        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotElevenId, cnvsElevenId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsElevenCtx.fillStyle = wDefaultColor;
+        cnvsElevenCtx.fillStyle = wDiskColor;
         cnvsElevenCtx.fillRect(0, 0, panelWidth, panelHeight);
         // Add title annotation:
 
@@ -6541,9 +6719,11 @@ Spectral line \n\
         txtPrint("<span style='font-size:small'>"
                 + " <span style='color:#FF0000'>Steam line</span> " + steamLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> "
                 + " <span style='color:#00FF88'><strong>Life zone</strong></span><br /> "
-                + " <span style='color:#0000FF'>Ice line</span> " + iceLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a>"
-                + " </span>",
+                + " <span style='color:#0000FF'>Ice line</span> " + iceLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> " 
+                + " <span style='color:#000000'>Reference line: 1 <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'>AU</a></span>",
                 legendX, legendY, lineColor, plotElevenId);
+//
+        txtPrint("<span style='font-size:small'> Boiling temp = " + steamTempRound + " K</span>", legendX, (legendY+300), lineColor, plotElevenId);
         //Get the Vega-calibrated colors from the intensity spectrum of each theta annulus:    
         // moved earlier var intcolors = iColors(lambdaScale, intens, numDeps, numThetas, numLams, tauRos, temp);
 
@@ -6586,6 +6766,14 @@ Spectral line \n\
 
         var plotRow = 1;
         var plotCol = 2;
+
+//background color needs to be finessed so that white-ish stars will stand out:
+       if (teff > 6000.0){
+  //hotter white or blue-white star - darken the background (default background in #F0F0F0
+           wDiskColor = "#808080";  
+       } else {
+           wDiskColor = wDefaultColor;
+       }
         // WARNING: Teff axis is backwards!!
         var minXData = logTen(100000.0); //K
         var maxXData = logTen(1000.0); //K
@@ -6608,10 +6796,10 @@ Spectral line \n\
      <em>L</em><sub>Sun</sub></a></span> ";
         //
         var fineness = "fine";
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotNineId, cnvsNineId);
+        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotNineId, cnvsNineId);
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsNineCtx.fillStyle = wDefaultColor;
+        cnvsNineCtx.fillStyle = wDiskColor;
         cnvsNineCtx.fillRect(0, 0, panelWidth, panelHeight);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
@@ -6794,9 +6982,9 @@ Spectral line \n\
         var dSizeCnvs = 2.0; //plot point size
         var opac = 0.7; //opacity
         // RGB color
-        var r255 = 50;
-        var g255 = 50;
-        var b255 = 50; //dark gray
+        var r255 = 0;
+        var g255 = 0;
+        var b255 = 0; 
         var RGBHex = colHex(r255, r255, r255);
 
         var ii;
@@ -6824,9 +7012,9 @@ Spectral line \n\
 //RGB stars
 
 // RGB color
-        var r255 = 100;
-        var g255 = 100;
-        var b255 = 100; //gray
+        var r255 = 0;
+        var g255 = 0;
+        var b255 = 0; 
         var RGBHex = colHex(r255, r255, r255);
 
         var ii;
@@ -6851,13 +7039,12 @@ Spectral line \n\
         }
 
 
-// No! Too bright for what GrayStar can model!
 // //SGB stars
 // 
 // // RGB color
- var r255 = 150;
- var g255 = 150;
- var b255 = 150; //light gray
+ var r255 = 0;
+ var g255 = 0;
+ var b255 = 0; 
  var RGBHex = colHex(r255, r255, r255);
   
  var ii;
@@ -7595,11 +7782,12 @@ Spectral line \n\
 
 // Plot five: SED
 // 
-    if ((ifLineOnly === false) && (ifShowRad === true)) { 
+    //if ((ifLineOnly === false) && (ifShowRad === true)) { 
+    //if ((ifLineOnly === false)) { 
 //    //For movie:
 //    if (ifLineOnly === false) { 
 
-        var plotRow = 3;
+        var plotRow = 1;
         var plotCol = 1;
         ////For movie:
         //var plotRow = 1;
@@ -7854,7 +8042,7 @@ Spectral line \n\
                         yFinesse, RGBHex, plotFiveId, cnvsFiveCtx);
         txtPrint("<span style='font-size:xx-small'>Filter</span>",
                 xShiftDum, titleOffsetY+60, lineColor, plotFiveId);
-    } 
+    //} 
 
 //
 //
@@ -9119,9 +9307,10 @@ Spectral line \n\
         txtPrint("log<sub>10</sub> <em>P</em><sub>Rad</sub> (dynes cm<sup>-2</sup>)", 10 + 5 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>&#961</em> (g cm<sup>-3</sup>)", 10 + 6 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>N</em><sub>e</sub> (cm<sup>-3</sup>)", 10 + 7 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#956</em> (g)", 10 + 8 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#954</em><sub>Ros</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 9 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> <em>&#954</em><sub>500</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 10 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>N</em><sub>H</sub> (cm<sup>-3</sup>)", 10 + 8 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#956</em> (g)", 10 + 9 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#954</em><sub>Ros</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 10 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> <em>&#954</em><sub>500</sub> (cm<sup>2</sup> g<sup>-1</sup>)", 10 + 11 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
 
         for (var i = 0; i < numDeps; i++) {
             yTab = yOffsetT + vOffset + (i+1) * lineHeight;
@@ -9153,15 +9342,18 @@ Spectral line \n\
             //value =  newNe[0][i] * k * temp[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 7 * xTab, yTab, txtColor, printModelId);
-            value = logE * Math.log(mmw[i]);
+            value = logE * logNH[i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 8 * xTab, yTab, txtColor, printModelId);
-            value = logE * kappaRos[1][i];
+            value = logE * Math.log(mmw[i]);
             value = value.toPrecision(5);
             numPrint(value, 10 + 9 * xTab, yTab, txtColor, printModelId);
-            value = logE * kappa500[1][i];
+            value = logE * kappaRos[1][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + 10 * xTab, yTab, txtColor, printModelId);
+            value = logE * kappa500[1][i];
+            value = value.toPrecision(5);
+            numPrint(value, 10 + 11 * xTab, yTab, txtColor, printModelId);
 
         }
 
