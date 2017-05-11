@@ -1682,7 +1682,7 @@ function main() {
     if (lam0 > 1000.0) {
         flagArr[6] = true;
         lam0 = 1000.0;
-        var lamStr = "10000";
+        var lamStr = "1000";
         settingsId[6].value = 1000.0;
         $("#lambda_0").val(1000.0);
     }
@@ -1815,7 +1815,7 @@ function main() {
         settingsId[13].value = 5.0;
         $("#chi_I4").val(5.0);
     }
-    if (chiI2 > 55.0) {
+    if (chiI4 > 55.0) {
         flagArr[13] = true;
         chiI4 = 55.0;
         var ionStr = "55.0";
@@ -2570,6 +2570,10 @@ function main() {
 
   var chiIArr = [];
   chiIArr.length = numStages;
+// safe initialization:
+  for (var i; i < numStages; i++){
+      chiIArr[i] = 999999.0;
+  }
   var log10UwAArr = [];
   log10UwAArr.length = numStages;
   for (var i = 0; i < numStages; i++){
@@ -2989,6 +2993,9 @@ var logAmu = Math.log(amu);
        }
     // console.log("iElem " + iElem + " iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
     // console.log("thisNumMols " + thisNumMols);
+    //FLAG!
+    //Trying to account for mols in ionization eq destabilized everything
+    thisNumMols = 0; 
      if (thisNumMols > 0){
        //Find pointer to molecule in master mname list for each associated molecule:
        for (var iMol = 0; iMol < thisNumMols; iMol++){
@@ -4724,12 +4731,12 @@ var logK = Math.log(k);
 
 
             //// Teff test - Also needed for convection module!:
-            if (il > 1) {
-                lambda2 = lambdaScale[il]; // * 1.0E-7;  // convert nm to cm
-                lambda1 = lambdaScale[il - 1]; // * 1.0E-7;  // convert nm to cm
-                fluxSurfBol = fluxSurfBol
-                        + contFluxLam[0] * (lambda2 - lambda1);
-            }
+            //if (il > 1) {
+            //    lambda2 = lambdaScale[il]; // * 1.0E-7;  // convert nm to cm
+            //    lambda1 = lambdaScale[il - 1]; // * 1.0E-7;  // convert nm to cm
+            //    fluxSurfBol = fluxSurfBol
+            //            + contFluxLam[0] * (lambda2 - lambda1);
+           // }
         } //il loop
         contFlux = flux3(contIntens, lambdaScale, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
@@ -4761,6 +4768,7 @@ var logK = Math.log(k);
                 masterIntens[il][it] = masterIntensLam[it];
             } //it loop - thetas
         } //il loop
+
             masterFlux = flux3(masterIntens, masterLams, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
             //// Teff test - Also needed for convection module!:
@@ -4769,7 +4777,7 @@ var logK = Math.log(k);
                 lambda2 = masterLams[il]; // * 1.0E-7;  // convert nm to cm
                 lambda1 = masterLams[il - 1]; // * 1.0E-7;  // convert nm to cm
                 fluxSurfBol = fluxSurfBol
-                        + masterFluxLam[0] * (lambda2 - lambda1);
+                        + masterFlux[0][il] * (lambda2 - lambda1);
             }
         } 
         var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
@@ -6308,7 +6316,7 @@ Spectral line \n\
      if (ifTiO == 1){
         TiOString = "On";
      }
-     txtPrint("TiO bands: " + TiOString, titleOffsetX + 400, titleOffsetY+35, lineColor, plotTenId);
+     txtPrint("TiO bands: " + TiOString, titleOffsetX + 10, titleOffsetY+35, lineColor, plotTenId);
 
         var xShift, zShift, xShiftDum, zLevel;
         var RGBHex; //, r255, g255, b255;
@@ -9262,7 +9270,7 @@ Spectral line \n\
         var xTab = 190;
         txtPrint("i", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
-        txtPrint("log<sub>10</sub> depth (cm)", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("depth (km)", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>T</em><sub>Kin</sub> (K)", 10 + 3 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>P</em><sub>Gas</sub> (dynes cm<sup>-2</sup>)", 10 + 4 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>P</em><sub>Rad</sub> (dynes cm<sup>-2</sup>)", 10 + 5 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
@@ -9280,7 +9288,7 @@ Spectral line \n\
             //value = tauRos[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + xTab, yTab, txtColor, printModelId);
-            value = logE * Math.log(depths[i]);
+            value = 1.0e-5 * depths[i];
             //value = (depths[i]);
             value = value.toPrecision(5);
             numPrint(value, 10 + 2 * xTab, yTab, txtColor, printModelId);

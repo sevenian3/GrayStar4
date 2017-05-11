@@ -959,7 +959,7 @@ var minMax2 = function(x) {
 
    var getIonE = function(species){
 
-   var ionE = 8.0; //default initialization
+   var ionE = 999999.0; //default initialization
 
       if (species == "HI"){
          ionE = 13.598434005136;
@@ -2599,13 +2599,13 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
       var jolaQuantumS = 1.0; //default for a multiplicative factor
 
       if (system == "TiO_C3Delta_X3Delta"){
-         jolaQuantumS = 1.0e-16;
+         jolaQuantumS = 1.0e-13;
       }
       if (system == "TiO_c1Phi_a1Delta"){
-         jolaQuantumS = 5.0e-16;
+         jolaQuantumS = 1.0e-14;
       }
       if (system == "TiO_A3Phi_X3Delta"){
-         jolaQuantumS = 5.0e-16;
+         jolaQuantumS = 1.0e-14;
       }
 
       return jolaQuantumS;

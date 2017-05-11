@@ -1095,13 +1095,13 @@ var logH = Math.log(h);
 
             for (var iD = 0; iD < numDeps; iD++){
 
-               kapBF = 0.0;
+               kapBF = 1.0e-99; //minimum safe value
                stimEmLogExp = stimEmLogExpHelp - temp[1][iD];
                stimEmExp = -1.0 * Math.exp(stimEmLogExp);
                stimEm = ( 1.0 - Math.exp(stimEmExp) ); //LTE correction for stimulated emission  
 
                //kapBF = aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD] ;
-               kapBF = aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD]; // + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD];  //debug
+               kapBF = kapBF + aC1[iD] + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD] + aFe1[iD]; // + aMg1[iD] + aMg2[iD] + aAl1[iD] + aSi1[iD] + aSi2[iD];  //debug
                masterBF[iL][iD] = Math.log(kapBF) + Math.log(stimEm);
              //  if ( (iD%10 == 0) && (iL%10 == 0) ) {
              //    System.out.format("%03d, %03d, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %21.15f, %n", 

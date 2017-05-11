@@ -267,6 +267,7 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
     var ln2 = Math.log(2.0);
     var ln4pi = Math.log(4.0 * Math.PI);
     var lnSqRtPi = 0.5 * Math.log(Math.PI);
+    var sqRtPi = Math.sqrt(Math.PI);
     var sqPi = Math.sqrt(Math.PI);
 
     var logE = logTen(Math.E); // for debug output
@@ -414,8 +415,14 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
            //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " v " + v[il] + " voigt " + voigt + " hjertFn " + hjertFn);
            // }
             //logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
-            logVoigt = Math.log(hjertFn) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
-            lineProf[il][id] = Math.exp(logVoigt);
+            //logVoigt = Math.log(hjertFn) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
+            voigt = hjertFn * Math.pow(lam0, 2) /sqRtPi / doppler / c;
+            //lineProf[il][id] = Math.exp(logVoigt);
+            lineProf[il][id] = voigt;
+            if (lineProf[il][id] <= 0.0){
+                lineProf[il][id] = -49.0;
+             }
+
            // if (id === 20) {
            //     console.log("lam0In " + lam0In);
            //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
@@ -458,6 +465,7 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
     var ln2 = Math.log(2.0);
     var ln4pi = Math.log(4.0 * Math.PI);
     var lnSqRtPi = 0.5 * Math.log(Math.PI);
+    var sqRtPi = Math.sqrt(Math.PI);
     var sqPi = Math.sqrt(Math.PI);
 
     var logE = logTen(Math.E); // for debug output
@@ -653,17 +661,24 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
            //     console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " v " + v[il] + " voigt " + voigt + " hjertFn " + hjertFn);
            // }
             //logVoigt = Math.log(voigt) + 2.0 * logLam0 - lnSqRtPi - logDopp - logC;
-            logVoigt = Math.log(hjertFn) - lnSqRtPi - logDopp;
+            //logVoigt = Math.log(hjertFn) - lnSqRtPi - logDopp;
+            voigt = hjertFn / sqRtPi / doppler;
             logStark = logStark - logF0;
             if (vAbs > 2.0){
             //if (id === 24) {
             //   console.log("il " + il + " v[il] " + v[il] + " logVoigt " + logE*logVoigt + " logStark " + logE*logStark);
             //}
-               voigt = Math.exp(logVoigt) + Math.exp(logStark);
-               logVoigt = Math.log(voigt);
+               //voigt = Math.exp(logVoigt) + Math.exp(logStark);
+               voigt = voigt + Math.exp(logStark);
+               //logVoigt = Math.log(voigt);
             }
-            logVoigt = logVoigt + 2.0 * logLam0 - logC;
-            lineProf[il][id] = Math.exp(logVoigt);
+            //logVoigt = logVoigt + 2.0 * logLam0 - logC;
+            voigt = voigt * Math.pow(lam0, 2) / c;
+            //lineProf[il][id] = Math.exp(logVoigt);
+            lineProf[il][id] = voigt;
+            if (lineProf[il][id] <= 0.0){
+                lineProf[il][id] = -49.0;
+            }
             //if (id === 24) {
             //    console.log("lam0In " + lam0In);
             //    console.log("il " + il + " linePoints " + 1.0e7 * linePoints[0][il] + " id " + id + " lineProf[il][id] " + lineProf[il][id]);
@@ -1455,6 +1470,10 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
                 //lineKap2 = 1.0e-99;  //test
             }
             //test lineKap2 = 1.0e-99;  //test
+            if (lineKap2 <= 0.0){
+                lineKap2 = 1.0e-49;
+            }
+
             totKap = kappa2 + lineKap2;
             logMasterKapsOut[iL][iD] = Math.log(totKap);
            // if (iD === 36) {
@@ -1542,6 +1561,9 @@ var logEv = Math.log(eV);
         //          }
          //   //
 
+        if (chiL <= 0.0){
+            chiL = 1.0e-49;
+         }
         var logChiL = Math.log(chiL) + logEv;
         //chiL = chiL * eV;  // Convert lower E-level from eV to ergs
 
