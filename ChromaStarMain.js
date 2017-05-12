@@ -2636,8 +2636,13 @@ function main() {
         //Rescaled  kinetic temeprature structure: 
         //var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
         if (teff < F0Vtemp) {
-            //We're a cool star! - rescale from 5000 K reference model 
-            temp = phx5kRefTemp(teff, numDeps, tauRos);
+            if (logg > 3.5){
+               //We're a cool dwarf! - rescale from 5000 K reference model 
+               temp = phx5kRefTemp(teff, numDeps, tauRos);
+            } else {
+               //We're a cool giant - rescale from 4250g20 reference model
+               temp = phx425g2RefTemp(teff, numDeps, tauRos);
+            }
         } else if (teff >= F0Vtemp) {
             //We're a HOT star! - rescale from 10000 K reference model 
             temp = phx10kRefTemp(teff, numDeps, tauRos);
@@ -2665,10 +2670,17 @@ function main() {
 
 
         if (teff < F0Vtemp) {
-            //We're a cool star - rescale from 5000 K reference model! 
-            guessPGas = phx5kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
-            guessPe = phx5kRefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
-            guessNe = phx5kRefNe(numDeps, temp, guessPe);
+            if (logg > 3.5){
+                //We're a cool dwarf - rescale from 5000 K reference model! 
+                guessPGas = phx5kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
+                guessPe = phx5kRefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
+                guessNe = phx5kRefNe(numDeps, temp, guessPe);
+            } else {
+                //We're a cool giant - rescale from 4250g20 reference model
+                guessPGas = phx425g2RefPGas(grav, zScale, logAz[1], numDeps, tauRos);
+                guessPe = phx425g2RefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
+                guessNe = phx425g2RefNe(numDeps, temp, guessPe);
+            }
         } else if (teff >= F0Vtemp) {
             //We're a HOT star!! - rescale from 10000 K reference model 
             guessPGas = phx10kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
