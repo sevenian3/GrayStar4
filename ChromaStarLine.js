@@ -1440,41 +1440,53 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
     }
     //double[][] kappa2 = new double[2][numTot];
     //double[][] lineKap2 = new double[2][numTot];
-    var kappa2, lineKap2, totKap;
-    lineKap2 = 1.0e-49; //initialization
+    //var kappa2, lineKap2, totKap;
+    //lineKap2 = 1.0e-49; //initialization
+    var logKappa2, logLineKap2, totKap;
+    logLineKap2 = -49.0; //initialization
 
     //int numCnt = lambdaScale.length;
     //int numLine = lineLambdas.length - 1;
-    var kappa1D = [];
-    kappa1D.length = numNow;
-    var lineKap1D = [];
-    lineKap1D.length = numPoints;
+    //var kappa1D = [];
+    //kappa1D.length = numNow;
+    //var lineKap1D = [];
+    //lineKap1D.length = numPoints;
+    var logKappa1D = [];
+    logKappa1D.length = numNow;
+    var logLineKap1D = [];
+    logLineKap1D.length = numPoints;
     //console.log("iL   masterLams    logMasterKappa");
     for (var iD = 0; iD < numDeps; iD++) {
 
         //Extract 1D *linear* opacity vectors for interpol()
         for (var k = 0; k < numNow; k++) {
-            kappa1D[k] = Math.exp(logMasterKaps[k][iD]); //actually wavelength independent - for now
+            //kappa1D[k] = Math.exp(logMasterKaps[k][iD]); //actually wavelength independent - for now
+            logKappa1D[k] = logMasterKaps[k][iD]; //actually wavelength independent - for now
         }
 
         for (var k = 0; k < numPoints; k++) {
-            lineKap1D[k] = Math.exp(listLogKappaL[k][iD]);
+            //lineKap1D[k] = Math.exp(listLogKappaL[k][iD]);
+            logLineKap1D[k] = listLogKappaL[k][iD];
         }
 
         //Interpolate continuum and line opacity onto master lambda scale, and add them lambda-wise:
         for (var iL = 0; iL < numTot; iL++) {
-            kappa2 = interpol(masterLams, kappa1D, masterLamsOut[iL]);
-            lineKap2 = 1.0e-49; //re-initialization
+            //kappa2 = interpol(masterLams, kappa1D, masterLamsOut[iL]);
+            logKappa2 = interpol(masterLams, logKappa1D, masterLamsOut[iL]);
+            //lineKap2 = 1.0e-49; //re-initialization
+            logLineKap2 = -49.0; //re-initialization
             if ((masterLamsOut[iL] >= listLineLambdas[0]) && (masterLamsOut[iL] <= listLineLambdas[numPoints - 1])) {
-                lineKap2 = interpol(listLineLambdas, lineKap1D, masterLamsOut[iL]);
+                //lineKap2 = interpol(listLineLambdas, lineKap1D, masterLamsOut[iL]);
+                logLineKap2 = interpol(listLineLambdas, logLineKap1D, masterLamsOut[iL]);
                 //lineKap2 = 1.0e-99;  //test
             }
             //test lineKap2 = 1.0e-99;  //test
-            if (lineKap2 <= 0.0){
-                lineKap2 = 1.0e-49;
-            }
+            //if (lineKap2 <= 0.0){
+            //    lineKap2 = 1.0e-49;
+            //}
 
-            totKap = kappa2 + lineKap2;
+            //totKap = kappa2 + lineKap2;
+            totKap = Math.exp(logKappa2) + Math.exp(logLineKap2);
             logMasterKapsOut[iL][iD] = Math.log(totKap);
            // if (iD === 36) {
             //    console.log("iL " + iL + " masterLamsOut " + masterLamsOut[iL] + " lineKap2 " + logE*Math.log(lineKap2) 
