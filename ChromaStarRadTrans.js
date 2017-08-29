@@ -402,6 +402,9 @@ var formalSoln = function(numDeps, cosTheta, lambda, tau, temp, lineMode) {
 
             // Extended rectangle rule:
             increment = integrand * delta;
+            if (increment < 0.0){
+               increment = 0.0;
+            }
             newInt = newInt + increment;
 
             // the following break-out condition is not so simple if using a closed formula: 
@@ -426,6 +429,9 @@ var formalSoln = function(numDeps, cosTheta, lambda, tau, temp, lineMode) {
         //newInt = newInt + increment;
 
         intens[it] = newInt;
+        if (intens[it] <= 0.0){
+          intens[it] = 1.0e-49;
+        }
     }   //it - theta loop
 
     //} // il - lambda loop
@@ -537,7 +543,7 @@ var dBdT = function(temp, lambda) {
     return logdBdTlam;
 };
 
-/* Repalced with non-axisymmeti flux3()...
+/* Replaced with non-axisymmeti flux3()...
  *
 // For some weird reason, JavaScript does not like the function name flux()!!! - Change to flux2()
 
@@ -736,6 +742,9 @@ var flux3 = function(intens, lambdas, cosTheta, phi, radius, omegaSini, macroV) 
            //flx = flx + ( intens[it] * thisThetFctr * delPhi ); 
            for (var il = 0; il < numLams; il++){
               flx[il] = flx[il] + ( thisIntens[il] * thisThetFctr * delPhi ); 
+              if (flx[il] <= 0.0){
+                 flx[il] = 1.0e-49;
+              }
               //console.log("il " + il + " thisIntens " + thisIntens[il] + " flx " + flx[il]);
            }
         } //ip - phi loop

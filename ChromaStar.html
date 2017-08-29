@@ -53,7 +53,7 @@
                     handleShape: "round",
                     sliderType: "min-range",
                     value: "5777",
-                    min: "3200",
+                    min: "3000",
                     max: "50000",
                     step: "1",
                     showTooltip: "true",
@@ -67,7 +67,7 @@
                     sliderType: "min-range",
                     value: "4.44",
                     min: "0.00",
-                    max: "7.00",
+                    max: "5.50",
                     step: "0.01",
                     showTooltip: "true",
                     editableTooltip: "true"
@@ -190,6 +190,7 @@
           <span style="color:violet">C</span><span style="color:blue">h</span><span style="color:green">r</span><span style="color:yellow">o</span><span style="color:orange">m</span><span style="color:red">a</span><span style="color:#333333">Star</span>
           <span style="font-size:small">(formerly "GrayStar")</span>
         </h2> 
+        <h5>Reliably responsive in Chrome, Opera, and sometimes Edge browsers under Windows</h5>
         <span style="color:#8888FF" title="The OpenStar project"><strong>OpenStar</strong></span> 
         pedagogical <a href="http://en.wikipedia.org/wiki/Model_photosphere" target="_blank">star</a> and <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">planet</a> modeling</a> in JavaScript.
         Visualization in HTML<span style="color:red; font-weight:bold">5</span>.  <span style="color:#AA00AA">Hover for tips.  <command>Ctrl +/-</command> to zoom</span> <br />
@@ -242,7 +243,7 @@
                             <td>
                                 <span title="Surface temperature of spherical blackbody radiation emitter of equivalent bolometric surface flux, in Kelvins (K)"> 
                                     <a href="http://en.wikipedia.org/wiki/Effective_temperature" target="_blank">Effective temperature, <em>T</em><sub>eff</sub></a> <br />
-                                    (3200 - 50000) 
+                                    (3400 - 50000) 
                                     <a href="http://en.wikipedia.org/wiki/Kelvin" target="_blank">K</a>) <br />
                                     <!-- <input id="Teff" type="number" name="Teff" value=5800 size="5" min="3500" max="25000" step="25"/> -->
                                     <!-- <input id="Teff" type="range" name="Teff" value="5800" min="3500" max="25000" step="10" onchange="displayTeff()"/> -->
@@ -255,7 +256,7 @@
                             <td>
                                 <span title="log(GM/R^2; M=mass, R=radius, cgs units, 2.0: Giant, 5.0: Dwarf">
                                     <a href="http://en.wikipedia.org/wiki/Surface_gravity" target="_blank">Log<sub>10</sub> surface gravity, log(<em>g</em>)</a> <br />
-                                    (0.0 - 7.0 cm s<sup>-2</sup> = dynes g<sup>-1</sup>) <br />
+                                    (0.0 - 5.5 cm s<sup>-2</sup> = dynes g<sup>-1</sup>) <br />
                                     <!-- <input id="logg" type="number" name="logg" value=4.5 size="3" min="1.5" max="5.5" step="0.25"/><br /> -->
                                     <!-- <input id="logg" type="range" name="logg" value=4.5 min="1.5" max="5.5" step="0.25" onchange="displayLogg()"/>-->
                                 </span>
@@ -296,6 +297,31 @@
                                     <input id="logKapFudge" type="number" name="logKapFudge" value="0.0" size="3" min="-2.0" max="2.0" step="0.1"/>
                                 </span>
                             </td>
+				<!-- Below are the new metallicity controls lburns June 2017 -->
+				<!-- [He/Fe] lburns -->
+			    <td>
+				<span title="log_10(N_He/N_Fe) - log_10(N_He/N_Fe)_Sun">
+				    <a href="https://en.wikipedia.org/wiki/Metallicity" target="_blank">[He/Fe]</a>
+				    (-1 - 1)<br />
+				    <input id="logHeFe" type="number" name="logHeFe" value="0.0" size="3" min="-1.0" max="1.0" step="0.1" />
+				</span>
+			    </td>
+				<!-- [C/O] lburns -->
+			    <td>
+				<span title="log_10(N_C/N_O) - log_10(N_C/N_O)_Sun">
+				    <a href="https://en.wikipedia.org/wiki/Metallicity" target="_blank">[C/O]</a>
+				    (-2 - 2)<br />
+				    <input id="logCO" type="number" name="logCO" value="0.0" size="3" min="-2.0" max="2.0" step="0.1" />
+				</span>
+			    </td>
+				<!-- [alpha/Fe] lburns -->
+			    <td>
+				<span title="log_10(N_alpha/N_Fe) - log_10(N_alpha/N_Fe)_Sun">
+				    <a href="https://en.wikipedia.org/wiki/Metallicity" target="_blank">[&#945/Fe]</a>
+				    (-0.5 - 0.5)<br />
+				    <input id="logAlphaFe" type="number" name="logAlphaFe" value="0.0" size="3" min="-0.5" max="0.5" step="0.1" />
+				</span>
+			    </td> 
                         </tr>
                     </table>
                 </fieldset> 
@@ -610,6 +636,9 @@
                                     <a href="http://en.wikipedia.org/wiki/Procyon" target="_blank">Procyon</a>
                                 </span>
                             </td>
+			    <th style="font-size:14px">
+				Planet hosts
+			    </th>
                             <td>
                                 <span title="Planet host: 51 Pegasi, HD 217014, HR 8729, G5 V">
                                     <input id="51pegasi" type="radio" name="switchStar" value="51Pegasi" />
@@ -621,7 +650,21 @@
                                     <input id="61cygnia" type="radio" name="switchStar" value="61CygniA" />
                                     <a href="https://en.wikipedia.org/wiki/61_Cygni" target="_blank">61 Cygni A</a>
                                 </span>
-                            </td>                             
+                            </td> 
+			    <td>
+				<!-- Proxima Centauri added 05/24 lburns -->
+				<span title="Planet host: Alpha Centauri C, M6 V">
+				    <input id="alphacentc" type="radio" name="switchStar" value="Alpha Centauri C" />
+				    <a href="https://en.wikipedia.org/wiki/Proxima_Centauri" target="_blank">Proxima Centauri</a> 
+			        </span>
+			    </td> 
+			    <td>
+				<!-- Fomalhaut added 06/19 lburns -->
+				<span title="Planet host: Fomalhaut, A3 V">
+				    <input id="fomalhaut" type="radio" name="switchStar" value="Fomalhaut" />
+				    <a href="https://en.wikipedia.org/wiki/Fomalhaut" target="_blank">Fomalhaut</a>
+				</span>
+			    </td>                                                       
                         </tr> 
                         <tr>
                             <th>
@@ -789,13 +832,13 @@
                             <td>
                                  <span title="Number of outer HSE (Pgas) - EOS - Opacity iterations">
                                     No. HSE-EOS-Opac iters
-                                    <input id="nOuterIter" type="number" name="nOuterIter" value="8" size="3" min="5" max="12" step="1" />
+                                    <input id="nOuterIter" type="number" name="nOuterIter" value="5" size="3" min="5" max="12" step="1" />
                                  </span> 
                             </td>
                             <td>
                                  <span title="Number of inner Pe - ionization equilibrium - molecular equilibrium iterations">
                                     No. Pe-IonEquil-MolecEquil iters
-                                    <input id="nInnerIter" type="number" name="nInnerIter" value="8" size="3" min="5" max="12" step="1" />
+                                    <input id="nInnerIter" type="number" name="nInnerIter" value="5" size="3" min="5" max="12" step="1" />
                                  </span> 
                             </td> 
                             <td>
@@ -939,88 +982,74 @@
 
   -->
 
-        <!-- Stellar disk -->
-        <div id="plotSeven">
-            <canvas id="plotSevenCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Direct image of spectrum -->
-        <div id="plotTen">
-            <canvas id="plotTenCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Life zone -->
-        <div id="plotEleven">
-            <canvas id="plotElevenCnvs" width="450" height="350"></canvas>
+        <div id="newPlotSeven">
+            <svg id="SVG7" width="450" height="350"></svg>
         </div>
 
-        <!-- Tunable monochromatic image -->
-        <div id="plotTwelve">
-            <canvas id="plotTwelveCnvs" width="450" height="350"></canvas>
+                <!--New Plot Ten-->
+        <div id="newPlotTen">
+            <svg id="SVG10" fill="" width="450" height="350">
+            </svg>
         </div>
 
-        <!-- SED: I_lambda, F_lambda(lambda) -->
-        <div id="plotFive" class="radPanel">
-            <canvas id="plotFiveCnvs" width="450" height="350"></canvas>
-        </div>          
-
-        <!-- Limb darkening: I_lambda(theta) -->
-        <div id="plotFour" class="radPanel" style="display:none">
-            <canvas id="plotFourCnvs" width="450" height="350"></canvas>
-        </div>  
-        
-        <!-- HR DIagram -->
-        <div id="plotNine">
-            <canvas id="plotNineCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- high-res spectral line -->
-        <div id="plotSix" class="linePanel" style="display:none">
-            <canvas id="plotSixCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Fourier transform of I(theta/(pi/2)) -->
-        <div id="plotSeventeen">
-            <canvas id="plotSeventeenCnvs" width="450" height="350"></canvas>
-        </div>        
-
-        <!-- Tkin vs log(Tau) -->
-        <div id="plotTwo" class="atmosPanel"style=" display:none">
-            <canvas id="plotTwoCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Grotrian diagram for high res line-->
-        <div id="plotEight" class="linePanel" style="display:none">
-            <canvas id="plotEightCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Pgas, Prad vs log(Tau) -->
-        <div id="plotThree" class="atmosPanel" style="display:none">
-            <canvas id="plotThreeCnvs" width="450" height="350"></canvas>
-        </div> 
-
-        <!-- Opacity vs lambda -->
-        <div id="plotSixteen">
-            <canvas id="plotSixteenCnvs" width="450" height="350"></canvas>
-        </div>        
-
-        <!-- Opacity vs lambda -->
-        <div id="plotFifteen">
-            <canvas id="plotFifteenCnvs" width="450" height="350"></canvas>
-        </div>        
-
-        <!-- Opacity vs depth -->
-        <div id="plotFourteen">
-            <canvas id="plotFourteenCnvs" width="450" height="350"></canvas>
-        </div>        
-
-<!--
-        <div id="plotOne" class="atmosPanel" style="display:none">
-            <canvas id="plotOneCnvs" width="450" height="350"></canvas>
+        <div id="newPlotEleven">
+            <svg id="SVG11" width="450" height="350"></svg>
         </div>
--->
 
-        <!-- HR DIagram -->
+        <div id="newPlotTwelve">
+            <svg id="SVG12" width="450" height="350"></svg>
+        </div>
+
+        <!-- NEW Plot 5 SED JB-->
+        <div id="newPlot5" class="radPanel">
+            <svg id = "SVG5" fill="" width="450" height="350"></svg>
+        </div>
+
+        <!--new plot 4-->
+        <div id="newPlotFour" class="radPanel" style="display:none">
+            <svg id="SVG4" width="450" height="350"></svg>
+        </div>
+
+        <!-- New Plot Nine -->
+        <div id="newPlotNine">
+                <svg id="SVG9" fill="" width="450" height="350"></svg>
+        </div>
+
+        <div id="newPlotSix" class="linePanel" style="display:none">
+                <svg id="SVG6" width="450" height="350"></svg>
+        </div>
+
+        <!-- new plot17 ID-->
+        <div id="newPlotSeventeen" style="display:none">
+            <svg id="SVG17" width="450" height="350"></svg>
+        </div>
+
+        <!-- New Plot Two-->
+        <div id="newPlotTwo"  class="atmosPanel" style=" display:none">
+                <svg id = "SVG2" fill="" width="450" height="350"></svg>
+        </div>
+
+        <div id="newPlotEight" class="linePanel" style="display:none">
+            <svg id="SVG8" width="450" height="350"></svg>
+        </div>
+        <!-- newPlotThree -->
+        <div id="newPlotThree" class="atmosPanel" style="display:none">
+            <SVG id="SVG3" width="450" height="350"></svg>
+        </div>
+
+        <div id="newPlotSixteen">
+            <svg id="SVG16" width="450" height="350"></svg>
+        </div>
+
+        <!-- new plot15-->
+        <div id="newPlotFifteen">
+            <SVG id="SVG15" width="450" height="350"></SVG>
+        </div>
+
+        <!-- new plot fourteen-->
+        <div id="newPlotFourteen">
+            <svg id="SVG14" width="450" height="350"></svg>
+        </div>
 
         <!-- Print-out panel -->
         <div id="printModel" style="display:block"></div>

@@ -921,19 +921,19 @@ var logH = Math.log(h);
          }
 
          var logUC1 = [];
-         logUC1.length = 2;
+         logUC1.length = 5;
          var logUMg1 = [];
-         logUMg1.length = 2;
+         logUMg1.length = 5;
          var logUMg2 = [];
-         logUMg2.length = 2;
+         logUMg2.length = 5;
          var logUAl1 = [];
-         logUAl1.length = 2;
+         logUAl1.length = 5;
          var logUSi1 = [];
-         logUSi1.length = 2;
+         logUSi1.length = 5;
          var logUSi2 = [];
-         logUSi2.length = 2;
+         logUSi2.length = 5;
          var logUFe1 = [];
-         logUFe1.length = 2;
+         logUFe1.length = 5;
 
          var logStatWC1 = 0.0;
          var logStatWMg1 = 0.0;
@@ -983,50 +983,24 @@ var logH = Math.log(h);
          aFe1.length = numDeps;
 
          species = "CI";
-         logUC1 = getPartFn(species);
+         logUC1 = getPartFn2(species);
          species = "MgI";
-         logUMg1 = getPartFn(species);
+         logUMg1 = getPartFn2(species);
          species = "MgII";
-         logUMg2 = getPartFn(species);
+         logUMg2 = getPartFn2(species);
          species = "AlI";
-         logUAl1 = getPartFn(species);
+         logUAl1 = getPartFn2(species);
          species = "SiI";
-         logUSi1 = getPartFn(species);
+         logUSi1 = getPartFn2(species);
          species = "SiII";
-         logUSi2 = getPartFn(species);
+         logUSi2 = getPartFn2(species);
          species = "FeI";
-         logUFe1 = getPartFn(species);
+         logUFe1 = getPartFn2(species);
 
          for (var iD = 0; iD < numDeps; iD++){
-//neutral stage
-//Assumes ground state stat weight, g_1, is 1.0
-            theta = 5040.0 / temp[0][iD];
-// U[0]: theta = 1.0, U[1]: theta = 0.5
-            if (theta <= 0.5){
-               logStatWC1 = logUC1[1];
-               logStatWMg1 = logUMg1[1];
-               logStatWMg2 = logUMg2[1];
-               logStatWAl1 = logUAl1[1];
-               logStatWSi1 = logUSi1[1];
-               logStatWSi2 = logUSi2[1];
-               logStatWFe1 = logUFe1[1];
-            } else if ( (theta < 1.0) && (theta > 0.5) ){
-               logStatWC1 = ( (theta-0.5) * logUC1[0] ) + ( (1.0-theta) * logUC1[1] );
-               //divide by common factor of interpolation interval of 0.5 = (1.0 - 0.5):
-               logStatWC1 = 2.0 * logStatWC1; 
-               logStatWMg1 = ( (theta-0.5) * logUMg1[0] ) + ( (1.0-theta) * logUMg1[1] );
-               logStatWMg1 = 2.0 * logStatWMg1; 
-               logStatWMg2 = ( (theta-0.5) * logUMg2[0] ) + ( (1.0-theta) * logUMg2[1] );
-               logStatWMg2 = 2.0 * logStatWMg2; 
-               logStatWAl1 = ( (theta-0.5) * logUAl1[0] ) + ( (1.0-theta) * logUAl1[1] );
-               logStatWAl1 = 2.0 * logStatWAl1; 
-               logStatWSi1 = ( (theta-0.5) * logUSi1[0] ) + ( (1.0-theta) * logUSi1[1] );
-               logStatWSi1 = 2.0 * logStatWSi1; 
-               logStatWSi2 = ( (theta-0.5) * logUSi2[0] ) + ( (1.0-theta) * logUSi2[1] );
-               logStatWSi2 = 2.0 * logStatWSi2; 
-               logStatWFe1 = ( (theta-0.5) * logUFe1[0] ) + ( (1.0-theta) * logUFe1[1] );
-               logStatWFe1 = 2.0 * logStatWFe1; 
-            } else {
+// NEW Interpolation involving temperature for new partition function: lburns
+            var thisTemp = temp[0][iD];
+            if (thisTemp <= 130){
                logStatWC1 = logUC1[0];
                logStatWMg1 = logUMg1[0];
                logStatWMg2 = logUMg2[0];
@@ -1034,16 +1008,88 @@ var logH = Math.log(h);
                logStatWSi1 = logUSi1[0];
                logStatWSi2 = logUSi2[0];
                logStatWFe1 = logUFe1[0];
-            }  
-            logGroundPopsC1[iD] = stagePops[5][0][iD] - logStatWC1; 
-            logGroundPopsMg1[iD] = stagePops[11][0][iD] - logStatWMg1; 
+            } else if (thisTemp > 130 && thisTemp <= 500){
+                // Add in interpolation here lburns
+                logStatWC1 = logUC1[1] * (thisTemp - 130)/(500 - 130)
+                           + logUC1[0] * (500 - thisTemp)/(500 - 130);
+                logStatWMg1 = logUMg1[1] * (thisTemp - 130)/(500 - 130)
+                            + logUMg1[0] * (500 - thisTemp)/(500 - 130);
+                logStatWMg2 = logUMg2[1] * (thisTemp - 130)/(500 - 130)
+                            + logUMg2[0] * (500 - thisTemp)/(500 - 130);
+                logStatWAl1 = logUAl1[1] * (thisTemp - 130)/(500 - 130)
+                            + logUAl1[0] * (500 - thisTemp)/(500 - 130);
+                logStatWSi1 = logUSi1[1] * (thisTemp - 130)/(500 - 130)
+                            + logUSi1[0] * (500 - thisTemp)/(500 - 130);
+                logStatWSi2 = logUSi2[1] * (thisTemp - 130)/(500 - 130)
+                            + logUSi2[0] * (500 - thisTemp)/(500 - 130);
+                logStatWFe1 = logUFe1[1] * (thisTemp - 130)/(500 - 130)
+                            + logUFe1[0] * (500 - thisTemp)/(500 - 130);
+            } else if (thisTemp > 500 && thisTemp <= 3000){
+                logStatWC1 = logUC1[2] * (thisTemp - 500)/(3000 - 500)
+                           + logUC1[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWMg1 = logUMg1[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUMg1[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWMg2 = logUMg2[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUMg2[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWAl1 = logUAl1[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUAl1[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWSi1 = logUSi1[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUSi1[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWSi2 = logUSi2[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUSi2[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWFe1 = logUFe1[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUFe1[1] * (3000 - thisTemp)/(3000 - 500);
+            } else if (thisTemp > 3000 && thisTemp <= 8000){
+                logStatWC1 = logUC1[3] * (thisTemp - 3000)/(8000 - 3000)
+                           + logUC1[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWMg1 = logUMg1[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUMg1[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWMg2 = logUMg2[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUMg2[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWAl1 = logUAl1[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUAl1[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWSi1 = logUSi1[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUSi1[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWSi2 = logUSi2[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUSi2[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWFe1 = logUFe1[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUFe1[2] * (8000 - thisTemp)/(8000 - 3000);
+            } else if (thisTemp > 8000 && thisTemp < 10000){
+                logStatWC1 = logUC1[4] * (thisTemp - 8000)/(10000 - 8000)
+                           + logUC1[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWMg1 = logUMg1[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUMg1[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWMg2 = logUMg2[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUMg2[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWAl1 = logUAl1[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUAl1[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWSi1 = logUSi1[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUSi1[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWSi2 = logUSi2[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUSi2[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWFe1 = logUFe1[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUFe1[3] * (10000 - thisTemp)/(10000 - 8000);
+            } else {
+            // for temperatures greater than or equal to 10000
+               logStatWC1 = logUC1[4];
+               logStatWMg1 = logUMg1[4];
+               logStatWMg2 = logUMg2[4];
+               logStatWAl1 = logUAl1[4];
+               logStatWSi1 = logUSi1[4];
+               logStatWSi2 = logUSi2[4];
+               logStatWFe1 = logUFe1[4];
+            }
+
+            logGroundPopsC1[iD] = stagePops[5][0][iD] - logStatWC1;
+            logGroundPopsMg1[iD] = stagePops[11][0][iD] - logStatWMg1;
             //console.log("iD " + iD + " stagePops[11][0] " + logE*(stagePops[11][0][iD]+temp[1][iD]+logK));
            // console.log("iD " + iD + " stagePops[11][0] " + Math.exp(stagePops[11][0][iD]+temp[1][iD]+logK));
-            logGroundPopsMg2[iD] = stagePops[11][1][iD] - logStatWMg2; 
-            logGroundPopsAl1[iD] = stagePops[12][0][iD] - logStatWAl1; 
-            logGroundPopsSi1[iD] = stagePops[13][0][iD] - logStatWSi1; 
-            logGroundPopsSi2[iD] = stagePops[13][1][iD] - logStatWSi2; 
-            logGroundPopsFe1[iD] = stagePops[25][0][iD] - logStatWFe1; 
+            logGroundPopsMg2[iD] = stagePops[11][1][iD] - logStatWMg2;
+            logGroundPopsAl1[iD] = stagePops[12][0][iD] - logStatWAl1;
+            logGroundPopsSi1[iD] = stagePops[13][0][iD] - logStatWSi1;
+            logGroundPopsSi2[iD] = stagePops[13][1][iD] - logStatWSi2;
+            logGroundPopsFe1[iD] = stagePops[25][0][iD] - logStatWFe1;
+
          }   
         
          var waveno;  //cm?? 
@@ -1947,9 +1993,9 @@ var logH = Math.log(h);
          }
 
          var logUH1 = [];
-         logUH1.length = 2;
+         logUH1.length = 5;
          var logUHe1 = [];
-         logUHe1.length = 2;
+         logUHe1.length = 5;
 
          var logStatWH1 = 0.0;
          var logStatWHe1 = 0.0;
@@ -1969,28 +2015,41 @@ var logH = Math.log(h);
          sigHe1.length = numDeps;
 
          species = "HI";
-         logUH1 = getPartFn(species);
+         logUH1 = getPartFn2(species);
          species = "HeI";
-         logUHe1 = getPartFn(species);
+         logUHe1 = getPartFn2(species);
 
          for (var iD = 0; iD < numDeps; iD++){
-//neutral stage
-//Assumes ground state stat weight, g_1, is 1.0
-            theta = 5040.0 / temp[0][iD];
-// U[0]: theta = 1.0, U[1]: theta = 0.5
-            if (theta <= 0.5){
-               logStatWH1 = logUH1[1];
-               logStatWHe1 = logUHe1[1];
-            } else if ( (theta < 1.0) && (theta > 0.5) ){
-               logStatWH1 = ( (theta-0.5) * logUH1[0] ) + ( (1.0-theta) * logUH1[1] );
-               logStatWHe1 = ( (theta-0.5) * logUHe1[0] ) + ( (1.0-theta) * logUHe1[1] );
-               //divide by common factor of interpolation interval of 0.5 = (1.0 - 0.5):
-               logStatWH1 = 2.0 * logStatWH1; 
-               logStatWHe1 = 2.0 * logStatWHe1; 
+// NEW Interpolation with temperature for new partition function: lburns
+            var thisTemp = temp[0][iD];
+            if (thisTemp <= 130){
+                logStatWH1 = logUH1[0];
+                logStatWHe1 = logUHe1[0];
+            } else if (thisTemp > 130 && thisTemp <= 500){
+                logStatWH1 = logUH1[1] * (thisTemp - 130)/(500 - 130)
+                           + logUH1[0] * (500 - thisTemp)/(500 - 130);
+                logStatWHe1 = logUHe1[1] * (thisTemp - 130)/(500 - 130)
+                            + logUHe1[0] * (500 - thisTemp)/(500 - 130);
+            } else if (thisTemp > 500 && thisTemp <= 3000){
+                logStatWH1 = logUH1[2] * (thisTemp - 500)/(3000 - 500)
+                           + logUH1[1] * (3000 - thisTemp)/(3000 - 500);
+                logStatWHe1 = logUHe1[2] * (thisTemp - 500)/(3000 - 500)
+                            + logUHe1[1] * (3000 - thisTemp)/(3000 - 500);
+            } else if (thisTemp > 3000 && thisTemp <= 8000){
+                logStatWH1 = logUH1[3] * (thisTemp - 3000)/(8000 - 3000)
+                           + logUH1[2] * (8000 - thisTemp)/(8000 - 3000);
+                logStatWHe1 = logUHe1[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + logUHe1[2] * (8000 - thisTemp)/(8000 - 3000);
+            } else if (thisTemp > 8000 && thisTemp < 10000){
+                logStatWH1 = logUH1[4] * (thisTemp - 8000)/(10000 - 8000)
+                           + logUH1[3] * (10000 - thisTemp)/(10000 - 8000);
+                logStatWHe1 = logUHe1[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + logUHe1[3] * (10000 - thisTemp)/(10000 - 8000);
             } else {
-               logStatWH1 = logUH1[0];
-               logStatWHe1 = logUHe1[0];
-            }  
+            // for temperatures of greater than or equal to 10000K lburns
+                logStatWH1 = logUH1[4];
+                logStatWHe1 = logUHe1[4];
+            }
             logGroundPopsH1[iD] = stagePops[0][0][iD] - logStatWH1; 
             logGroundPopsHe1[iD] = stagePops[1][0][iD] - logStatWHe1; 
          }   

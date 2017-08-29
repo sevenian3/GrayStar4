@@ -110,6 +110,24 @@ var logEv = Math.log(eV);
         areaId.appendChild(txtId);
     }; // end txtPrint
 
+                        //JB
+    var txtPrintYAx = function(text, x, y, RGBHex, areaId) {
+
+        var xStr = numToPxStrng(x);
+        var yStr = numToPxStrng(y);
+       // var RGBHex = colHex(r255, g255, b255);
+        var txtId = document.createElement("p");
+        txtId.style.position = "absolute";
+        txtId.style.display = "block";
+        txtId.style.width = "50px";
+        txtId.style.marginTop = yStr;
+        txtId.style.marginLeft = xStr;
+        txtId.style.color = RGBHex;
+        txtId.innerHTML = text;
+        //masterId.appendChild(numId);
+        areaId.appendChild(txtId);
+    }; // end txtPrint
+                        //Jb
 
     /* Not needed with HTML5 <canvas> tag... ???
  *
@@ -313,6 +331,42 @@ var tauPoint = function(numDeps, tauRos, tau) {
 
     return index;
 };
+
+/**
+ * Return the array index of the optical depth arry (tauRos) closest to a
+ * desired value of optical depth (tau). except an (N x M) array of values
+ */
+
+
+var tauPointP2 = function(numDeps, tauN, nth, logTau) {
+
+    var index;
+    //var indacies = [];
+    var tauForNth = [];
+   // help.length = numDeps;
+
+    for (var i = 0; i < numDeps; i++) {
+        //console.log(tauN[nth][i]);
+        var tempVar = (Math.abs(tauN[nth][i]));
+        tauForNth.push(tempVar);// - logTau;
+        //help.push(Math.abs(help[i]));
+    }
+
+    index = 0;
+    var min = tauForNth[index];
+    for (var i = 1; i < numDeps; i++) {
+
+        if (tauForNth[i] < min) {
+            min = tauForNth[i];
+            index = i;
+//          console.log(index);
+            //indacies.push(index);
+        }
+    }
+
+    return index;//indacies;
+
+    };
 
 /**
  * Return the array index of the wavelength array (lambdas) closest to a desired
@@ -2599,13 +2653,13 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
       var jolaQuantumS = 1.0; //default for a multiplicative factor
 
       if (system == "TiO_C3Delta_X3Delta"){
-         jolaQuantumS = 1.0e-13;
+         jolaQuantumS = 3.0e-11;
       }
       if (system == "TiO_c1Phi_a1Delta"){
-         jolaQuantumS = 1.0e-14;
+         jolaQuantumS = 3.0e-12;
       }
       if (system == "TiO_A3Phi_X3Delta"){
-         jolaQuantumS = 1.0e-14;
+         jolaQuantumS = 3.0e-12;
       }
 
       return jolaQuantumS;
@@ -2792,3 +2846,2360 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
       return steamTempK;  
 
    }; //end function solventPhase
+
+// Copied over getPartFn2 from Dr Short's PartitionFn.java file lburns
+
+   var getPartFn2 = function(species){
+
+// Diatomic Partition fn values, QAB, from
+//http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+A/588/A96
+//See: Barklem, P. S.; Collet, R., 2016, Astronomy & Astrophysics, Volume 588, id.A96
+//Just do linear piecewise interpolation in log of to hottest five values for now:
+    var logPartFn = [];
+    logPartFn.length = 5;
+    
+     //default initialization
+     logPartFn[0] = 0.0;  //for T = 130 K
+     logPartFn[1] = 0.0;  //for T = 500 K
+     logPartFn[2] = 0.0;  //for T = 3000 K
+     logPartFn[3] = 0.0;  //for T = 8000 K
+     logPartFn[4] = 0.0;  //for T = 10000 K
+
+if (species == "HI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00001e+00);
+    logPartFn[4] = Math.log(2.00015e+00);
+       }
+
+if (species == "HII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+//dummy
+if (species == "HIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+//dummy
+if (species == "HIV"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "HII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "DI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00001e+00);
+    logPartFn[4] = Math.log(2.00014e+00);
+       }
+
+if (species == "DII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+//dummy
+if (species == "DIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+//dummy
+if (species == "DIV"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "HeI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "HeII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00000e+00);
+    logPartFn[4] = Math.log(2.00000e+00);
+       }
+
+if (species == "HeIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+//dummy
+if (species == "HeIV"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "LiI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00473e+00);
+    logPartFn[3] = Math.log(2.70188e+00);
+    logPartFn[4] = Math.log(3.86752e+00);
+       }
+
+if (species == "LiII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "LiIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00000e+00);
+    logPartFn[4] = Math.log(2.00000e+00);
+       }
+
+//dummy
+if (species == "LiIV"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "BeI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00024e+00);
+    logPartFn[3] = Math.log(1.17655e+00);
+    logPartFn[4] = Math.log(1.41117e+00);
+       }
+
+if (species == "BeII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.01924e+00);
+    logPartFn[4] = Math.log(2.06070e+00);
+       }
+
+if (species == "BeIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "BI"){
+    logPartFn[0] = Math.log(5.37746e+00);
+    logPartFn[1] = Math.log(5.82788e+00);
+    logPartFn[2] = Math.log(5.97080e+00);
+    logPartFn[3] = Math.log(6.06978e+00);
+    logPartFn[4] = Math.log(6.27955e+00);
+       }
+
+if (species == "BII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.01090e+00);
+    logPartFn[4] = Math.log(1.04184e+00);
+       }
+
+if (species == "BIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00100e+00);
+    logPartFn[4] = Math.log(2.00569e+00);
+       }
+
+if (species == "CI"){
+    logPartFn[0] = Math.log(6.59516e+00);
+    logPartFn[1] = Math.log(8.27478e+00);
+    logPartFn[2] = Math.log(8.91124e+00);
+    logPartFn[3] = Math.log(9.78474e+00);
+    logPartFn[4] = Math.log(1.02090e+01);
+       }
+
+if (species == "CII"){
+    logPartFn[0] = Math.log(3.98273e+00);
+    logPartFn[1] = Math.log(5.33283e+00);
+    logPartFn[2] = Math.log(5.88018e+00);
+    logPartFn[3] = Math.log(5.95988e+00);
+    logPartFn[4] = Math.log(5.98845e+00);
+       }
+
+if (species == "CIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00073e+00);
+    logPartFn[4] = Math.log(1.00478e+00);
+       }
+
+if (species == "NI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00100e+00);
+    logPartFn[3] = Math.log(4.34860e+00);
+    logPartFn[4] = Math.log(4.72409e+00);
+       }
+
+if (species == "NII"){
+    logPartFn[0] = Math.log(3.92596e+00);
+    logPartFn[1] = Math.log(7.03961e+00);
+    logPartFn[2] = Math.log(8.63000e+00);
+    logPartFn[3] = Math.log(9.17980e+00);
+    logPartFn[4] = Math.log(9.45305e+00);
+       }
+
+if (species == "NIII"){
+    logPartFn[0] = Math.log(2.58062e+00);
+    logPartFn[1] = Math.log(4.42179e+00);
+    logPartFn[2] = Math.log(5.67908e+00);
+    logPartFn[3] = Math.log(5.87690e+00);
+    logPartFn[4] = Math.log(5.90406e+00);
+       }
+
+if (species == "OI"){
+    logPartFn[0] = Math.log(5.60172e+00);
+    logPartFn[1] = Math.log(7.42310e+00);
+    logPartFn[2] = Math.log(8.68009e+00);
+    logPartFn[3] = Math.log(9.16637e+00);
+    logPartFn[4] = Math.log(9.41864e+00);
+       }
+
+if (species == "OII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00003e+00);
+    logPartFn[3] = Math.log(4.08460e+00);
+    logPartFn[4] = Math.log(4.22885e+00);
+       }
+
+if (species == "OIII"){
+    logPartFn[0] = Math.log(2.02626e+00);
+    logPartFn[1] = Math.log(5.23819e+00);
+    logPartFn[2] = Math.log(8.15906e+00);
+    logPartFn[3] = Math.log(8.80275e+00);
+    logPartFn[4] = Math.log(9.00956e+00);
+       }
+
+if (species == "FI"){
+    logPartFn[0] = Math.log(4.02285e+00);
+    logPartFn[1] = Math.log(4.62529e+00);
+    logPartFn[2] = Math.log(5.64768e+00);
+    logPartFn[3] = Math.log(5.85982e+00);
+    logPartFn[4] = Math.log(5.88706e+00);
+       }
+
+if (species == "FII"){
+    logPartFn[0] = Math.log(5.07333e+00);
+    logPartFn[1] = Math.log(6.36892e+00);
+    logPartFn[2] = Math.log(8.33830e+00);
+    logPartFn[3] = Math.log(8.85472e+00);
+    logPartFn[4] = Math.log(9.03812e+00);
+       }
+
+if (species == "FIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.02228e+00);
+    logPartFn[4] = Math.log(4.07763e+00);
+       }
+
+if (species == "NeI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "NeII"){
+    logPartFn[0] = Math.log(4.00036e+00);
+    logPartFn[1] = Math.log(4.21176e+00);
+    logPartFn[2] = Math.log(5.37562e+00);
+    logPartFn[3] = Math.log(5.73812e+00);
+    logPartFn[4] = Math.log(5.78760e+00);
+       }
+
+if (species == "NeIII"){
+    logPartFn[0] = Math.log(5.00248e+00);
+    logPartFn[1] = Math.log(5.54261e+00);
+    logPartFn[2] = Math.log(7.84726e+00);
+    logPartFn[3] = Math.log(8.56792e+00);
+    logPartFn[4] = Math.log(8.73276e+00);
+       }
+
+if (species == "NaI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00178e+00);
+    logPartFn[3] = Math.log(3.40984e+00);
+    logPartFn[4] = Math.log(7.08960e+00);
+       }
+
+if (species == "NaII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "NaIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.03921e+00);
+    logPartFn[2] = Math.log(5.03856e+00);
+    logPartFn[3] = Math.log(5.56425e+00);
+    logPartFn[4] = Math.log(5.64305e+00);
+       }
+
+if (species == "MgI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00025e+00);
+    logPartFn[3] = Math.log(1.21285e+00);
+    logPartFn[4] = Math.log(1.64434e+00);
+       }
+
+if (species == "MgII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00976e+00);
+    logPartFn[4] = Math.log(2.03571e+00);
+       }
+
+if (species == "MgIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "AlI"){
+    logPartFn[0] = Math.log(3.15743e+00);
+    logPartFn[1] = Math.log(4.89757e+00);
+    logPartFn[2] = Math.log(5.79075e+00);
+    logPartFn[3] = Math.log(6.19328e+00);
+    logPartFn[4] = Math.log(7.05012e+00);
+       }
+
+if (species == "AlII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.01064e+00);
+    logPartFn[4] = Math.log(1.04138e+00);
+       }
+
+if (species == "AlIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00037e+00);
+    logPartFn[4] = Math.log(2.00260e+00);
+       }
+
+if (species == "SiI"){
+    logPartFn[0] = Math.log(2.70106e+00);
+    logPartFn[1] = Math.log(6.03405e+00);
+    logPartFn[2] = Math.log(8.62816e+00);
+    logPartFn[3] = Math.log(1.04988e+01);
+    logPartFn[4] = Math.log(1.13575e+01);
+       }
+
+if (species == "SiII"){
+    logPartFn[0] = Math.log(2.16657e+00);
+    logPartFn[1] = Math.log(3.75040e+00);
+    logPartFn[2] = Math.log(5.48529e+00);
+    logPartFn[3] = Math.log(5.80440e+00);
+    logPartFn[4] = Math.log(5.86668e+00);
+       }
+
+if (species == "SiIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00066e+00);
+    logPartFn[4] = Math.log(1.00443e+00);
+       }
+
+if (species == "PI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.04361e+00);
+    logPartFn[3] = Math.log(5.50312e+00);
+    logPartFn[4] = Math.log(6.38380e+00);
+       }
+
+if (species == "PII"){
+    logPartFn[0] = Math.log(1.51156e+00);
+    logPartFn[1] = Math.log(4.16319e+00);
+    logPartFn[2] = Math.log(7.83534e+00);
+    logPartFn[3] = Math.log(9.54223e+00);
+    logPartFn[4] = Math.log(1.00500e+01);
+       }
+
+if (species == "PIII"){
+    logPartFn[0] = Math.log(2.00822e+00);
+    logPartFn[1] = Math.log(2.80054e+00);
+    logPartFn[2] = Math.log(5.05924e+00);
+    logPartFn[3] = Math.log(5.61779e+00);
+    logPartFn[4] = Math.log(5.69424e+00);
+       }
+
+if (species == "SI"){
+    logPartFn[0] = Math.log(5.03922e+00);
+    logPartFn[1] = Math.log(6.15186e+00);
+    logPartFn[2] = Math.log(8.30016e+00);
+    logPartFn[3] = Math.log(9.66532e+00);
+    logPartFn[4] = Math.log(1.01385e+01);
+       }
+
+if (species == "SII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00804e+00);
+    logPartFn[3] = Math.log(4.76202e+00);
+    logPartFn[4] = Math.log(5.35265e+00);
+       }
+
+if (species == "SIII"){
+    logPartFn[0] = Math.log(1.11055e+00);
+    logPartFn[1] = Math.log(2.72523e+00);
+    logPartFn[2] = Math.log(6.97489e+00);
+    logPartFn[3] = Math.log(8.80785e+00);
+    logPartFn[4] = Math.log(9.31110e+00);
+       }
+
+if (species == "ClI"){
+    logPartFn[0] = Math.log(4.00011e+00);
+    logPartFn[1] = Math.log(4.15794e+00);
+    logPartFn[2] = Math.log(5.31000e+00);
+    logPartFn[3] = Math.log(5.70664e+00);
+    logPartFn[4] = Math.log(5.76344e+00);
+       }
+
+if (species == "ClII"){
+    logPartFn[0] = Math.log(5.00137e+00);
+    logPartFn[1] = Math.log(5.46184e+00);
+    logPartFn[2] = Math.log(7.78751e+00);
+    logPartFn[3] = Math.log(9.10464e+00);
+    logPartFn[4] = Math.log(9.53390e+00);
+       }
+
+if (species == "ClIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00171e+00);
+    logPartFn[3] = Math.log(4.41428e+00);
+    logPartFn[4] = Math.log(4.82231e+00);
+       }
+
+if (species == "ArI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00007e+00);
+       }
+
+if (species == "ArII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.03252e+00);
+    logPartFn[2] = Math.log(5.00667e+00);
+    logPartFn[3] = Math.log(5.54606e+00);
+    logPartFn[4] = Math.log(5.62775e+00);
+       }
+
+if (species == "ArIII"){
+    logPartFn[0] = Math.log(5.00001e+00);
+    logPartFn[1] = Math.log(5.13320e+00);
+    logPartFn[2] = Math.log(7.23696e+00);
+    logPartFn[3] = Math.log(8.61527e+00);
+    logPartFn[4] = Math.log(9.02887e+00);
+       }
+
+if (species == "KI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.01222e+00);
+    logPartFn[3] = Math.log(4.77353e+00);
+    logPartFn[4] = Math.log(9.82105e+00);
+       }
+
+if (species == "KII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "KIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00394e+00);
+    logPartFn[2] = Math.log(4.70805e+00);
+    logPartFn[3] = Math.log(5.35493e+00);
+    logPartFn[4] = Math.log(5.46467e+00);
+       }
+
+if (species == "CaI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00701e+00);
+    logPartFn[3] = Math.log(2.60365e+00);
+    logPartFn[4] = Math.log(5.69578e+00);
+       }
+
+if (species == "CaII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.01415e+00);
+    logPartFn[3] = Math.log(2.91713e+00);
+    logPartFn[4] = Math.log(3.56027e+00);
+       }
+
+if (species == "CaIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "ScI"){
+    logPartFn[0] = Math.log(4.93134e+00);
+    logPartFn[1] = Math.log(7.69658e+00);
+    logPartFn[2] = Math.log(9.68986e+00);
+    logPartFn[3] = Math.log(2.16410e+01);
+    logPartFn[4] = Math.log(3.31527e+01);
+       }
+
+if (species == "ScII"){
+    logPartFn[0] = Math.log(6.34225e+00);
+    logPartFn[1] = Math.log(1.13155e+01);
+    logPartFn[2] = Math.log(1.78090e+01);
+    logPartFn[3] = Math.log(2.94840e+01);
+    logPartFn[4] = Math.log(3.36439e+01);
+       }
+
+if (species == "ScIII"){
+    logPartFn[0] = Math.log(4.67343e+00);
+    logPartFn[1] = Math.log(7.39773e+00);
+    logPartFn[2] = Math.log(9.45747e+00);
+    logPartFn[3] = Math.log(9.81083e+00);
+    logPartFn[4] = Math.log(9.88331e+00);
+       }
+
+if (species == "TiI"){
+    logPartFn[0] = Math.log(6.18965e+00);
+    logPartFn[1] = Math.log(1.22473e+01);
+    logPartFn[2] = Math.log(2.08195e+01);
+    logPartFn[3] = Math.log(5.53232e+01);
+    logPartFn[4] = Math.log(8.32038e+01);
+       }
+
+if (species == "TiII"){
+    logPartFn[0] = Math.log(6.90468e+00);
+    logPartFn[1] = Math.log(1.72793e+01);
+    logPartFn[2] = Math.log(4.40264e+01);
+    logPartFn[3] = Math.log(7.23680e+01);
+    logPartFn[4] = Math.log(8.37248e+01);
+       }
+
+if (species == "TiIII"){
+    logPartFn[0] = Math.log(5.99049e+00);
+    logPartFn[1] = Math.log(1.17969e+01);
+    logPartFn[2] = Math.log(1.89121e+01);
+    logPartFn[3] = Math.log(2.32253e+01);
+    logPartFn[4] = Math.log(2.49249e+01);
+       }
+
+if (species == "VI"){
+    logPartFn[0] = Math.log(5.55703e+00);
+    logPartFn[1] = Math.log(1.32751e+01);
+    logPartFn[2] = Math.log(3.47920e+01);
+    logPartFn[3] = Math.log(7.90427e+01);
+    logPartFn[4] = Math.log(1.11459e+02);
+       }
+
+if (species == "VII"){
+    logPartFn[0] = Math.log(5.45407e+00);
+    logPartFn[1] = Math.log(1.46216e+01);
+    logPartFn[2] = Math.log(3.18263e+01);
+    logPartFn[3] = Math.log(6.43796e+01);
+    logPartFn[4] = Math.log(8.08903e+01);
+       }
+
+if (species == "VIII"){
+    logPartFn[0] = Math.log(5.39755e+00);
+    logPartFn[1] = Math.log(1.28067e+01);
+    logPartFn[2] = Math.log(2.40588e+01);
+    logPartFn[3] = Math.log(3.19510e+01);
+    logPartFn[4] = Math.log(3.59622e+01);
+       }
+
+if (species == "CrI"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00000e+00);
+    logPartFn[2] = Math.log(7.65435e+00);
+    logPartFn[3] = Math.log(2.01376e+01);
+    logPartFn[4] = Math.log(3.31787e+01);
+       }
+
+if (species == "CrII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.08747e+00);
+    logPartFn[3] = Math.log(1.21840e+01);
+    logPartFn[4] = Math.log(1.84825e+01);
+       }
+
+if (species == "CrIII"){
+    logPartFn[0] = Math.log(3.31635e+00);
+    logPartFn[1] = Math.log(1.06851e+01);
+    logPartFn[2] = Math.log(2.12330e+01);
+    logPartFn[3] = Math.log(2.71108e+01);
+    logPartFn[4] = Math.log(3.11257e+01);
+       }
+
+if (species == "MnI"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.01140e+00);
+    logPartFn[3] = Math.log(9.82265e+00);
+    logPartFn[4] = Math.log(1.53539e+01);
+       }
+
+if (species == "MnII"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00000e+00);
+    logPartFn[2] = Math.log(7.07640e+00);
+    logPartFn[3] = Math.log(1.07144e+01);
+    logPartFn[4] = Math.log(1.45638e+01);
+       }
+
+if (species == "MnIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.00011e+00);
+    logPartFn[3] = Math.log(6.46711e+00);
+    logPartFn[4] = Math.log(7.39061e+00);
+       }
+
+if (species == "FeI"){
+    logPartFn[0] = Math.log(9.07242e+00);
+    logPartFn[1] = Math.log(1.20678e+01);
+    logPartFn[2] = Math.log(2.19554e+01);
+    logPartFn[3] = Math.log(4.28266e+01);
+    logPartFn[4] = Math.log(5.96627e+01);
+       }
+
+if (species == "FeII"){
+    logPartFn[0] = Math.log(1.01172e+01);
+    logPartFn[1] = Math.log(1.40327e+01);
+    logPartFn[2] = Math.log(3.43147e+01);
+    logPartFn[3] = Math.log(5.64784e+01);
+    logPartFn[4] = Math.log(6.69023e+01);
+       }
+
+if (species == "FeIII"){
+    logPartFn[0] = Math.log(9.05759e+00);
+    logPartFn[1] = Math.log(1.18492e+01);
+    logPartFn[2] = Math.log(2.07199e+01);
+    logPartFn[3] = Math.log(2.52719e+01);
+    logPartFn[4] = Math.log(2.81882e+01);
+       }
+
+if (species == "CoI"){
+    logPartFn[0] = Math.log(1.00010e+01);
+    logPartFn[1] = Math.log(1.08918e+01);
+    logPartFn[2] = Math.log(2.44719e+01);
+    logPartFn[3] = Math.log(4.80929e+01);
+    logPartFn[4] = Math.log(6.08394e+01);
+       }
+
+if (species == "CoII"){
+    logPartFn[0] = Math.log(9.00019e+00);
+    logPartFn[1] = Math.log(9.50563e+00);
+    logPartFn[2] = Math.log(2.09531e+01);
+    logPartFn[3] = Math.log(4.21891e+01);
+    logPartFn[4] = Math.log(5.04464e+01);
+       }
+
+if (species == "CoIII"){
+    logPartFn[0] = Math.log(1.00007e+01);
+    logPartFn[1] = Math.log(1.08219e+01);
+    logPartFn[2] = Math.log(1.99830e+01);
+    logPartFn[3] = Math.log(2.65869e+01);
+    logPartFn[4] = Math.log(2.93889e+01);
+       }
+
+if (species == "NiI"){
+    logPartFn[0] = Math.log(9.72623e+00);
+    logPartFn[1] = Math.log(1.34631e+01);
+    logPartFn[2] = Math.log(2.63546e+01);
+    logPartFn[3] = Math.log(3.63831e+01);
+    logPartFn[4] = Math.log(4.15802e+01);
+       }
+
+if (species == "NiII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.05237e+00);
+    logPartFn[2] = Math.log(8.29948e+00);
+    logPartFn[3] = Math.log(1.57985e+01);
+    logPartFn[4] = Math.log(1.94018e+01);
+       }
+
+if (species == "NiIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.14687e+00);
+    logPartFn[2] = Math.log(1.43380e+01);
+    logPartFn[3] = Math.log(1.87862e+01);
+    logPartFn[4] = Math.log(2.01688e+01);
+       }
+
+if (species == "CuI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.03485e+00);
+    logPartFn[3] = Math.log(3.25011e+00);
+    logPartFn[4] = Math.log(4.17708e+00);
+       }
+
+if (species == "CuII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00032e+00);
+    logPartFn[3] = Math.log(1.30264e+00);
+    logPartFn[4] = Math.log(1.69815e+00);
+       }
+
+if (species == "CuIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.01031e+00);
+    logPartFn[2] = Math.log(7.48119e+00);
+    logPartFn[3] = Math.log(8.75641e+00);
+    logPartFn[4] = Math.log(8.97397e+00);
+       }
+
+if (species == "ZnI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.02806e+00);
+    logPartFn[4] = Math.log(1.11187e+00);
+       }
+
+if (species == "ZnII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00099e+00);
+    logPartFn[4] = Math.log(2.00625e+00);
+       }
+
+if (species == "ZnIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00001e+00);
+    logPartFn[4] = Math.log(1.00021e+00);
+       }
+
+if (species == "GaI"){
+    logPartFn[0] = Math.log(2.00043e+00);
+    logPartFn[1] = Math.log(2.37127e+00);
+    logPartFn[2] = Math.log(4.69154e+00);
+    logPartFn[3] = Math.log(5.64961e+00);
+    logPartFn[4] = Math.log(6.47300e+00);
+       }
+
+if (species == "GaII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00154e+00);
+    logPartFn[4] = Math.log(1.00881e+00);
+       }
+
+if (species == "GaIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00004e+00);
+    logPartFn[4] = Math.log(2.00043e+00);
+       }
+
+if (species == "GeI"){
+    logPartFn[0] = Math.log(1.00630e+00);
+    logPartFn[1] = Math.log(1.69040e+00);
+    logPartFn[2] = Math.log(6.00402e+00);
+    logPartFn[3] = Math.log(9.09691e+00);
+    logPartFn[4] = Math.log(1.01931e+01);
+       }
+
+if (species == "GeII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.02475e+00);
+    logPartFn[2] = Math.log(3.71392e+00);
+    logPartFn[3] = Math.log(4.91199e+00);
+    logPartFn[4] = Math.log(5.10944e+00);
+       }
+
+if (species == "GeIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00010e+00);
+    logPartFn[4] = Math.log(1.00101e+00);
+       }
+
+if (species == "AsI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.05774e+00);
+    logPartFn[3] = Math.log(5.65799e+00);
+    logPartFn[4] = Math.log(6.57374e+00);
+       }
+
+if (species == "AsII"){
+    logPartFn[0] = Math.log(1.00002e+00);
+    logPartFn[1] = Math.log(1.14402e+00);
+    logPartFn[2] = Math.log(4.31914e+00);
+    logPartFn[3] = Math.log(7.47497e+00);
+    logPartFn[4] = Math.log(8.25460e+00);
+       }
+
+if (species == "AsIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00085e+00);
+    logPartFn[2] = Math.log(2.97673e+00);
+    logPartFn[3] = Math.log(4.35751e+00);
+    logPartFn[4] = Math.log(4.62049e+00);
+       }
+
+if (species == "SeI"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.01048e+00);
+    logPartFn[2] = Math.log(6.50285e+00);
+    logPartFn[3] = Math.log(8.64654e+00);
+    logPartFn[4] = Math.log(9.28469e+00);
+       }
+
+if (species == "SeII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.01539e+00);
+    logPartFn[3] = Math.log(4.96394e+00);
+    logPartFn[4] = Math.log(5.62894e+00);
+       }
+
+if (species == "SeIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.02009e+00);
+    logPartFn[2] = Math.log(3.06837e+00);
+    logPartFn[3] = Math.log(6.14277e+00);
+    logPartFn[4] = Math.log(6.95690e+00);
+       }
+
+if (species == "BrI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00005e+00);
+    logPartFn[2] = Math.log(4.34162e+00);
+    logPartFn[3] = Math.log(5.03126e+00);
+    logPartFn[4] = Math.log(5.18274e+00);
+       }
+
+if (species == "BrII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00038e+00);
+    logPartFn[2] = Math.log(5.84067e+00);
+    logPartFn[3] = Math.log(7.78362e+00);
+    logPartFn[4] = Math.log(8.38287e+00);
+       }
+
+if (species == "BrIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00537e+00);
+    logPartFn[3] = Math.log(4.62671e+00);
+    logPartFn[4] = Math.log(5.14171e+00);
+       }
+
+if (species == "KrI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00001e+00);
+    logPartFn[4] = Math.log(1.00044e+00);
+       }
+
+if (species == "KrII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.15228e+00);
+    logPartFn[3] = Math.log(4.76145e+00);
+    logPartFn[4] = Math.log(4.92367e+00);
+       }
+
+if (species == "KrIII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00001e+00);
+    logPartFn[2] = Math.log(5.42146e+00);
+    logPartFn[3] = Math.log(7.07047e+00);
+    logPartFn[4] = Math.log(7.64176e+00);
+       }
+
+if (species == "RbI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.01473e+00);
+    logPartFn[3] = Math.log(5.41664e+00);
+    logPartFn[4] = Math.log(1.13631e+01);
+       }
+
+if (species == "RbII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "RbIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.05824e+00);
+    logPartFn[3] = Math.log(4.53101e+00);
+    logPartFn[4] = Math.log(4.69229e+00);
+       }
+
+if (species == "SrI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.01064e+00);
+    logPartFn[3] = Math.log(2.98824e+00);
+    logPartFn[4] = Math.log(6.20304e+00);
+       }
+
+if (species == "SrII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00865e+00);
+    logPartFn[3] = Math.log(2.78698e+00);
+    logPartFn[4] = Math.log(3.40185e+00);
+       }
+
+if (species == "SrIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "YI"){
+    logPartFn[0] = Math.log(4.01695e+00);
+    logPartFn[1] = Math.log(5.30447e+00);
+    logPartFn[2] = Math.log(8.85992e+00);
+    logPartFn[3] = Math.log(2.22176e+01);
+    logPartFn[4] = Math.log(3.32369e+01);
+       }
+
+if (species == "YII"){
+    logPartFn[0] = Math.log(1.00032e+00);
+    logPartFn[1] = Math.log(1.62308e+00);
+    logPartFn[2] = Math.log(1.09488e+01);
+    logPartFn[3] = Math.log(2.25715e+01);
+    logPartFn[4] = Math.log(2.70276e+01);
+       }
+
+if (species == "YIII"){
+    logPartFn[0] = Math.log(4.00199e+00);
+    logPartFn[1] = Math.log(4.74694e+00);
+    logPartFn[2] = Math.log(8.29546e+00);
+    logPartFn[3] = Math.log(9.79259e+00);
+    logPartFn[4] = Math.log(1.01030e+01);
+       }
+
+if (species == "ZrI"){
+    logPartFn[0] = Math.log(5.01271e+00);
+    logPartFn[1] = Math.log(6.60966e+00);
+    logPartFn[2] = Math.log(1.99689e+01);
+    logPartFn[3] = Math.log(6.46409e+01);
+    logPartFn[4] = Math.log(9.29133e+01);
+       }
+
+if (species == "ZrII"){
+    logPartFn[0] = Math.log(4.18616e+00);
+    logPartFn[1] = Math.log(7.54284e+00);
+    logPartFn[2] = Math.log(2.91432e+01);
+    logPartFn[3] = Math.log(6.73523e+01);
+    logPartFn[4] = Math.log(8.12269e+01);
+       }
+
+if (species == "ZrIII"){
+    logPartFn[0] = Math.log(5.00371e+00);
+    logPartFn[1] = Math.log(6.10992e+00);
+    logPartFn[2] = Math.log(1.49741e+01);
+    logPartFn[3] = Math.log(2.35798e+01);
+    logPartFn[4] = Math.log(2.64105e+01);
+       }
+
+if (species == "NbI"){
+    logPartFn[0] = Math.log(2.80828e+00);
+    logPartFn[1] = Math.log(8.30968e+00);
+    logPartFn[2] = Math.log(3.50009e+01);
+    logPartFn[3] = Math.log(9.41753e+01);
+    logPartFn[4] = Math.log(1.32663e+02);
+       }
+
+if (species == "NbII"){
+    logPartFn[0] = Math.log(1.55657e+00);
+    logPartFn[1] = Math.log(5.28597e+00);
+    logPartFn[2] = Math.log(2.62767e+01);
+    logPartFn[3] = Math.log(7.22928e+01);
+    logPartFn[4] = Math.log(9.34755e+01);
+       }
+
+if (species == "NbIII"){
+    logPartFn[0] = Math.log(4.01990e+00);
+    logPartFn[1] = Math.log(5.66842e+00);
+    logPartFn[2] = Math.log(1.76187e+01);
+    logPartFn[3] = Math.log(3.32180e+01);
+    logPartFn[4] = Math.log(3.96549e+01);
+       }
+
+if (species == "MoI"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00000e+00);
+    logPartFn[2] = Math.log(7.13826e+00);
+    logPartFn[3] = Math.log(1.94435e+01);
+    logPartFn[4] = Math.log(3.41087e+01);
+       }
+
+if (species == "MoII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.10323e+00);
+    logPartFn[3] = Math.log(1.57858e+01);
+    logPartFn[4] = Math.log(2.53531e+01);
+       }
+
+if (species == "MoIII"){
+    logPartFn[0] = Math.log(1.20909e+00);
+    logPartFn[1] = Math.log(3.47425e+00);
+    logPartFn[2] = Math.log(1.49713e+01);
+    logPartFn[3] = Math.log(2.84296e+01);
+    logPartFn[4] = Math.log(3.53071e+01);
+       }
+
+if (species == "TcI"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00698e+00);
+    logPartFn[2] = Math.log(1.26513e+01);
+    logPartFn[3] = Math.log(4.01671e+01);
+    logPartFn[4] = Math.log(5.99532e+01);
+       }
+
+if (species == "TcII"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00047e+00);
+    logPartFn[2] = Math.log(1.05476e+01);
+    logPartFn[3] = Math.log(2.00471e+01);
+    logPartFn[4] = Math.log(2.31663e+01);
+       }
+
+if (species == "TcIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.00000e+00);
+    logPartFn[3] = Math.log(6.00000e+00);
+    logPartFn[4] = Math.log(6.00000e+00);
+       }
+
+if (species == "RuI"){
+    logPartFn[0] = Math.log(1.10000e+01);
+    logPartFn[1] = Math.log(1.13122e+01);
+    logPartFn[2] = Math.log(2.23319e+01);
+    logPartFn[3] = Math.log(5.81063e+01);
+    logPartFn[4] = Math.log(7.89315e+01);
+       }
+
+if (species == "RuII"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.01050e+01);
+    logPartFn[2] = Math.log(1.71302e+01);
+    logPartFn[3] = Math.log(3.64331e+01);
+    logPartFn[4] = Math.log(4.65540e+01);
+       }
+
+if (species == "RuIII"){
+    logPartFn[0] = Math.log(9.00002e+00);
+    logPartFn[1] = Math.log(9.28086e+00);
+    logPartFn[2] = Math.log(1.64154e+01);
+    logPartFn[3] = Math.log(2.09762e+01);
+    logPartFn[4] = Math.log(2.17901e+01);
+       }
+
+if (species == "RhI"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.01020e+01);
+    logPartFn[2] = Math.log(1.86621e+01);
+    logPartFn[3] = Math.log(3.88108e+01);
+    logPartFn[4] = Math.log(4.81045e+01);
+       }
+
+if (species == "RhII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00716e+00);
+    logPartFn[2] = Math.log(1.22675e+01);
+    logPartFn[3] = Math.log(2.08582e+01);
+    logPartFn[4] = Math.log(2.51822e+01);
+       }
+
+if (species == "RhIII"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.00168e+01);
+    logPartFn[2] = Math.log(1.45746e+01);
+    logPartFn[3] = Math.log(2.50952e+01);
+    logPartFn[4] = Math.log(2.95669e+01);
+       }
+
+if (species == "PdI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.46384e+00);
+    logPartFn[3] = Math.log(5.77132e+00);
+    logPartFn[4] = Math.log(7.96499e+00);
+       }
+
+if (species == "PdII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00015e+00);
+    logPartFn[2] = Math.log(6.73288e+00);
+    logPartFn[3] = Math.log(8.40680e+00);
+    logPartFn[4] = Math.log(9.23953e+00);
+       }
+
+if (species == "PdIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00065e+00);
+    logPartFn[2] = Math.log(1.10655e+01);
+    logPartFn[3] = Math.log(1.69387e+01);
+    logPartFn[4] = Math.log(1.89830e+01);
+       }
+
+if (species == "AgI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00001e+00);
+    logPartFn[3] = Math.log(2.07520e+00);
+    logPartFn[4] = Math.log(2.29282e+00);
+       }
+
+if (species == "AgII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.01183e+00);
+    logPartFn[4] = Math.log(1.05173e+00);
+       }
+
+if (species == "AgIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00001e+00);
+    logPartFn[2] = Math.log(6.43868e+00);
+    logPartFn[3] = Math.log(7.74647e+00);
+    logPartFn[4] = Math.log(8.06409e+00);
+       }
+
+if (species == "CdI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.03706e+00);
+    logPartFn[4] = Math.log(1.13787e+00);
+       }
+
+if (species == "CdII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00166e+00);
+    logPartFn[4] = Math.log(2.00881e+00);
+       }
+
+if (species == "CdIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00001e+00);
+    logPartFn[4] = Math.log(1.00013e+00);
+       }
+
+if (species == "InI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00688e+00);
+    logPartFn[2] = Math.log(3.38443e+00);
+    logPartFn[3] = Math.log(4.93682e+00);
+    logPartFn[4] = Math.log(5.96634e+00);
+       }
+
+if (species == "InII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00309e+00);
+    logPartFn[4] = Math.log(1.01538e+00);
+       }
+
+if (species == "InIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00013e+00);
+    logPartFn[4] = Math.log(2.00111e+00);
+       }
+
+if (species == "SnI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.02333e+00);
+    logPartFn[2] = Math.log(3.37985e+00);
+    logPartFn[3] = Math.log(7.09384e+00);
+    logPartFn[4] = Math.log(8.36474e+00);
+       }
+
+if (species == "SnII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00002e+00);
+    logPartFn[2] = Math.log(2.52079e+00);
+    logPartFn[3] = Math.log(3.86439e+00);
+    logPartFn[4] = Math.log(4.18355e+00);
+       }
+
+if (species == "SnIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00033e+00);
+    logPartFn[4] = Math.log(1.00255e+00);
+       }
+
+if (species == "SbI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.12205e+00);
+    logPartFn[3] = Math.log(6.14860e+00);
+    logPartFn[4] = Math.log(7.20611e+00);
+       }
+
+if (species == "SbII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00046e+00);
+    logPartFn[2] = Math.log(2.03582e+00);
+    logPartFn[3] = Math.log(5.05509e+00);
+    logPartFn[4] = Math.log(5.97984e+00);
+       }
+
+if (species == "SbIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.17082e+00);
+    logPartFn[3] = Math.log(3.22630e+00);
+    logPartFn[4] = Math.log(3.55562e+00);
+       }
+
+if (species == "TeI"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.44375e+00);
+    logPartFn[3] = Math.log(7.47891e+00);
+    logPartFn[4] = Math.log(8.22338e+00);
+       }
+
+if (species == "TeII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.04540e+00);
+    logPartFn[3] = Math.log(5.38198e+00);
+    logPartFn[4] = Math.log(6.15477e+00);
+       }
+
+if (species == "TeIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.40826e+00);
+    logPartFn[3] = Math.log(3.64876e+00);
+    logPartFn[4] = Math.log(4.47090e+00);
+       }
+
+if (species == "II"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.05220e+00);
+    logPartFn[3] = Math.log(4.51156e+00);
+    logPartFn[4] = Math.log(4.69382e+00);
+       }
+
+if (species == "III"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.15261e+00);
+    logPartFn[3] = Math.log(6.58097e+00);
+    logPartFn[4] = Math.log(7.18642e+00);
+       }
+
+if (species == "IIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.01931e+00);
+    logPartFn[3] = Math.log(4.94321e+00);
+    logPartFn[4] = Math.log(5.56234e+00);
+       }
+
+if (species == "XeI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00015e+00);
+    logPartFn[4] = Math.log(1.00319e+00);
+       }
+
+if (species == "XeII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.01278e+00);
+    logPartFn[3] = Math.log(4.30069e+00);
+    logPartFn[4] = Math.log(4.43930e+00);
+       }
+
+if (species == "XeIII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.04902e+00);
+    logPartFn[3] = Math.log(5.97976e+00);
+    logPartFn[4] = Math.log(6.47644e+00);
+       }
+
+if (species == "CsI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.03442e+00);
+    logPartFn[3] = Math.log(7.88683e+00);
+    logPartFn[4] = Math.log(1.69354e+01);
+       }
+
+if (species == "CsII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00001e+00);
+       }
+
+if (species == "CsIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00261e+00);
+    logPartFn[3] = Math.log(4.16580e+00);
+    logPartFn[4] = Math.log(4.27282e+00);
+       }
+
+if (species == "BaI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.21060e+00);
+    logPartFn[3] = Math.log(8.29000e+00);
+    logPartFn[4] = Math.log(1.66116e+01);
+       }
+
+if (species == "BaII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.78137e+00);
+    logPartFn[3] = Math.log(5.96568e+00);
+    logPartFn[4] = Math.log(6.97202e+00);
+       }
+
+if (species == "BaIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "LaI"){
+    logPartFn[0] = Math.log(4.00005e+00);
+    logPartFn[1] = Math.log(4.29315e+00);
+    logPartFn[2] = Math.log(1.42312e+01);
+    logPartFn[3] = Math.log(5.77343e+01);
+    logPartFn[4] = Math.log(8.81122e+01);
+       }
+
+if (species == "LaII"){
+    logPartFn[0] = Math.log(5.00009e+00);
+    logPartFn[1] = Math.log(5.51405e+00);
+    logPartFn[2] = Math.log(2.03638e+01);
+    logPartFn[3] = Math.log(4.28241e+01);
+    logPartFn[4] = Math.log(5.27740e+01);
+       }
+
+if (species == "LaIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.05954e+00);
+    logPartFn[2] = Math.log(7.09841e+00);
+    logPartFn[3] = Math.log(1.19933e+01);
+    logPartFn[4] = Math.log(1.34792e+01);
+       }
+
+if (species == "CeI"){
+    logPartFn[0] = Math.log(9.39731e+00);
+    logPartFn[1] = Math.log(1.20470e+01);
+    logPartFn[2] = Math.log(7.59152e+01);
+    logPartFn[3] = Math.log(4.66858e+02);
+    logPartFn[4] = Math.log(7.08652e+02);
+       }
+
+if (species == "CeII"){
+    logPartFn[0] = Math.log(8.00018e+00);
+    logPartFn[1] = Math.log(8.83511e+00);
+    logPartFn[2] = Math.log(8.20718e+01);
+    logPartFn[3] = Math.log(3.70729e+02);
+    logPartFn[4] = Math.log(4.91152e+02);
+       }
+
+if (species == "CeIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.13795e+00);
+    logPartFn[2] = Math.log(2.59288e+01);
+    logPartFn[3] = Math.log(7.43305e+01);
+    logPartFn[4] = Math.log(9.01542e+01);
+       }
+
+if (species == "PrI"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.02326e+01);
+    logPartFn[2] = Math.log(3.50798e+01);
+    logPartFn[3] = Math.log(3.18645e+02);
+    logPartFn[4] = Math.log(5.02583e+02);
+       }
+
+if (species == "PrII"){
+    logPartFn[0] = Math.log(9.08268e+00);
+    logPartFn[1] = Math.log(1.22739e+01);
+    logPartFn[2] = Math.log(5.41964e+01);
+    logPartFn[3] = Math.log(2.74460e+02);
+    logPartFn[4] = Math.log(3.80580e+02);
+       }
+
+if (species == "PrIII"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.02182e+01);
+    logPartFn[2] = Math.log(2.19864e+01);
+    logPartFn[3] = Math.log(6.64136e+01);
+    logPartFn[4] = Math.log(9.66706e+01);
+       }
+
+if (species == "NdI"){
+    logPartFn[0] = Math.log(9.00004e+00);
+    logPartFn[1] = Math.log(9.44310e+00);
+    logPartFn[2] = Math.log(2.95270e+01);
+    logPartFn[3] = Math.log(3.13305e+02);
+    logPartFn[4] = Math.log(5.42293e+02);
+       }
+
+if (species == "NdII"){
+    logPartFn[0] = Math.log(8.03412e+00);
+    logPartFn[1] = Math.log(1.05550e+01);
+    logPartFn[2] = Math.log(4.95287e+01);
+    logPartFn[3] = Math.log(3.20614e+02);
+    logPartFn[4] = Math.log(5.04711e+02);
+       }
+
+if (species == "NdIII"){
+    logPartFn[0] = Math.log(9.00004e+00);
+    logPartFn[1] = Math.log(9.43038e+00);
+    logPartFn[2] = Math.log(2.35346e+01);
+    logPartFn[3] = Math.log(4.66105e+01);
+    logPartFn[4] = Math.log(5.66490e+01);
+       }
+
+if (species == "PmI"){
+    logPartFn[0] = Math.log(6.00110e+00);
+    logPartFn[1] = Math.log(6.86120e+00);
+    logPartFn[2] = Math.log(2.40772e+01);
+    logPartFn[3] = Math.log(7.47623e+01);
+    logPartFn[4] = Math.log(1.13054e+02);
+       }
+
+if (species == "PmII"){
+    logPartFn[0] = Math.log(5.05009e+00);
+    logPartFn[1] = Math.log(7.39584e+00);
+    logPartFn[2] = Math.log(4.17360e+01);
+    logPartFn[3] = Math.log(1.35782e+02);
+    logPartFn[4] = Math.log(1.78314e+02);
+       }
+
+if (species == "PmIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.00000e+00);
+    logPartFn[3] = Math.log(6.00000e+00);
+    logPartFn[4] = Math.log(6.00000e+00);
+       }
+
+if (species == "SmI"){
+    logPartFn[0] = Math.log(1.11838e+00);
+    logPartFn[1] = Math.log(2.88715e+00);
+    logPartFn[2] = Math.log(1.84133e+01);
+    logPartFn[3] = Math.log(1.09023e+02);
+    logPartFn[4] = Math.log(1.89582e+02);
+       }
+
+if (species == "SmII"){
+    logPartFn[0] = Math.log(2.10827e+00);
+    logPartFn[1] = Math.log(4.26988e+00);
+    logPartFn[2] = Math.log(3.12536e+01);
+    logPartFn[3] = Math.log(1.19821e+02);
+    logPartFn[4] = Math.log(1.75950e+02);
+       }
+
+if (species == "SmIII"){
+    logPartFn[0] = Math.log(1.11724e+00);
+    logPartFn[1] = Math.log(2.88059e+00);
+    logPartFn[2] = Math.log(1.77904e+01);
+    logPartFn[3] = Math.log(3.49109e+01);
+    logPartFn[4] = Math.log(4.10217e+01);
+       }
+
+if (species == "EuI"){
+    logPartFn[0] = Math.log(8.00000e+00);
+    logPartFn[1] = Math.log(8.00000e+00);
+    logPartFn[2] = Math.log(8.15223e+00);
+    logPartFn[3] = Math.log(2.69921e+01);
+    logPartFn[4] = Math.log(5.13327e+01);
+       }
+
+if (species == "EuII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.05745e+00);
+    logPartFn[2] = Math.log(1.24460e+01);
+    logPartFn[3] = Math.log(2.38118e+01);
+    logPartFn[4] = Math.log(3.15054e+01);
+       }
+
+if (species == "EuIII"){
+    logPartFn[0] = Math.log(8.00000e+00);
+    logPartFn[1] = Math.log(8.00000e+00);
+    logPartFn[2] = Math.log(8.00004e+00);
+    logPartFn[3] = Math.log(8.65078e+00);
+    logPartFn[4] = Math.log(1.03670e+01);
+       }
+
+if (species == "GdI"){
+    logPartFn[0] = Math.log(5.67234e+00);
+    logPartFn[1] = Math.log(1.14248e+01);
+    logPartFn[2] = Math.log(3.48245e+01);
+    logPartFn[3] = Math.log(1.36394e+02);
+    logPartFn[4] = Math.log(2.17943e+02);
+       }
+
+if (species == "GdII"){
+    logPartFn[0] = Math.log(6.45033e+00);
+    logPartFn[1] = Math.log(1.18671e+01);
+    logPartFn[2] = Math.log(4.85326e+01);
+    logPartFn[3] = Math.log(1.46650e+02);
+    logPartFn[4] = Math.log(1.95931e+02);
+       }
+
+if (species == "GdIII"){
+    logPartFn[0] = Math.log(5.32234e+00);
+    logPartFn[1] = Math.log(9.64026e+00);
+    logPartFn[2] = Math.log(3.56490e+01);
+    logPartFn[3] = Math.log(6.82437e+01);
+    logPartFn[4] = Math.log(7.69994e+01);
+       }
+
+if (species == "TbI"){
+    logPartFn[0] = Math.log(1.67331e+01);
+    logPartFn[1] = Math.log(2.93841e+01);
+    logPartFn[2] = Math.log(8.97544e+01);
+    logPartFn[3] = Math.log(3.47204e+02);
+    logPartFn[4] = Math.log(5.12797e+02);
+       }
+
+if (species == "TbII"){
+    logPartFn[0] = Math.log(1.70002e+01);
+    logPartFn[1] = Math.log(1.78116e+01);
+    logPartFn[2] = Math.log(5.25407e+01);
+    logPartFn[3] = Math.log(1.68157e+02);
+    logPartFn[4] = Math.log(2.17753e+02);
+       }
+
+if (species == "TbIII"){
+    logPartFn[0] = Math.log(1.60000e+01);
+    logPartFn[1] = Math.log(1.60044e+01);
+    logPartFn[2] = Math.log(2.36107e+01);
+    logPartFn[3] = Math.log(7.90783e+01);
+    logPartFn[4] = Math.log(1.08698e+02);
+       }
+
+if (species == "DyI"){
+    logPartFn[0] = Math.log(1.70000e+01);
+    logPartFn[1] = Math.log(1.70001e+01);
+    logPartFn[2] = Math.log(2.11524e+01);
+    logPartFn[3] = Math.log(1.37365e+02);
+    logPartFn[4] = Math.log(2.61442e+02);
+       }
+
+if (species == "DyII"){
+    logPartFn[0] = Math.log(1.80017e+01);
+    logPartFn[1] = Math.log(1.94761e+01);
+    logPartFn[2] = Math.log(3.37600e+01);
+    logPartFn[3] = Math.log(1.26585e+02);
+    logPartFn[4] = Math.log(2.08424e+02);
+       }
+
+if (species == "DyIII"){
+    logPartFn[0] = Math.log(1.70000e+01);
+    logPartFn[1] = Math.log(1.70000e+01);
+    logPartFn[2] = Math.log(1.70000e+01);
+    logPartFn[3] = Math.log(1.70000e+01);
+    logPartFn[4] = Math.log(1.70000e+01);
+       }
+
+if (species == "HoI"){
+    logPartFn[0] = Math.log(1.60000e+01);
+    logPartFn[1] = Math.log(1.60000e+01);
+    logPartFn[2] = Math.log(1.87758e+01);
+    logPartFn[3] = Math.log(9.97150e+01);
+    logPartFn[4] = Math.log(1.71521e+02);
+       }
+
+if (species == "HoII"){
+    logPartFn[0] = Math.log(1.70130e+01);
+    logPartFn[1] = Math.log(1.93968e+01);
+    logPartFn[2] = Math.log(3.03102e+01);
+    logPartFn[3] = Math.log(5.61173e+01);
+    logPartFn[4] = Math.log(7.13807e+01);
+       }
+
+if (species == "HoIII"){
+    logPartFn[0] = Math.log(1.60000e+01);
+    logPartFn[1] = Math.log(1.60000e+01);
+    logPartFn[2] = Math.log(1.73144e+01);
+    logPartFn[3] = Math.log(3.55564e+01);
+    logPartFn[4] = Math.log(5.14625e+01);
+       }
+
+if (species == "ErI"){
+    logPartFn[0] = Math.log(1.30000e+01);
+    logPartFn[1] = Math.log(1.30000e+01);
+    logPartFn[2] = Math.log(1.62213e+01);
+    logPartFn[3] = Math.log(1.03737e+02);
+    logPartFn[4] = Math.log(1.94418e+02);
+       }
+
+if (species == "ErII"){
+    logPartFn[0] = Math.log(1.40917e+01);
+    logPartFn[1] = Math.log(1.73794e+01);
+    logPartFn[2] = Math.log(2.71056e+01);
+    logPartFn[3] = Math.log(9.05747e+01);
+    logPartFn[4] = Math.log(1.40942e+02);
+       }
+
+if (species == "ErIII"){
+    logPartFn[0] = Math.log(1.30000e+01);
+    logPartFn[1] = Math.log(1.30000e+01);
+    logPartFn[2] = Math.log(1.52920e+01);
+    logPartFn[3] = Math.log(3.23775e+01);
+    logPartFn[4] = Math.log(4.33307e+01);
+       }
+
+if (species == "TmI"){
+    logPartFn[0] = Math.log(8.00000e+00);
+    logPartFn[1] = Math.log(8.00000e+00);
+    logPartFn[2] = Math.log(8.16070e+00);
+    logPartFn[3] = Math.log(2.89498e+01);
+    logPartFn[4] = Math.log(5.79555e+01);
+       }
+
+if (species == "TmII"){
+    logPartFn[0] = Math.log(9.50853e+00);
+    logPartFn[1] = Math.log(1.25401e+01);
+    logPartFn[2] = Math.log(1.54699e+01);
+    logPartFn[3] = Math.log(3.09619e+01);
+    logPartFn[4] = Math.log(4.97225e+01);
+       }
+
+if (species == "TmIII"){
+    logPartFn[0] = Math.log(8.00000e+00);
+    logPartFn[1] = Math.log(8.00000e+00);
+    logPartFn[2] = Math.log(8.08981e+00);
+    logPartFn[3] = Math.log(1.09856e+01);
+    logPartFn[4] = Math.log(1.49391e+01);
+       }
+
+if (species == "YbI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00151e+00);
+    logPartFn[3] = Math.log(2.45238e+00);
+    logPartFn[4] = Math.log(5.30693e+00);
+       }
+
+if (species == "YbII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00045e+00);
+    logPartFn[3] = Math.log(2.90499e+00);
+    logPartFn[4] = Math.log(4.84517e+00);
+       }
+
+if (species == "YbIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.10983e+00);
+    logPartFn[4] = Math.log(1.44387e+00);
+       }
+
+if (species == "LuI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.01936e+00);
+    logPartFn[2] = Math.log(6.69800e+00);
+    logPartFn[3] = Math.log(1.39052e+01);
+    logPartFn[4] = Math.log(2.05472e+01);
+       }
+
+if (species == "LuII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.03231e+00);
+    logPartFn[3] = Math.log(2.81256e+00);
+    logPartFn[4] = Math.log(4.21040e+00);
+       }
+
+if (species == "LuIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.35394e+00);
+    logPartFn[3] = Math.log(4.70352e+00);
+    logPartFn[4] = Math.log(5.50348e+00);
+       }
+
+if (species == "HfI"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00797e+00);
+    logPartFn[2] = Math.log(8.96794e+00);
+    logPartFn[3] = Math.log(2.73353e+01);
+    logPartFn[4] = Math.log(4.03170e+01);
+       }
+
+if (species == "HfII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00104e+00);
+    logPartFn[2] = Math.log(7.28122e+00);
+    logPartFn[3] = Math.log(2.20042e+01);
+    logPartFn[4] = Math.log(2.94434e+01);
+       }
+
+if (species == "HfIII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.00000e+00);
+    logPartFn[3] = Math.log(5.00000e+00);
+    logPartFn[4] = Math.log(5.00000e+00);
+       }
+
+if (species == "TaI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.01856e+00);
+    logPartFn[2] = Math.log(8.90727e+00);
+    logPartFn[3] = Math.log(3.81227e+01);
+    logPartFn[4] = Math.log(5.94676e+01);
+       }
+
+if (species == "TaII"){
+    logPartFn[0] = Math.log(3.00006e+00);
+    logPartFn[1] = Math.log(3.26126e+00);
+    logPartFn[2] = Math.log(1.20456e+01);
+    logPartFn[3] = Math.log(4.24778e+01);
+    logPartFn[4] = Math.log(5.72237e+01);
+       }
+
+if (species == "TaIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00000e+00);
+    logPartFn[4] = Math.log(4.00000e+00);
+       }
+
+if (species == "WI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.02634e+00);
+    logPartFn[2] = Math.log(6.30546e+00);
+    logPartFn[3] = Math.log(2.85590e+01);
+    logPartFn[4] = Math.log(4.57837e+01);
+       }
+
+if (species == "WII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.05127e+00);
+    logPartFn[2] = Math.log(6.98039e+00);
+    logPartFn[3] = Math.log(2.94443e+01);
+    logPartFn[4] = Math.log(4.35189e+01);
+       }
+
+if (species == "WIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00456e+00);
+    logPartFn[2] = Math.log(3.26242e+00);
+    logPartFn[3] = Math.log(1.74093e+01);
+    logPartFn[4] = Math.log(2.62418e+01);
+       }
+
+if (species == "ReI"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.10431e+00);
+    logPartFn[3] = Math.log(1.55905e+01);
+    logPartFn[4] = Math.log(2.56949e+01);
+       }
+
+if (species == "ReII"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00000e+00);
+    logPartFn[2] = Math.log(7.02641e+00);
+    logPartFn[3] = Math.log(1.17977e+01);
+    logPartFn[4] = Math.log(1.72060e+01);
+       }
+
+if (species == "ReIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.00000e+00);
+    logPartFn[3] = Math.log(6.00000e+00);
+    logPartFn[4] = Math.log(6.00000e+00);
+       }
+
+if (species == "OsI"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00193e+00);
+    logPartFn[2] = Math.log(1.28046e+01);
+    logPartFn[3] = Math.log(3.57251e+01);
+    logPartFn[4] = Math.log(5.01909e+01);
+       }
+
+if (species == "OsII"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.00003e+01);
+    logPartFn[2] = Math.log(1.29335e+01);
+    logPartFn[3] = Math.log(2.68382e+01);
+    logPartFn[4] = Math.log(3.34231e+01);
+       }
+
+if (species == "OsIII"){
+    logPartFn[0] = Math.log(7.00000e+00);
+    logPartFn[1] = Math.log(7.00000e+00);
+    logPartFn[2] = Math.log(7.00000e+00);
+    logPartFn[3] = Math.log(7.00000e+00);
+    logPartFn[4] = Math.log(7.00000e+00);
+       }
+
+if (species == "IrI"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.00029e+01);
+    logPartFn[2] = Math.log(1.43208e+01);
+    logPartFn[3] = Math.log(3.28930e+01);
+    logPartFn[4] = Math.log(4.25998e+01);
+       }
+
+if (species == "IrII"){
+    logPartFn[0] = Math.log(1.10000e+01);
+    logPartFn[1] = Math.log(1.10141e+01);
+    logPartFn[2] = Math.log(1.64858e+01);
+    logPartFn[3] = Math.log(3.43934e+01);
+    logPartFn[4] = Math.log(4.27953e+01);
+       }
+
+if (species == "IrIII"){
+    logPartFn[0] = Math.log(1.00000e+01);
+    logPartFn[1] = Math.log(1.00000e+01);
+    logPartFn[2] = Math.log(1.00000e+01);
+    logPartFn[3] = Math.log(1.00000e+01);
+    logPartFn[4] = Math.log(1.00000e+01);
+       }
+
+if (species == "PtI"){
+    logPartFn[0] = Math.log(7.00192e+00);
+    logPartFn[1] = Math.log(8.37770e+00);
+    logPartFn[2] = Math.log(1.68661e+01);
+    logPartFn[3] = Math.log(2.39027e+01);
+    logPartFn[4] = Math.log(2.70210e+01);
+       }
+
+if (species == "PtII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00001e+00);
+    logPartFn[2] = Math.log(7.18367e+00);
+    logPartFn[3] = Math.log(1.45322e+01);
+    logPartFn[4] = Math.log(1.81439e+01);
+       }
+
+if (species == "PtIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00000e+00);
+    logPartFn[2] = Math.log(9.00000e+00);
+    logPartFn[3] = Math.log(9.00000e+00);
+    logPartFn[4] = Math.log(9.00000e+00);
+       }
+
+if (species == "AuI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.07431e+00);
+    logPartFn[3] = Math.log(3.26015e+00);
+    logPartFn[4] = Math.log(3.89945e+00);
+       }
+
+if (species == "AuII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00623e+00);
+    logPartFn[3] = Math.log(1.73082e+00);
+    logPartFn[4] = Math.log(2.36680e+00);
+       }
+
+if (species == "AuIII"){
+    logPartFn[0] = Math.log(6.00000e+00);
+    logPartFn[1] = Math.log(6.00000e+00);
+    logPartFn[2] = Math.log(6.00000e+00);
+    logPartFn[3] = Math.log(6.00000e+00);
+    logPartFn[4] = Math.log(6.00000e+00);
+       }
+
+if (species == "HgI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00627e+00);
+    logPartFn[4] = Math.log(1.03521e+00);
+       }
+
+if (species == "HgII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.01083e+00);
+    logPartFn[4] = Math.log(2.04111e+00);
+       }
+
+if (species == "HgIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00459e+00);
+    logPartFn[4] = Math.log(1.02282e+00);
+       }
+
+if (species == "TlI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.09532e+00);
+    logPartFn[3] = Math.log(3.13616e+00);
+    logPartFn[4] = Math.log(4.01172e+00);
+       }
+
+if (species == "TlII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00046e+00);
+    logPartFn[4] = Math.log(1.00317e+00);
+       }
+
+if (species == "TlIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00000e+00);
+    logPartFn[3] = Math.log(2.00006e+00);
+    logPartFn[4] = Math.log(2.00068e+00);
+       }
+
+if (species == "PbI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.10102e+00);
+    logPartFn[3] = Math.log(2.61747e+00);
+    logPartFn[4] = Math.log(3.50725e+00);
+       }
+
+if (species == "PbII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00467e+00);
+    logPartFn[3] = Math.log(2.31815e+00);
+    logPartFn[4] = Math.log(2.52964e+00);
+       }
+
+if (species == "PbIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00005e+00);
+    logPartFn[4] = Math.log(1.00051e+00);
+       }
+
+if (species == "BiI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.02047e+00);
+    logPartFn[3] = Math.log(4.95911e+00);
+    logPartFn[4] = Math.log(5.65786e+00);
+       }
+
+if (species == "BiII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00645e+00);
+    logPartFn[3] = Math.log(1.51854e+00);
+    logPartFn[4] = Math.log(1.91272e+00);
+       }
+
+if (species == "BiIII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.00019e+00);
+    logPartFn[3] = Math.log(2.09519e+00);
+    logPartFn[4] = Math.log(2.20117e+00);
+       }
+
+if (species == "PoI"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.02832e+00);
+    logPartFn[3] = Math.log(5.51747e+00);
+    logPartFn[4] = Math.log(5.89033e+00);
+       }
+
+if (species == "PoII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00000e+00);
+    logPartFn[4] = Math.log(4.00000e+00);
+       }
+
+if (species == "PoIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "AtI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00297e+00);
+    logPartFn[4] = Math.log(4.01505e+00);
+       }
+
+if (species == "AtII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.00000e+00);
+    logPartFn[3] = Math.log(5.00000e+00);
+    logPartFn[4] = Math.log(5.00000e+00);
+       }
+
+if (species == "AtIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00000e+00);
+    logPartFn[4] = Math.log(4.00000e+00);
+       }
+
+if (species == "RnI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00086e+00);
+    logPartFn[4] = Math.log(1.00996e+00);
+       }
+
+if (species == "RnII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00773e+00);
+    logPartFn[4] = Math.log(4.02348e+00);
+       }
+
+if (species == "RnIII"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00000e+00);
+    logPartFn[2] = Math.log(5.00000e+00);
+    logPartFn[3] = Math.log(5.00000e+00);
+    logPartFn[4] = Math.log(5.00000e+00);
+       }
+
+if (species == "FrI"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.01509e+00);
+    logPartFn[3] = Math.log(4.72683e+00);
+    logPartFn[4] = Math.log(8.72909e+00);
+       }
+
+if (species == "FrII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "FrIII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.00000e+00);
+    logPartFn[3] = Math.log(4.00000e+00);
+    logPartFn[4] = Math.log(4.00000e+00);
+       }
+
+if (species == "RaI"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.02509e+00);
+    logPartFn[3] = Math.log(3.46852e+00);
+    logPartFn[4] = Math.log(5.89341e+00);
+       }
+
+if (species == "RaII"){
+    logPartFn[0] = Math.log(2.00000e+00);
+    logPartFn[1] = Math.log(2.00000e+00);
+    logPartFn[2] = Math.log(2.02050e+00);
+    logPartFn[3] = Math.log(3.04735e+00);
+    logPartFn[4] = Math.log(3.76227e+00);
+       }
+
+if (species == "RaIII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "AcI"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00977e+00);
+    logPartFn[2] = Math.log(6.29803e+00);
+    logPartFn[3] = Math.log(1.61130e+01);
+    logPartFn[4] = Math.log(2.21832e+01);
+       }
+
+if (species == "AcII"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.99066e+00);
+    logPartFn[3] = Math.log(9.40315e+00);
+    logPartFn[4] = Math.log(1.34413e+01);
+       }
+
+if (species == "AcIII"){
+    logPartFn[0] = Math.log(2.00057e+00);
+    logPartFn[1] = Math.log(2.39921e+00);
+    logPartFn[2] = Math.log(5.52353e+00);
+    logPartFn[3] = Math.log(8.45689e+00);
+    logPartFn[4] = Math.log(9.28067e+00);
+       }
+
+if (species == "ThI"){
+    logPartFn[0] = Math.log(5.00000e+00);
+    logPartFn[1] = Math.log(5.00263e+00);
+    logPartFn[2] = Math.log(1.10507e+01);
+    logPartFn[3] = Math.log(4.50659e+01);
+    logPartFn[4] = Math.log(5.99031e+01);
+       }
+
+if (species == "ThII"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.09432e+00);
+    logPartFn[2] = Math.log(1.45463e+01);
+    logPartFn[3] = Math.log(6.18533e+01);
+    logPartFn[4] = Math.log(8.01502e+01);
+       }
+
+if (species == "ThIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00000e+00);
+    logPartFn[2] = Math.log(9.00000e+00);
+    logPartFn[3] = Math.log(9.00000e+00);
+    logPartFn[4] = Math.log(9.00000e+00);
+       }
+
+if (species == "PaI"){
+    logPartFn[0] = Math.log(1.20011e+01);
+    logPartFn[1] = Math.log(1.30217e+01);
+    logPartFn[2] = Math.log(4.32464e+01);
+    logPartFn[3] = Math.log(1.22610e+02);
+    logPartFn[4] = Math.log(1.49295e+02);
+       }
+
+if (species == "PaII"){
+    logPartFn[0] = Math.log(9.00122e+00);
+    logPartFn[1] = Math.log(1.01871e+01);
+    logPartFn[2] = Math.log(4.27330e+01);
+    logPartFn[3] = Math.log(9.03874e+01);
+    logPartFn[4] = Math.log(1.01197e+02);
+       }
+
+if (species == "PaIII"){
+    logPartFn[0] = Math.log(1.20000e+01);
+    logPartFn[1] = Math.log(1.20000e+01);
+    logPartFn[2] = Math.log(1.20000e+01);
+    logPartFn[3] = Math.log(1.20000e+01);
+    logPartFn[4] = Math.log(1.20000e+01);
+       }
+
+if (species == "UI"){
+    logPartFn[0] = Math.log(1.30115e+01);
+    logPartFn[1] = Math.log(1.48466e+01);
+    logPartFn[2] = Math.log(3.35353e+01);
+    logPartFn[3] = Math.log(1.07772e+02);
+    logPartFn[4] = Math.log(1.36160e+02);
+       }
+
+if (species == "UII"){
+    logPartFn[0] = Math.log(1.04902e+01);
+    logPartFn[1] = Math.log(1.60511e+01);
+    logPartFn[2] = Math.log(5.15324e+01);
+    logPartFn[3] = Math.log(1.55945e+02);
+    logPartFn[4] = Math.log(1.91265e+02);
+       }
+
+if (species == "UIII"){
+    logPartFn[0] = Math.log(9.00000e+00);
+    logPartFn[1] = Math.log(9.00000e+00);
+    logPartFn[2] = Math.log(9.00000e+00);
+    logPartFn[3] = Math.log(9.00000e+00);
+    logPartFn[4] = Math.log(9.00000e+00);
+       }
+
+if (species == "H-"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "C-"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.08591e+00);
+    logPartFn[3] = Math.log(5.67986e+00);
+    logPartFn[4] = Math.log(6.40004e+00);
+       }
+
+if (species == "O-"){
+    logPartFn[0] = Math.log(4.28183e+00);
+    logPartFn[1] = Math.log(5.20160e+00);
+    logPartFn[2] = Math.log(5.83718e+00);
+    logPartFn[3] = Math.log(5.93732e+00);
+    logPartFn[4] = Math.log(5.94969e+00);
+       }
+
+if (species == "F-"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+if (species == "Si-"){
+    logPartFn[0] = Math.log(4.00000e+00);
+    logPartFn[1] = Math.log(4.00000e+00);
+    logPartFn[2] = Math.log(4.38825e+00);
+    logPartFn[3] = Math.log(7.70408e+00);
+    logPartFn[4] = Math.log(8.92238e+00);
+       }
+                                                                      
+if (species == "S-"){
+    logPartFn[0] = Math.log(4.00949e+00);
+    logPartFn[1] = Math.log(4.49753e+00);
+    logPartFn[2] = Math.log(5.58609e+00);
+    logPartFn[3] = Math.log(5.83344e+00);
+    logPartFn[4] = Math.log(5.86560e+00);
+       }
+
+if (species == "Cl-"){
+    logPartFn[0] = Math.log(1.00000e+00);
+    logPartFn[1] = Math.log(1.00000e+00);
+    logPartFn[2] = Math.log(1.00000e+00);
+    logPartFn[3] = Math.log(1.00000e+00);
+    logPartFn[4] = Math.log(1.00000e+00);
+       }
+
+   return logPartFn;
+
+   }; //end of method getPartFn2
+

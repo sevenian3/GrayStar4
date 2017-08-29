@@ -11,7 +11,7 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
 
     var filters = filterSet();
 
-    var numCols = 5;  //five band combinations in Johnson-Bessell UxBxBVRI: Ux-Bx, B-V, V-R, V-I, R-I
+    var numCols = 7;  //seven band combinations in Johnson-Bessell UxBxBVRI + Bessell & Brett 1988 JHK: Ux-Bx, B-V, V-R, V-I, R-I, V-K, J-K
     var colors = [];
     colors.length = numCols;
 
@@ -33,7 +33,8 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     //var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
     //With Balmer line linear Stark broadening wings:
     //var vegaColors = [0.321691, -0.248000, 0.061419, -0.463083, -0.524502];
-    var vegaColors = [0.09, 0.00, 0.08, -0.43, -0.51];
+    //var vegaColors = [0.09, 0.00, 0.08, -0.43, -0.51];
+    var vegaColors = [0.17, -0.09, 0.10, -0.44, -0.54, -3.11, -1.54];//lburns, June 2017
 
     var deltaLam, newY, product;
 
@@ -98,6 +99,16 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     colors[4] = raw - vegaColors[4];
     //console.log("R-I: " + colors[4]);
 
+    // V-K: lburns
+    raw = 2.5 * logTen(bandFlux[8] / bandFlux[3]);
+    colors[5] = raw - vegaColors[5];
+    //console.log("V-K: " + colors[5]);
+
+    // J-K: lburns
+    raw = 2.5 * logTen(bandFlux[8] / bandFlux[7]);
+    colors[6] = raw - vegaColors[6];
+    //console.log("J-K: " + colors[6]);
+
     return colors;
 
 }; //UBVRI
@@ -109,7 +120,7 @@ var iColors = function(lambdaScale, intens, numThetas, numLams) {
     //No! iColors now returns band-integrated intensities
 
     var filters = filterSet();
-    var numCols = 5; //five band combinations in Johnson-Bessell UxBxBVRI: Ux-Bx, B-V, V-R, V-I, R-I
+    var numCols = 7; //seven band combinations in Johnson-Bessell UxBxBVRI + Bessell & Brett 1988 JHK: Ux-Bx, B-V, V-R, V-I, R-I, V-K, J-K
 
     var numBands = filters.length;
     var numLambdaFilt = filters[0][0].length;
@@ -218,7 +229,7 @@ var iColors = function(lambdaScale, intens, numThetas, numLams) {
 
 var filterSet = function() {
 
-    var numBands = 6; // Bessell-Johnson UxBxBVRI
+    var numBands = 9; // Bessell-Johnson UxBxBVRI
     var numLambdaFilt = 25; //test for now
 
     //double[][][] filterCurves = new double[numBands][2][numLambdaFilt];
@@ -555,6 +566,164 @@ var filterSet = function() {
     filterCurves[5][0][24] = 920.0;
     filterCurves[5][1][24] = 0.000;
     //
+//H lburns /06
+    filterCurves[6][0][0] = 1460;
+    filterCurves[6][1][0] = 0.000;
+    filterCurves[6][0][1] = 1480;
+    filterCurves[6][1][1] = 0.150;
+    filterCurves[6][0][2] = 1500;
+    filterCurves[6][1][2] = 0.440;
+    filterCurves[6][0][3] = 1520;
+    filterCurves[6][1][3] = 0.860;
+    filterCurves[6][0][4] = 1540;
+    filterCurves[6][1][4] = 0.940;
+    filterCurves[6][0][5] = 1550;
+    filterCurves[6][1][5] = 0.960;
+    filterCurves[6][0][6] = 1560;
+    filterCurves[6][1][6] = 0.980;
+    filterCurves[6][0][7] = 1580;
+    filterCurves[6][1][7] = 0.950;
+    filterCurves[6][0][8] = 1600;
+    filterCurves[6][1][8] = 0.990;
+    filterCurves[6][0][9] = 1610;
+    filterCurves[6][1][9] = 0.990;
+    filterCurves[6][0][10] = 1620;
+    filterCurves[6][1][10] = 0.990;
+    filterCurves[6][0][11] = 1640;
+    filterCurves[6][1][11] = 0.990;
+    filterCurves[6][0][12] = 1660;
+    filterCurves[6][1][12] = 0.990;
+    filterCurves[6][0][13] = 1670;
+    filterCurves[6][1][13] = 0.990;
+    filterCurves[6][0][14] = 1680;
+    filterCurves[6][1][14] = 0.990;
+    filterCurves[6][0][15] = 1690;
+    filterCurves[6][1][15] = 0.990;
+    filterCurves[6][0][16] = 1700;
+    filterCurves[6][1][16] = 0.990;
+    filterCurves[6][0][17] = 1710;
+    filterCurves[6][1][17] = 0.970;
+    filterCurves[6][0][18] = 1720;
+    filterCurves[6][1][18] = 0.950;
+    filterCurves[6][0][19] = 1740;
+    filterCurves[6][1][19] = 0.870;
+    filterCurves[6][0][20] = 1760;
+    filterCurves[6][1][20] = 0.840;
+    filterCurves[6][0][21] = 1780;
+    filterCurves[6][1][21] = 0.710;
+    filterCurves[6][0][22] = 1800;
+    filterCurves[6][1][22] = 0.520;
+    filterCurves[6][0][23] = 1820;
+    filterCurves[6][1][23] = 0.020;
+    filterCurves[6][0][24] = 1840;
+    filterCurves[6][1][24] = 0.000;
+
+//J lburns /06
+    filterCurves[7][0][0] = 1040;
+    filterCurves[7][1][0] = 0.000;
+    filterCurves[7][0][1] = 1060;
+    filterCurves[7][1][1] = 0.020;
+    filterCurves[7][0][2] = 1080;
+    filterCurves[7][1][2] = 0.110;
+    filterCurves[7][0][3] = 1100;
+    filterCurves[7][1][3] = 0.420;
+    filterCurves[7][0][4] = 1120;
+    filterCurves[7][1][4] = 0.320;
+    filterCurves[7][0][5] = 1140;
+    filterCurves[7][1][5] = 0.470;
+    filterCurves[7][0][6] = 1160;
+    filterCurves[7][1][6] = 0.630;
+    filterCurves[7][0][7] = 1180;
+    filterCurves[7][1][7] = 0.730;
+    filterCurves[7][0][8] = 1190;
+    filterCurves[7][1][8] = 0.750;
+    filterCurves[7][0][9] = 1200;
+    filterCurves[7][1][9] = 0.770;
+    filterCurves[7][0][10] = 1210;
+    filterCurves[7][1][10] = 0.790;
+    filterCurves[7][0][11] = 1220;
+    filterCurves[7][1][11] = 0.810;
+    filterCurves[7][0][12] = 1230;
+    filterCurves[7][1][12] = 0.820;
+    filterCurves[7][0][13] = 1240;
+    filterCurves[7][1][13] = 0.830;
+    filterCurves[7][0][14] = 1250;
+    filterCurves[7][1][14] = 0.850;
+    filterCurves[7][0][15] = 1260;
+    filterCurves[7][1][15] = 0.880;
+    filterCurves[7][0][16] = 1280;
+    filterCurves[7][1][16] = 0.940;
+    filterCurves[7][0][17] = 1300;
+    filterCurves[7][1][17] = 0.910;
+    filterCurves[7][0][18] = 1320;
+    filterCurves[7][1][18] = 0.790;
+    filterCurves[7][0][19] = 1340;
+    filterCurves[7][1][19] = 0.680;
+    filterCurves[7][0][20] = 1360;
+    filterCurves[7][1][20] = 0.040;
+    filterCurves[7][0][21] = 1380;
+    filterCurves[7][1][21] = 0.110;
+    filterCurves[7][0][22] = 1400;
+    filterCurves[7][1][22] = 0.070;
+    filterCurves[7][0][23] = 1420;
+    filterCurves[7][1][23] = 0.030;
+    filterCurves[7][0][24] = 1440;
+    filterCurves[7][1][24] = 0.000;
+
+
+//K lburns /06  
+    filterCurves[8][0][0] = 1940;
+    filterCurves[8][1][0] = 0.000;
+    filterCurves[8][0][1] = 1960;
+    filterCurves[8][1][1] = 0.120;
+    filterCurves[8][0][2] = 1980;
+    filterCurves[8][1][2] = 0.200;
+    filterCurves[8][0][3] = 2000;
+    filterCurves[8][1][3] = 0.300;
+    filterCurves[8][0][4] = 2020;
+    filterCurves[8][1][4] = 0.550;
+    filterCurves[8][0][5] = 2040;
+    filterCurves[8][1][5] = 0.740;
+    filterCurves[8][0][6] = 2060;
+    filterCurves[8][1][6] = 0.550;
+    filterCurves[8][0][7] = 2080;
+    filterCurves[8][1][7] = 0.770;
+    filterCurves[8][0][8] = 2100;
+    filterCurves[8][1][8] = 0.850;
+    filterCurves[8][0][9] = 2120;
+    filterCurves[8][1][9] = 0.900;
+    filterCurves[8][0][10] = 2140;
+    filterCurves[8][1][10] = 0.940;
+    filterCurves[8][0][11] = 2160;
+    filterCurves[8][1][11] = 0.940;
+    filterCurves[8][0][12] = 2180;
+    filterCurves[8][1][12] = 0.950;
+    filterCurves[8][0][13] = 2200;
+    filterCurves[8][1][13] = 0.940;
+    filterCurves[8][0][14] = 2220;
+    filterCurves[8][1][14] = 0.960;
+    filterCurves[8][0][15] = 2240;
+    filterCurves[8][1][15] = 0.980;
+    filterCurves[8][0][16] = 2260;
+    filterCurves[8][1][16] = 0.970;
+    filterCurves[8][0][17] = 2280;
+    filterCurves[8][1][17] = 0.960;
+    filterCurves[8][0][18] = 2300;
+    filterCurves[8][1][18] = 0.910;
+    filterCurves[8][0][19] = 2320;
+    filterCurves[8][1][19] = 0.880;
+    filterCurves[8][0][20] = 2340;
+    filterCurves[8][1][20] = 0.840;
+    filterCurves[8][0][21] = 2380;
+    filterCurves[8][1][21] = 0.750;
+    filterCurves[8][0][22] = 2400;
+    filterCurves[8][1][22] = 0.640;
+    filterCurves[8][0][23] = 2440;
+    filterCurves[8][1][23] = 0.010;
+    filterCurves[8][0][24] = 2480;
+    filterCurves[8][1][24] = 0.000;
+
+
     //Check that we set up the array corectly:
 //    for (var ib = 0; ib < numBands; ib++) {
 //    var ib = 0;

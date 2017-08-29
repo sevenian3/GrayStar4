@@ -82,8 +82,8 @@ var logEv = Math.log(eV);
  * scaling gamma
  */
 var lineGrid = function(lam0In, massIn, xiTIn,
-        numDeps, teff, numCore, numWing,
-        logGammaCol, tauRos, temp, press, tempSun, pressSun) {
+        numDeps, teff, numCore, numWing, species){
+        //logGammaCol, tauRos, temp, press, tempSun, pressSun) {
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
     var k = 1.3806488E-16; // Boltzmann constant in ergs/K
@@ -161,6 +161,16 @@ var lineGrid = function(lam0In, massIn, xiTIn,
     var maxWingDeltaLogV = 9.0 + minWingDeltaLogV;
     //console.log("First value: " + 3.5 * ln10);
     //console.log("Second value: " + (8.0 + minWingDeltaLogV) );
+
+      if(species=="HI" && teff>=7000){ 
+              maxCoreV = 3.5; 
+              minWingDeltaLogV = Math.log(maxCoreV + 1.5);
+              maxWingDeltaLogV = 12.0 + minWingDeltaLogV;
+
+//console.log("2)"+maxWingDeltaLogV);
+      }
+
+
 
     var logV, ii, jj;
     for (var il = 0; il < numPoints; il++) {
@@ -451,7 +461,7 @@ var voigt = function(linePoints, lam0In, logAij, logGammaCol,
  */
 var stark = function(linePoints, lam0In, logAij, logGammaCol,
         numDeps, teff, tauRos, temp, press, Ne,
-        tempSun, pressSun, hjertComp) {
+        tempSun, pressSun, hjertComp, lineName) {
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
     var k = 1.3806488E-16; // Boltzmann constant in ergs/K
@@ -523,17 +533,27 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
    //Parameters for linear Stark broadening:
    //Assymptotic ("far wing") "K" parameters
    //Stehle & Hutcheon, 1999, A&A Supp Ser, 140, 93 and CDS data table
+   //http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=VI/98A
    //Assume K has something to do with "S" and proceed as in Observation and Analysis of
    // Stellar Photosphere, 3rd Ed. (D. Gray), Eq. 11.50,
-   var logTuneStark = Math.log(1.0e10); //convert DeltaI K parameters to deltaS STark profile parameters 
+   // Tuning value fitted to Phoenix Vega model by JB
+   var logTuneStark = Math.log(3.1623e7); //convert DeltaI K parameters to deltaS Stark profile parameters 
    var logKStark = [];
-   logKStark.length = 5; //For now: Halpha to Hepsilon 
+   logKStark.length = 11; //For now: Halpha to Hepsilon 
    logKStark[0] = Math.log(2.56e-03) + logTuneStark;  //Halpha
    logKStark[1] = Math.log(7.06e-03) + logTuneStark;   //Hbeta
    logKStark[2] = Math.log(1.19e-02) + logTuneStark;  //Hgamma
    logKStark[3] = Math.log(1.94e-02) + logTuneStark;  //Hdelta
    logKStark[4] = Math.log(2.95e-02) + logTuneStark;  //Hepsilon
-   var thisLogK = logKStark[4]; //default initialization
+   logKStark[5] = Math.log(4.62e-02) + logTuneStark;  //H8 JB
+   logKStark[6] = Math.log(6.38e-02) + logTuneStark;  //H9 JB
+   logKStark[7] = Math.log(8.52e-02) + logTuneStark;  //H10 JB
+   logKStark[8] = Math.log(1.12e-01) + logTuneStark;  //H11 JB
+   logKStark[9] = Math.log(1.43e-01) + logTuneStark;  //H12 JB
+   logKStark[10] = Math.log(1.80e-01) + logTuneStark;  //H13 JB
+   //logKStark[11] = Math.log(2.11) + logTuneStark; //H30 JB
+
+   var thisLogK = logKStark[10]; //default initialization
    //which Balmer line are we?  crude but effective:
    if (lam0In > 650.0e-7){
     //  console.log("Halpha");
@@ -551,10 +571,19 @@ var stark = function(linePoints, lam0In, logAij, logGammaCol,
    //   console.log("Hdelta");
       thisLogK = logKStark[3];  //Hdelta
    }
-   if ( (lam0In < 400.0e-7) ){
+   if ( (lam0In > 390.0e-7) && (lam0In < 400.0e-7) ){
    //   console.log("Hepsilon");
       thisLogK = logKStark[4];  //Hepsilon
    }
+//JB
+   if ((lam0In < 390.0e-7)){
+
+      var numberInName = parseInt(lineName.substring("HI".length),10);
+      console.log(numberInName);
+      thisLogK = logKStark[numberInName-3];
+   }
+
+
 
 //
    var F0, logF0, lamOverF0, logLamOverF0; //electrostatic field strength (e.s.u.)
@@ -1551,15 +1580,16 @@ var logEv = Math.log(eV);
         //double logNl = logNlIn * ln10;  // Convert to base e
 
 
-// Parition functions passed in are 2-element vectore with remperature-dependent base 10 log Us
+// Partition functions passed in are 5-element vectors with temperature-dependent base 10 log Us
 // Convert to natural logs:
         var thisLogUw, Ttheta;
         thisLogUw = 0.0; //default initialization
         var logUw = [];  
-        logUw.length = 2;
+        logUw.length = 5;
         var logE10 = Math.log(10.0);
-        logUw[0] = logE10*log10UwStage[0];
-        logUw[1] = logE10*log10UwStage[1];
+        for (var k = 0; k < logUw.length; k++){
+            logUw[k] = logE10*log10UwStage[k]; // lburns new loop
+        }
         var logGwL = Math.log(gwL);
 
         //System.out.println("chiL before: " + chiL);
@@ -1602,19 +1632,34 @@ var logEv = Math.log(eV);
         for (var id = 0; id < numDeps; id++) {
 
 
-//Determine temeprature dependenet aprtition functions Uw:
-        Ttheta = 5040.0 / temp[0][id];
+//NEW Determine temperature dependent partition functions Uw: lburns
+        var thisTemp = temp[0][id];
 
-        if (Ttheta >= 1.0){
+        if (thisTemp >= 10000){
+            thisLogUw = logUw[4];
+        }
+        if (thisTemp <= 130){
             thisLogUw = logUw[0];
         }
-        if (Ttheta <= 0.5){
-            thisLogUw = logUw[1];
+        if (thisTemp > 130 && thisTemp <= 500){
+            thisLogUw = logUw[1] * (thisTemp - 130)/(500 - 130)
+                      + logUw[0] * (500 - thisTemp)/(500 - 130);
         }
-        if (Ttheta > 0.5 && Ttheta < 1.0){
-            thisLogUw = logUw[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + logUw[0] * (1.0 - Ttheta)/(1.0 - 0.5);
+        if (thisTemp > 500 && thisTemp <= 3000){
+            thisLogUw = logUw[2] * (thisTemp - 500)/(3000 - 500)
+                      + logUw[1] * (3000 - thisTemp)/(3000 - 500);
         }
+        if (thisTemp > 3000 && thisTemp <= 8000){
+            thisLogUw = logUw[3] * (thisTemp - 3000)/(8000 - 3000)
+                      + logUw[2] * (8000 - thisTemp)/(8000 - 3000);
+        }
+        if (thisTemp > 8000 && thisTemp < 10000){
+            thisLogUw = logUw[4] * (thisTemp - 8000)/(10000 - 8000)
+                      + logUw[3] * (10000 - thisTemp)/(10000 - 8000);
+        }
+
+
+
 
                 //System.out.println("LevPops: ionized branch taken, ionized =  " + ionized);
 // Take stat weight of ground state as partition function:
@@ -1716,16 +1761,18 @@ var logEv = Math.log(eV);
         logUw.length = numStages+1;
         for (var i  = 0; i < numStages+1; i++){
            logUw[i] = [];
-           logUw[i].length = 2;
+           logUw[i].length = 5;
         } 
         for (var i  = 0; i < numStages; i++){
-           logUw[i][0] = logE10*log10UwAArr[i][0];
-           logUw[i][1] = logE10*log10UwAArr[i][1];
+           for (var k = 0; k < 5; k++){
+                logUw[i][k] = logE10*log10UwAArr[i][k];
+           } // lburns- what variable can we use instead of 5?
         } 
         //Assume ground state statistical weight (or partition fn) of highest stage is 1.0;
         //var logGw5 = 0.0;
-        logUw[numStages][0] = 0.0;
-        logUw[numStages][1] = 0.0;
+        for (var k = 0; k < 5; k++){
+            logUw[numStages][k] = 0.0;
+        } // lburns
 
         //System.out.println("chiL before: " + chiL);
         // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
@@ -1799,9 +1846,10 @@ var logEv = Math.log(eV);
 // for molecule formation:
         var logUwA = [];
       if (numMols > 0){
-        logUwA.length = 2;
-        logUwA[0] = logUw[0][0];
-        logUwA[1] = logUw[0][1];
+        logUwA.length = 5;
+        for (var k = 0; k < logUwA.length; k++){
+            logUwA[k] = logUw[0][k];
+        } // lburns
       }
 // Array of elements B for all molecular species AB:
        var logUwB = [];
@@ -1809,11 +1857,12 @@ var logEv = Math.log(eV);
        logUwB.length = numMols;
        for (var iMol = 0; iMol < numMols; iMol++){
           logUwB[iMol] = [];
-          logUwB[iMol].length = 2;
+          logUwB[iMol].length = 5;
        } 
         for (var iMol  = 0; iMol < numMols; iMol++){
-           logUwB[iMol][0] = logE10*log10UwBArr[iMol][0];
-           logUwB[iMol][1] = logE10*log10UwBArr[iMol][1];
+           for (var k = 0; k < 5; k++){
+                logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
+           } // lburns
         }
       //}
 //// Molecular partition functions:
@@ -1855,34 +1904,65 @@ var logEv = Math.log(eV);
 
 //Determine temeprature dependenet aprtition functions Uw:
             thisTemp = temp[0][id];
-            Ttheta = 5040.0 / thisTemp;
 
-       if (Ttheta >= 1.0){
-           for (var iStg = 0; iStg < numStages; iStg++){
-              thisLogUw[iStg] = logUw[iStg][0];
-           }
-           for (var iMol = 0; iMol < numMols; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][0];
-           }
-       }
-       if (Ttheta <= 0.5){
-           for (var iStg = 0; iStg < numStages; iStg++){
-              thisLogUw[iStg] = logUw[iStg][1];
-           }
-           for (var iMol = 0; iMol < numMols; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][1];
-           }
-       }
-       if (Ttheta > 0.5 && Ttheta < 1.0){
-           for (var iStg = 0; iStg < numStages; iStg++){
-              thisLogUw[iStg] = logUw[iStg][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                              + logUw[iStg][0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           }
-           for (var iMol = 0; iMol < numMols; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                               + logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           }
-       }
+// NEW Determine temperature dependent partition functions Uw: lburns
+        if (thisTemp <= 130){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][0];
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][0];
+            }
+        }
+        if (thisTemp > 130 && thisTemp <= 500){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][1] * (thisTemp - 130)/(500 - 130)
+                                + logUw[iStg][0] * (500 - thisTemp)/(500 - 130);
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][1] * (thisTemp - 130)/(500 - 130)
+                                 + logUwB[iMol][0] * (500 - thisTemp)/(500 - 130);
+            }
+        }
+        if (thisTemp > 500 && thisTemp <= 3000){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][2] * (thisTemp - 500)/(3000 - 500)
+                                + logUw[iStg][1] * (3000 - thisTemp)/(3000 - 500);
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][2] * (thisTemp - 500)/(3000 - 500)
+                                 + logUwB[iMol][1] * (3000 - thisTemp)/(3000 - 500);
+            }
+        }
+        if (thisTemp > 3000 && thisTemp <= 8000){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][3] * (thisTemp - 3000)/(8000 - 3000)
+                                + logUw[iStg][2] * (8000 - thisTemp)/(8000 - 3000);
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][3] * (thisTemp - 3000)/(8000 - 3000)
+                                 + logUwB[iMol][2] * (8000 - thisTemp)/(8000 - 3000);
+            }
+        }
+        if (thisTemp > 8000 && thisTemp < 10000){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][4] * (thisTemp - 8000)/(10000 - 8000)
+                                + logUw[iStg][3] * (10000 - thisTemp)/(10000 - 8000);
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][4] * (thisTemp - 8000)/(10000 - 8000)
+                                 + logUwB[iMol][3] * (10000 - thisTemp)/(10000 - 8000);
+            }
+        }
+        if (thisTemp >= 10000){
+            for (var iStg = 0; iStg < numStages; iStg++){
+                thisLogUw[iStg] = logUw[iStg][4];
+            }
+            for (var iMol = 0; iMol < numMols; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][4];
+            }
+        }
+
          thisLogUw[numStages] = 0.0;
       for (var iMol = 0; iMol < numMols; iMol++){
          if (thisTemp < 3000.0){
@@ -2029,13 +2109,15 @@ var logEv = Math.log(eV);
         var logE10 = Math.log(10.0);
 //We need one more stage in size of saha factor than number of stages we're actualy populating
         var logUwU = [];
-        logUwU.length = 2;
+        logUwU.length = 5;
         var logUwL = [];
-        logUwL.length = 2;
-           logUwU[0] = logE10*log10UwUArr[0];
-           logUwU[1] = logE10*log10UwUArr[1];
-           logUwL[0] = logE10*log10UwLArr[0];
-           logUwL[1] = logE10*log10UwLArr[1];
+        logUwL.length = 5;
+        // For logUwL AND logUwU: new lburns
+           for (var k = 0; k < logUwL.length; k++){
+                logUwU[k] = logE10*log10UwUArr[k];
+                logUwL[k] = logE10*log10UwLArr[k];
+           }
+
 
         //System.out.println("chiL before: " + chiL);
         // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
@@ -2061,24 +2143,42 @@ var logEv = Math.log(eV);
 //
 //Determine temperature dependent partition functions Uw:
             thisTemp = temp[0];
-            Ttheta = 5040.0 / thisTemp;
 
+// NEW Determine temperature dependent partition functions Uw: lburns
+            thisTemp = temp[0];
 
-       if (Ttheta >= 1.0){
-              thisLogUwU = logUwU[0];
-              thisLogUwL = logUwL[0];
-       }
-       if (Ttheta <= 0.5){
-              thisLogUwU = logUwU[1];
-              thisLogUwL = logUwL[1];
-       }
-       if (Ttheta > 0.5 && Ttheta < 1.0){
-              thisLogUwU = ( logUwU[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
-                         + ( logUwU[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
-              thisLogUwL = ( logUwL[1] * (Ttheta - 0.5)/(1.0 - 0.5) )
-                         + ( logUwL[0] * (1.0 - Ttheta)/(1.0 - 0.5) );
-       }
-
+        if (thisTemp <= 130){
+            thisLogUwU = logUwU[0];
+            thisLogUwL = logUwL[0];
+        }
+        if (thisTemp > 130 && thisTemp <= 500){
+            thisLogUwU = logUwU[1] * (thisTemp - 130)/(500 - 130)
+                       + logUwU[0] * (500 - thisTemp)/(500 - 130);
+            thisLogUwL = logUwL[1] * (thisTemp - 130)/(500 - 130)
+                       + logUwL[0] * (500 - thisTemp)/(500 - 130);
+        }
+        if (thisTemp > 500 && thisTemp <= 3000){
+            thisLogUwU = logUwU[2] * (thisTemp - 500)/(3000 - 500)
+                       + logUwU[1] * (3000 - thisTemp)/(3000 - 500);
+            thisLogUwL = logUwL[2] * (thisTemp - 500)/(3000 - 500);
+                       + logUwL[1] * (3000 - thisTemp)/(3000 - 500);
+        }
+        if (thisTemp > 3000 && thisTemp <= 8000){
+            thisLogUwU = logUwU[3] * (thisTemp - 3000)/(8000 - 3000)
+                       + logUwU[2] * (8000 - thisTemp)/(8000 - 3000);
+            thisLogUwL = logUwL[3] * (thisTemp - 3000)/(8000 - 3000)
+                       + logUwL[2] * (8000 - thisTemp)/(8000 - 3000);
+        }
+        if (thisTemp > 8000 && thisTemp < 10000){
+            thisLogUwU = logUwU[4] * (thisTemp - 8000)/(10000 - 8000)
+                       + logUwU[3] * (10000 - thisTemp)/(10000 - 8000);
+            thisLogUwL = logUwL[4] * (thisTemp - 8000)/(10000 - 8000)
+                       + logUwL[3] * (10000 - thisTemp)/(10000 - 8000);
+        }
+        if (thisTemp >= 10000){
+            thisLogUwU = logUwU[4];
+            thisLogUwL = logUwL[4];
+        }
 
    //Ionization stage Saha factors:
 
@@ -2178,24 +2278,26 @@ var logEv = Math.log(eV);
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
         var logUwA = [];
-        logUwA.length = 2;
-        logUwA[0] = logE10*log10UwA[0];
-        logUwA[1] = logE10*log10UwA[1];
+        logUwA.length = 5;
         var nmrtrLogUwB = [];
-        nmrtrLogUwB.length = 2;
-        nmrtrLogUwB[0] = logE10*nmrtrLog10UwB[0];
-        nmrtrLogUwB[1] = logE10*nmrtrLog10UwB[1];
+        nmrtrLogUwB.length = 5;
+        for (var k = 0; k < logUwA.length; k++){
+            logUwA[k] = logE10*log10UwA[k];
+            nmrtrLogUwB[k] = logE10*nmrtrLog10UwB[k];
+        } // lburns new loop
+
 // Array of elements B for all molecular species AB:
        var logUwB = [];
       //if (numMolsB > 0){
        logUwB.length = numMolsB;
        for (var iMol = 0; iMol < numMolsB; iMol++){
           logUwB[iMol] = [];
-          logUwB[iMol].length = 2;
+          logUwB[iMol].length = 5;
        } 
         for (var iMol  = 0; iMol < numMolsB; iMol++){
-           logUwB[iMol][0] = logE10*log10UwBArr[iMol][0];
-           logUwB[iMol][1] = logE10*log10UwBArr[iMol][1];
+           for (var k = 0; k < 5; k++){
+                logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
+           } // lburns new loop
         }
       //}
 //// Molecular partition functions:
@@ -2249,32 +2351,64 @@ var logEv = Math.log(eV);
 
 //Determine temperature dependent partition functions Uw:
             thisTemp = temp[0][id];
-            Ttheta = 5040.0 / thisTemp;
 
-       if (Ttheta >= 1.0){
-           thisLogUwA = logUwA[0];
-           nmrtrThisLogUwB = nmrtrLogUwB[0];
-           for (var iMol = 0; iMol < numMolsB; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][0];
-           }
-       }
-       if (Ttheta <= 0.5){
-           thisLogUwA = logUwA[1];
-           nmrtrThisLogUwB = nmrtrLogUwB[1];
-           for (var iMol = 0; iMol < numMolsB; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][1];
-           }
-       }
-       if (Ttheta > 0.5 && Ttheta < 1.0){
-           thisLogUwA = logUwA[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                      + logUwA[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           nmrtrThisLogUwB = nmrtrLogUwB[1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                           + nmrtrLogUwB[0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           for (var iMol = 0; iMol < numMolsB; iMol++){
-              thisLogUwB[iMol] = logUwB[iMol][1] * (Ttheta - 0.5)/(1.0 - 0.5)
-                               + logUwB[iMol][0] * (1.0 - Ttheta)/(1.0 - 0.5);
-           }
-       }
+// NEW Determine temperature dependent partition functions Uw: lburns
+        thisTemp = temp[0][id];
+        if (thisTemp <= 130){
+            thisLogUwA = logUwA[0];
+            nmrtrThisLogUwB = nmrtrLogUwB[0];
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][0];
+            }
+        }
+        if (thisTemp > 130 && thisTemp <= 500){
+            thisLogUwA = logUwA[1] * (thisTemp - 130)/(500 - 130)
+                       + logUwA[0] * (500 - thisTemp)/(500 - 130);
+            nmrtrThisLogUwB = nmrtrLogUwB[1] * (thisTemp - 130)/(500 - 130)
+                            + nmrtrLogUwB[0] * (500 - thisTemp)/(500 - 130);
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][1] * (thisTemp - 130)/(500 - 130)
+                                 + logUwB[iMol][0] * (500 - thisTemp)/(500 - 130);
+            }
+        }
+        if (thisTemp > 500 && thisTemp <= 3000){
+            thisLogUwA = logUwA[2] * (thisTemp - 500)/(3000 - 500)
+                       + logUwA[1] * (3000 - thisTemp)/(3000 - 500);
+            nmrtrThisLogUwB = nmrtrLogUwB[2] * (thisTemp - 500)/(3000 - 500)
+                            + nmrtrLogUwB[1] * (3000 - thisTemp)/(3000 - 500);
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][2] * (thisTemp - 500)/(3000 - 500)
+                                 + logUwB[iMol][1] * (3000 - thisTemp)/(3000 - 500);
+            }
+        }
+        if (thisTemp > 3000 && thisTemp <= 8000){
+            thisLogUwA = logUwA[3] * (thisTemp - 3000)/(8000 - 3000)
+                       + logUwA[2] * (8000 - thisTemp)/(8000 - 3000);
+            nmrtrThisLogUwB = nmrtrLogUwB[3] * (thisTemp - 3000)/(8000 - 3000)
+                            + nmrtrLogUwB[2] * (8000 - thisTemp)/(8000 - 3000);
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][3] * (thisTemp - 3000)/(8000 - 3000)
+                                 + logUwB[iMol][2] * (8000 - thisTemp)/(8000 - 3000);
+            }
+        }
+        if (thisTemp > 8000 && thisTemp < 10000){
+            thisLogUwA = logUwA[4] * (thisTemp - 8000)/(10000 - 8000)
+                       + logUwA[3] * (10000 - thisTemp)/(10000 - 8000);
+            nmrtrThisLogUwB = nmrtrLogUwB[4] * (thisTemp - 8000)/(10000 - 8000)
+                            + nmrtrLogUwB[3] * (10000 - thisTemp)/(10000 - 8000);
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][4] * (thisTemp - 8000)/(10000 - 8000)
+                                 + logUwB[iMol][3] * (10000 - thisTemp)/(10000 - 8000);
+            }
+        }
+        if (thisTemp >= 10000){
+            thisLogUwA = logUwA[4];
+            nmrtrThisLogUwB = nmrtrLogUwB[4];
+            for (var iMol = 0; iMol < numMolsB; iMol++){
+                thisLogUwB[iMol] = logUwB[iMol][4];
+            }
+        }
+
       for (var iMol = 0; iMol < numMolsB; iMol++){
          if (thisTemp < 3000.0){
             thisLogQwAB = ( logQwABArr[iMol][1] * (3000.0 - thisTemp)/(3000.0 - 500.0) )
@@ -2662,6 +2796,9 @@ var logEv = Math.log(eV);
 
 //extinction coefficient in cm^2 g^-1:
           logKappaJola[iW][iD] = logSigma + jolaLogNums[iD] - rho[1][iD] + Math.log(stimEm);
+          if (logKappaJola[iW][iD] > 49.0){
+            logKappaJola[iW][iD] = 49.0;
+          }
           //logKappaJola[iW][iD] = -999.0; 
           //if (iD%10 == 1){
           //  console.log("iD " + iD + " iW " + iW + " logFreq " + log10E*logFreq + " logW " + log10E*logW + " logStimEm " + log10E*Math.log(stimEm));

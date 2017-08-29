@@ -13,6 +13,12 @@
  * Halifax, NS, Canada
  *  * ian.short@smu.ca
  * www.ap.smu.ca/~ishort/
+ *
+ *
+ * Co-developers:
+ *
+ * Lindsey Burns (SMU) - 2017 - "lburns"
+ * Jason Bayer (SMU) - 2017 - "JB"
  * 
  * Open source pedagogical computational stellar astrophysics
  *
@@ -87,6 +93,16 @@ var logRSun = Math.log(rSun);
 var logMSun = Math.log(mSun);
 var logLSun = Math.log(lSun);
 var logAu = Math.log(au);
+
+//Links required to create elements easily
+                      //JB
+    var xmlns = "http://www.w3.org/2000/xmlns/";
+    var xmlnsLink = "xmlns:xlink";
+    var xmlnsLink2 = "http://w3.org/1999/xlink"; 
+    var xmlW3 = "http://www.w3.org/2000/svg";    
+                      //JB
+
+
 // ********************************************
 
 //***************************  Main ******************************
@@ -128,7 +144,7 @@ function main() {
 
 //JQuery:  Independent of order of switches in HTML file?
 // Stellar atmospheric parameters
-    var numInputs = 30;
+    var numInputs = 33;
 //Make settingsId object array by hand:
 // setId() is an object constructor
     function setId(nameIn, valueIn) {
@@ -201,7 +217,10 @@ function main() {
     var rotI = 1.0 * $("#rotI").val(); // degrees
     var nOuterIter = $("#nOuterIter").val(); //number of outer HSE-EOS-Opacity iterations
     var nInnerIter = $("#nInnerIter").val(); //number of inner Pe-(ion. fraction) iterations
-
+    // Add new variables to hold values for new metallicity controls lburns
+    var logHeFe = 1.0 * $("#logAlphaFe").val(); // lburns
+    var logCO = 1.0 * $("#logCO").val(); // lburns
+    var logAlphaFe = 1.0 * $("#logAlphaFe").val(); // lburns
 //    
     settingsId[0] = new setId("<em>T</em><sub>eff</sub>", teff);
     settingsId[1] = new setId("log <em>g</em>", logg);
@@ -233,6 +252,9 @@ function main() {
     settingsId[27] = new setId("<em>v</em><sub>Rot</sub>", rotV);
     settingsId[28] = new setId("<em>i</em><sub>Rot</sub>", rotI);
     settingsId[29] = new setId("<span style='color:green'>AtmP</span>", atmosPress);
+    settingsId[30] = new setId("<em>[He/Fe]</em>", logHeFe); // lburns
+    settingsId[31] = new setId("<em>[C/O]</em>", logCO); // lburns
+    settingsId[32] = new setId("<em>[&#945/Fe]</em>", logAlphaFe); // lburns
 
     var solvent = "water"; //default intialization
     //
@@ -371,7 +393,7 @@ function main() {
 
 
     var switchStar = "None";
-    var numPreStars = 7;
+    var numPreStars = 9;
     //JQuery:
     // None: (default)
     if ($("#none").is(":checked")) {
@@ -410,7 +432,15 @@ function main() {
     if ($("#51pegasi").is(":checked")) {
         switchStar = $("#51pegasi").val(); // radio 
     }
+// Proxima Centauri (lburns)
+    if ($("#alphacentc").is(":checked")) {
+	switchStar = $("#alphacentc").val(); // radio
+    }
 
+// Fomalhaut (lburns)
+    if ($("#fomalhaut").is(":checked")) {
+	switchStar = $("#fomalhaut").val(); // radio
+    }
 
 //JQuery:
     if (switchStar === "Sun") {
@@ -431,7 +461,7 @@ function main() {
         var massStar = 1.0;
         settingsId[3].value = 1.0;
         //$("#starMass").val(1.0);
-        $("#massStar").roundSlider("setValue", "1.0");
+        $("#starMass").roundSlider("setValue", "1.0");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
@@ -453,10 +483,13 @@ function main() {
         var massStar = 1.1;
         settingsId[3].value = 1.1;
         //$("#starMass").val(1.1);
-        $("#massStar").roundSlider("setValue", "1.1");
+        $("#starMass").roundSlider("setValue", "1.1");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
+        logAlphaFe = 0.3;
+        settingsId[32].value = 0.3;
+        $("#logAlphaFe").val(0.3);
     }
 
     if (switchStar === "Vega") {
@@ -475,7 +508,7 @@ function main() {
         var massStar = 2.1;
         settingsId[3].value = 2.1;
         //$("#starMass").val(2.1);
-        $("#massStar").roundSlider("setValue", "2.1");
+        $("#starMass").roundSlider("setValue", "2.1");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
@@ -497,7 +530,7 @@ function main() {
         var massStar = 3.8;
         settingsId[3].value = 3.8;
         //$("#starMass").val(3.8);
-        $("#massStar").roundSlider("setValue", "3.8");
+        $("#starMass").roundSlider("setValue", "3.8");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
@@ -519,7 +552,7 @@ function main() {
         var massStar = 1.4;
         settingsId[3].value = 1.4;
         //$("#starMass").val(1.4);
-        $("#massStar").roundSlider("setValue", "1.4");
+        $("#starMass").roundSlider("setValue", "1.4");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
@@ -541,7 +574,7 @@ function main() {
         var massStar = 0.6;
         settingsId[3].value = 0.6;
         //$("#starMass").val(0.63);
-        $("#massStar").roundSlider("setValue", "0.6");
+        $("#starMass").roundSlider("setValue", "0.6");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
@@ -563,11 +596,57 @@ function main() {
         var massStar = 1.1;
         settingsId[3].value = 1.1;
         //$("#starMass").val(1.11);
-        $("#massStar").roundSlider("setValue", "1.1");
+        $("#starMass").roundSlider("setValue", "1.1");
         var logKapFudge = 0.0;
         settingsId[25].value = 0.0;
         $("#logKapFudge").val(0.0);
     }
+//Alpha Centauri C added 05/24 lburns
+    if (switchStar === "Alpha Centauri C") {
+	var teff = 3050.0;
+	settingsId[0].value = 3050.0;
+	//$("#Teff").val(3050.0);
+	$("#Teff").roundSlider("setValue", "3050.0");
+	var logg = 4.6;
+	settingsId[1].value = 4.6;
+	//$("#logg").val(4.6);
+	$("#logg").roundSlider("setValue", "4.6");
+	var log10ZScale = 0.0;
+	settingsId[2].value = 0.0;
+	//$("#zScale").val(0.0);
+	$("#zScale").roundSlider("setValue", "0.0");
+	var massStar = 0.1;
+	settingsId[3].value = 0.1;
+	//$("#starMass").val(0.12);
+	$("#starMass").roundSlider("setValue", "0.1");
+	var logKapFudge = 0.0;
+	settingsId[25].value = 0.0;
+	$("#logKapFudge").val(0.0);
+    } 
+
+//Fomalhaut added 06/15 lburns
+    if (switchStar === "Fomalhaut") {
+	var teff = 8590.0;
+	settingsId[0].value = 8590.0;
+	//$("#Teff").val(8590.0);
+	$("#Teff").roundSlider("setValue", "8590.0");
+	var logg = 4.2;
+	settingsId[1].value = 4.2;
+	//$("#logg").val(4.2);
+	$("#logg").roundSlider("setValue", "4.2");
+	var log10ZScale = 0.0;
+	settingsId[2].value = 0.0;
+	//$("#zScale").val(0.0);
+	$("#zScale").roundSlider("setValue", "0.0");
+	var massStar = 1.9;
+	settingsId[3].value = 1.9;
+	//$("#starMass").val(1.92);
+	$("#starMass").roundSlider("setValue", "1.9");
+	var logKapFudge = 0.0;
+        settingsId[25].value = 0.0;
+        $("#logKapFudge").val(0.0);	
+    }
+
 
     var switchSolvent = "Water";
     var numSolvents = 4;
@@ -1042,7 +1121,7 @@ function main() {
 //Set up for molecules with JOLA bands:
    var jolaTeff = 5000.0;
    //var jolaTeff = 1500.0; //test
-   var numJola = 3; //for now
+   var numJola = 2; //for now
    //var numJola = 2; // test
    var jolaSpecies = []; // molecule name
    jolaSpecies.length = numJola;
@@ -1059,17 +1138,107 @@ function main() {
      jolaSpecies[1] = "TiO"; // molecule name
      jolaSystem[1] = "TiO_c1Phi_a1Delta"; //band system //DeltaLambda=1
      jolaDeltaLambda[1] = 1;
-     jolaSpecies[2] = "TiO"; // molecule name
-     jolaSystem[2] = "TiO_A3Phi_X3Delta"; //band system //DeltaLambda=0
-     jolaDeltaLambda[2] = 0;
+     //jolaSpecies[2] = "TiO"; // molecule name
+     //jolaSystem[2] = "TiO_A3Phi_X3Delta"; //band system //DeltaLambda=0
+     //jolaDeltaLambda[2] = 0;
 
    }
+
+// For new metallicity commands lburns
+// For logHeFe: (lburns)
+    var flagArr = [];
+    flagArr.length = numInputs;
+    if (logHeFe === null || logHeFe === "") {
+	alert("logHeFe must be filled out");
+	return;
+    }
+    flagArr[30] = false;
+    if (logHeFe < -1.0) {
+	flagArr[30] = true;
+	logHeFe = -1.0;
+	var logHeFeStr = "-1.0";
+	settingsId[30].value = -1.0;
+	$("#logHeFe").val(-1.0);
+    }
+    if (logHeFe > 1.0) {
+	flagArr[30] = true;
+	logHeFe = 1.0;
+	var logHeFeStr = "1.0";
+	settingsId[30].value = 1.0;
+	$("#logHeFe").val(1.0);
+    }
+// For logCO: (lburns)
+    if (logCO === null || logCO === "") {
+	alert("logCO must be filled out");
+	return;
+    }
+    flagArr[31] = false;
+    if (logCO < -2.0) {
+	flagArr[31] = true;
+	logCO = -2.0;
+	var logCOStr = "-2.0";
+	settingsId[31].value = -2.0;
+	$("#logCO").val(-2.0);
+    }
+    if (logCO > 2.0) {
+	flagArr[31] = true;
+	logCO = 2.0;
+	var logCOStr = "2.0";
+	settingsId[31].value = 2.0;
+	$("#logCO").val(2.0);
+    }
+// For logAlphaFe: (lburns)
+    if (logAlphaFe === null || logAlphaFe === "") {
+	alert("logAlphaFe must be filled out");
+	return;
+    }
+    flagArr[32] = false;
+    if (logAlphaFe < -0.5) {
+	flagArr[32] = true;
+	logAlphaFe = -0.5;
+	var logAlphaFeStr = "-0.5";
+	settingsId[32].value = -0.5;
+	$("#logAlphaFe").val(-0.5);
+    }
+    if (logAlphaFe > 0.5) {
+	flagArr[32] = true;
+	logAlphaFe = 0.5;
+	var logAlphaFeStr = "0.5";
+	settingsId[32].value = 0.5;
+	$("#logAlphaFe").val(0.5);
+    }
+
 
 
   var logE = logTen(Math.E); // for debug output
   var logE10 = Math.log(10.0);
   var ATot = 0.0;
   var thisAz, eheuScale;
+
+     // Set value of eheuScale for new metallicity options. 06/17 lburns
+      if (logHeFe != 0.0) {
+           eheu[1] = eheu[1] + logHeFe;
+        }
+        if (logAlphaFe != 0.0) {
+           eheu[7] = eheu[7] + logAlphaFe;
+           eheu[9] = eheu[9] + logAlphaFe;
+           eheu[11] = eheu[11] + logAlphaFe;
+           eheu[13] = eheu[13] + logAlphaFe;
+           eheu[15] = eheu[15] + logAlphaFe;
+           eheu[17] = eheu[17] + logAlphaFe;
+           eheu[19] = eheu[19] + logAlphaFe;
+           eheu[21] = eheu[21] + logAlphaFe;
+        }
+        if (logCO > 0.0) {
+           eheu[5] = eheu[5] + logCO;
+           //console.log("logCO " + logCO);
+        }
+        if (logCO < 0.0) {
+           eheu[7] = eheu[7] + Math.abs(logCO);
+	   //console.log("logCO " + logCO);
+        }
+	//console.log("logCO " + logCO);
+
   for (var i = 0; i < nelemAbnd; i++){
      eheuScale = eheu[i]; //default intialization // still base 10
      if (i > 1){  //if not H or He
@@ -1083,25 +1252,24 @@ function main() {
   }
   var logATot = Math.log(ATot); //natural log
 
-    //The following is a 2-element vector of temperature-dependent partition fns, U,
+    //The following is a 5-element vector of temperature-dependent partition fns, U,
     // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
        var log10Gw1V = [];
-       log10Gw1V.length = 2;
+       log10Gw1V.length = 5;
        var log10Gw2V = [];
-       log10Gw2V.length = 2;
+       log10Gw2V.length = 5;
        var log10Gw3V = [];
-       log10Gw3V.length = 2;
+       log10Gw3V.length = 5;
        var log10Gw4V = [];
-       log10Gw4V.length = 2;
+       log10Gw4V.length = 5;
 //Default is to set both temperature-dependent values to to the user-input value:
-  log10Gw1V[0] = logTen(gw1);
-  log10Gw1V[1] = logTen(gw1);
-  log10Gw2V[0] = logTen(gw2);
-  log10Gw2V[1] = logTen(gw2);
-  log10Gw3V[0] = logTen(gw3);
-  log10Gw3V[1] = logTen(gw3);
-  log10Gw4V[0] = logTen(gw4);
-  log10Gw4V[1] = logTen(gw4);
+// Loop that defaults the temperature dependent values to user input, now with 5 temperatures lburns
+for (var i = 0; i < log10Gw1V.length; i++) {
+    log10Gw1V[i] = logTen(gw1);
+    log10Gw2V[i] = logTen(gw2);
+    log10Gw3V[i] = logTen(gw3);
+    log10Gw4V[i] = logTen(gw4);
+}
 
     var thisCname = " ";
 
@@ -1379,24 +1547,28 @@ function main() {
          $("#chi_I1").val(chiI1);
       //THe following is a 2-element vector of temperature-dependent partitio fns, U,
       // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-         log10Gw1V = getPartFn(species); //base 10 log_10 U
+         //log10Gw1V = getPartFn(species); //base 10 log_10 U
+         log10Gw1V = getPartFn2(species); //lburns
          thisGw1 = Math.pow(10.0, log10Gw1V[0]);
          settingsId[15].value = thisGw1;
          $("#gw_1").val(thisGw1);
-           species = thisCname + "II";
+         species = thisCname + "II";
          chiI2 = getIonE(species);
          settingsId[11].value = chiI2;
          $("#chi_I2").val(chiI2);
-         log10Gw2V = getPartFn(species); //base 10 log_10 U
+         //log10Gw2V = getPartFn(species); //base 10 log_10 U
+         log10Gw2V = getPartFn2(species);//lburns
          thisGw2 = Math.pow(10.0, log10Gw2V[0]);
          settingsId[16].value = thisGw2;
          $("#gw_2").val(thisGw2);
          species = thisCname + "III";
          chiI3 = getIonE(species);
-         log10Gw3V = getPartFn(species); //base 10 log_10 U
+         //log10Gw3V = getPartFn(species); //base 10 log_10 U
+         log10Gw3V = getPartFn2(species);//lburns
          species = thisCname + "IV";
          chiI4 = getIonE(species);
-         log10Gw4V = getPartFn(species); //base 10 log_10 U
+         //log10Gw4V = getPartFn(species); //base 10 log_10 U
+         log10Gw4V = getPartFn2(species); //lburns
          mass = getMass(thisCname);
          settingsId[21].value = mass;
          $("#mass").val(mass);
@@ -1408,12 +1580,9 @@ function main() {
 
 // Stellar parameters:
 //
-    var flagArr = [];
-    flagArr.length = numInputs;
-//
     flagArr[0] = false;
     var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
-    var minTeff = 3200.0;
+    var minTeff = 3000.0;
     var maxTeff = 50000.0;
     if (teff === null || teff == "") {
         alert("Teff must be filled out");
@@ -2178,95 +2347,114 @@ function main() {
    // var plotOneId = document.getElementById("plotOne");
    // var cnvsOneId = document.getElementById("plotOneCnvs");
    // var cnvsOneCtx = cnvsOneId.getContext("2d"); 
-    var plotTwoId = document.getElementById("plotTwo");
-    var cnvsTwoId = document.getElementById("plotTwoCnvs");
-    var cnvsTwoCtx = cnvsTwoId.getContext("2d"); 
-    var plotThreeId = document.getElementById("plotThree");
-    var cnvsThreeId = document.getElementById("plotThreeCnvs");
-    var cnvsThreeCtx = cnvsThreeId.getContext("2d"); 
-    var plotFourId = document.getElementById("plotFour");
-    var cnvsFourId = document.getElementById("plotFourCnvs");
-    var cnvsFourCtx = cnvsFourId.getContext("2d"); 
-    var plotFiveId = document.getElementById("plotFive");
-    var cnvsFiveId = document.getElementById("plotFiveCnvs");
-    var cnvsFiveCtx = cnvsFiveId.getContext("2d"); 
-    var plotSixId = document.getElementById("plotSix");
-    var cnvsSixId = document.getElementById("plotSixCnvs");
-    var cnvsSixCtx = cnvsSixId.getContext("2d"); 
-    var plotSevenId = document.getElementById("plotSeven");
-    var cnvsSevenId = document.getElementById("plotSevenCnvs");
-    var cnvsSevenCtx = cnvsSevenId.getContext("2d"); 
-    var plotEightId = document.getElementById("plotEight");
-    var cnvsEightId = document.getElementById("plotEightCnvs");
-    var cnvsEightCtx = cnvsEightId.getContext("2d"); 
-    var plotNineId = document.getElementById("plotNine");
-    var cnvsNineId = document.getElementById("plotNineCnvs");
-    var cnvsNineCtx = cnvsNineId.getContext("2d"); 
-    var plotTenId = document.getElementById("plotTen");
-    var cnvsTenId = document.getElementById("plotTenCnvs");
-    var cnvsTenCtx = cnvsTenId.getContext("2d"); 
-    var plotElevenId = document.getElementById("plotEleven");
-    var cnvsElevenId = document.getElementById("plotElevenCnvs");
-    var cnvsElevenCtx = cnvsElevenId.getContext("2d"); 
-    var plotTwelveId = document.getElementById("plotTwelve");
-    var cnvsTwelveId = document.getElementById("plotTwelveCnvs");
-    var cnvsTwelveCtx = cnvsTwelveId.getContext("2d"); 
+
+                        //JB
+    var newPlotTwoId = document.getElementById("newPlotTwo");
+    var SVGTwo = document.getElementById("SVG2");
+                        //JB    
+                        //JB
+    var newPlotThreeId = document.getElementById("newPlotThree");
+    var SVGThree = document.getElementById("SVG3");
+                        //JB
+                        //JB
+    var newPlotFourId = document.getElementById("newPlotFour");
+    var SVGFour = document.getElementById("SVG4");
+                        //JB
+    //JB
+    var newPlotFiveId = document.getElementById("newPlot5");
+    var SVGFive = document.getElementById("SVG5");
+
+    var newPlotSixId = document.getElementById("newPlotSix");
+    var SVGSix = document.getElementById("SVG6");
+                                //JB
+    var newPlotSevenId = document.getElementById("newPlotSeven");
+    var SVGSeven = document.getElementById("SVG7");
+                                //JB
+    var newPlotEightId = document.getElementById("newPlotEight");
+    var SVGEight = document.getElementById("SVG8");
+                                //JB
+    var newPlotNineId = document.getElementById("newPlotNine");
+    var SVGNine = document.getElementById("SVG9");
+                                //JB
+    var newPlotTenId = document.getElementById("newPlotTen");
+    var SVGTen = document.getElementById("SVG10");
+                                //JB
+    var newPlotElevenId = document.getElementById("newPlotEleven");
+    var SVGEleven = document.getElementById("SVG11");
+                                //JB
+    var newPlotTwelveId = document.getElementById("newPlotTwelve");
+    var SVGTwelve = document.getElementById("SVG12");
+                                //JB
     var printModelId = document.getElementById("printModel"); //detailed model print-out area
-    var plotFourteenId = document.getElementById("plotFourteen");
-    var cnvsFourteenId = document.getElementById("plotFourteenCnvs");
-    var cnvsFourteenCtx = cnvsFourteenId.getContext("2d"); 
-    var plotFifteenId = document.getElementById("plotFifteen");
-    var cnvsFifteenId = document.getElementById("plotFifteenCnvs");
-    var cnvsFifteenCtx = cnvsFifteenId.getContext("2d"); 
-    var plotSixteenId = document.getElementById("plotSixteen");
-    var cnvsSixteenId = document.getElementById("plotSixteenCnvs");
-    var cnvsSixteenCtx = cnvsSixteenId.getContext("2d"); 
-    var plotSeventeenId = document.getElementById("plotSeventeen");
-    var cnvsSeventeenId = document.getElementById("plotSeventeenCnvs");
-    var cnvsSeventeenCtx = cnvsSeventeenId.getContext("2d"); 
+                                //JB
+    var newPlotFourteenId=document.getElementById("newPlotFourteen");
+    var SVGFourteen = document.getElementById("SVG14");
+                                //JB
+    var newPlotFifteenId=document.getElementById("newPlotFifteen");
+    var SVGFifteen = document.getElementById("SVG15");
+                                //JB
+    var newPlotSixteenId = document.getElementById("newPlotSixteen");
+    var SVGSixteen = document.getElementById("SVG16");
+                                //JB
+    var newPlotSeventeenId=document.getElementById("newPlotSeventeen");
+    var SVGSeventeen = document.getElementById("SVG17");
+                                //JB
 
     var printModelId = document.getElementById("printModel"); //detailed model print-out area
 
 
     if (ifShowAtmos === true) {
         //plotOneId.style.display = "block";
-        plotTwoId.style.display = "block";
-        plotThreeId.style.display = "block";
-        plotFourteenId.style.display = "block";
-        plotFifteenId.style.display = "block";
-        plotSixteenId.style.display = "block";
+        newPlotTwoId.style.display = "block";
+        newPlotThreeId.style.display = "block";
+        newPlotFourteenId.style.display = "block";
+        newPlotFifteenId.style.display = "block";
+        if($("#showLogNums").val()=="None"){
+        newPlotSixteenId.style.display = "none";
+        }
+        newPlotSeventeenId.style.display ="none";
     }
 
     if (ifShowRad === true) {
-        plotFourId.style.display = "block";
-        plotFiveId.style.display = "block";
-        plotSeventeenId.style.display = "block";
+        newPlotFourId.style.display = "block";
+        newPlotFiveId.style.display = "block";
+        newPlotSeventeenId.style.display = "block";
+        newPlotSixteenId.style.display="block";
+                if($("#showLogNums").val()=="None"){
+        newPlotSixteenId.style.display = "none";
+        }
     }
     if (ifShowLine === true) {
-        plotSixId.style.display = "block";
-        plotEightId.style.display = "block";
+        newPlotSixId.style.display = "block";
+        newPlotEightId.style.display = "block";
+                if($("#showLogNums").val()=="None"){
+        newPlotSixteenId.style.display = "none";
+        }
     }
     if (ifShowLogNums === true) {
         //plotSixId.style.display = "block";
-        plotEightId.style.display = "block";
+        newPlotEightId.style.display = "block";
+        if($("#showLogNums").val()=="None"){
+        newPlotSixteenId.style.display = "none";
+        }
     }
 
     if (ifShowAtmos === false) {
         //plotOneId.style.display = "none";
-        plotTwoId.style.display = "none";
-        plotThreeId.style.display = "none";
-        plotFourteenId.style.display = "none";
-        plotFifteenId.style.display = "none";
-        plotSixteenId.style.display = "none";
+        newPlotTwoId.style.display = "none";
+        newPlotThreeId.style.display = "none";
+        newPlotFourteenId.style.display = "none";
+        newPlotFifteenId.style.display = "none";
+        newPlotSixteenId.style.display = "none";
     }
 
     if (ifShowRad === false) {
-        plotFourId.style.display = "none";
+        newPlotFourId.style.display = "none";
        // plotFiveId.style.display = "none";
     }
     if (ifShowLine === false) {
-        plotSixId.style.display = "none";
-        plotEightId.style.display = "none";
+        newPlotSixId.style.display = "none";
+        newPlotEightId.style.display = "none";
     }
     if ((ifPrintAtmos === true) ||
             (ifPrintSED === true) ||
@@ -2290,7 +2478,7 @@ function main() {
     var log10MaxDepth = 2.0;
 
     //var numLams = 250;
-    var numLams = 350;
+    var numLams = 200;
     //var lamUV = 300.0;
     var lamUV = 260.0;
     //var lamIR = 1000.0;
@@ -2578,15 +2766,20 @@ function main() {
   log10UwAArr.length = numStages;
   for (var i = 0; i < numStages; i++){
     log10UwAArr[i] = [];
-    log10UwAArr[i].length = 2;
-    log10UwAArr[i][0] = 0.0; //default initialization - logarithmic
-    log10UwAArr[i][1] = 0.0; //default initialization - logarithmic
+    log10UwAArr[i].length = 5;
+    for (var k = 0; k < log10UwAArr[0].length; k++){
+        log10UwAArr[i][k] = 0.0; //lburns default initialization - logarithmic
+    }
   }
 // This holds 2-element temperature-dependent base 10 logarithmic parition fn:
+// Change this to hold a five-element temp-dependent base 10 log part fn lburns
         var thisUwV = []; 
-        thisUwV.length = 2;
-         thisUwV[0] = 0.0; //default initialization
-         thisUwV[1] = 0.0;
+        thisUwV.length = 5;
+   // Below created a loop to initialize each value to zero for the five temperatures lburns
+   for (i = 0; i < thisUwV.length; i++) {
+        thisUwV[i] = 0.0;
+   }
+
 //
     if (ifLineOnly === true) {
 
@@ -2636,13 +2829,8 @@ function main() {
         //Rescaled  kinetic temeprature structure: 
         //var F0Vtemp = 7300.0;  // Teff of F0 V star (K)       
         if (teff < F0Vtemp) {
-            if (logg > 3.5){
-               //We're a cool dwarf! - rescale from 5000 K reference model 
-               temp = phx5kRefTemp(teff, numDeps, tauRos);
-            } else {
-               //We're a cool giant - rescale from 4250g20 reference model
-               temp = phx425g2RefTemp(teff, numDeps, tauRos);
-            }
+            //We're a cool star! - rescale from 5000 K reference model 
+            temp = phx5kRefTemp(teff, numDeps, tauRos);
         } else if (teff >= F0Vtemp) {
             //We're a HOT star! - rescale from 10000 K reference model 
             temp = phx10kRefTemp(teff, numDeps, tauRos);
@@ -2670,17 +2858,10 @@ function main() {
 
 
         if (teff < F0Vtemp) {
-            if (logg > 3.5){
-                //We're a cool dwarf - rescale from 5000 K reference model! 
-                guessPGas = phx5kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
-                guessPe = phx5kRefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
-                guessNe = phx5kRefNe(numDeps, temp, guessPe);
-            } else {
-                //We're a cool giant - rescale from 4250g20 reference model
-                guessPGas = phx425g2RefPGas(grav, zScale, logAz[1], numDeps, tauRos);
-                guessPe = phx425g2RefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
-                guessNe = phx425g2RefNe(numDeps, temp, guessPe);
-            }
+            //We're a cool star - rescale from 5000 K reference model! 
+            guessPGas = phx5kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
+            guessPe = phx5kRefPe(teff, grav, numDeps, tauRos, zScale, logAz[1]);
+            guessNe = phx5kRefNe(numDeps, temp, guessPe);
         } else if (teff >= F0Vtemp) {
             //We're a HOT star!! - rescale from 10000 K reference model 
             guessPGas = phx10kRefPGas(grav, zScale, logAz[1], numDeps, tauRos);
@@ -2768,10 +2949,10 @@ function main() {
        masterMolPops[i][j] = -49.0;  //these are logarithmic
     }
   }
-  var thisUwAV = [];
-  thisUwAV.length = 2;
-  var thisUwBV = [];
-  thisUwBV.length = 2;
+  //var thisUwAV = [];
+  //thisUwAV.length = 2;
+  //var thisUwBV = [];
+  //thisUwBV.length = 2;
   var thisQwAB;
   var thisDissE;
 //
@@ -2819,7 +3000,7 @@ function main() {
           logNumBArr[i] = [];
           logNumBArr[i].length = numDeps;
           log10UwBArr[i] = [];
-          log10UwBArr[i].length = 2;
+          log10UwBArr[i].length = 5;
        }
        var dissEArr = [];
        dissEArr.length = numAssocMols;
@@ -2850,9 +3031,9 @@ function main() {
 var thisTemp = [];
 thisTemp.length = 2;
 var log10UwUArr = [];
-log10UwUArr.length = 2;
+log10UwUArr.length = 5;
 var log10UwLArr = [];
-log10UwLArr.length = 2;
+log10UwLArr.length = 5;
 var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe, logPeNumerTerm, logPeDenomTerm;
 //Begin Pgas-kapp iteration
 
@@ -2877,9 +3058,11 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
            chiI = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
     // that are base 10 log_10 U
-           log10UwLArr = getPartFn(species); //base 10 log_10 U
+           //log10UwLArr = getPartFn(species); //base 10 log_10 U
+           log10UwLArr = getPartFn2(species); //lburns
            species = cname[iElem] + "II";
-           log10UwUArr = getPartFn(species); //base 10 log_10 U
+           //log10UwUArr = getPartFn(species); //base 10 log_10 U
+           log10UwUArr = getPartFn2(species); //lburns
            logPhi = sahaRHS(chiI, log10UwUArr, log10UwLArr, thisTemp);
            logPhiOverPe = logPhi - guessPe[1][iD];
            logOnePlusPhiOverPe = Math.log(1.0 + Math.exp(logPhiOverPe));
@@ -2899,8 +3082,6 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
     for (var iD = 0; iD < numDeps; iD++){
        newNe[1][iD] = newPe[1][iD] - temp[1][iD] - logK;
        newNe[0][iD] = Math.exp(newNe[1][iD]);
-       guessNe[1][iD] = newNe[1][iD];
-       guessNe[0][iD] = newNe[0][iD];
     }
 
 //
@@ -2926,8 +3107,9 @@ var logAmu = Math.log(amu);
            for (var j = 0; j < numDeps; j++){
                logNumBArr[i][j] = -49.0; 
            }
-           log10UwBArr[i][0] = 0.0;
-           log10UwBArr[i][1] = 0.0;
+           for (var k = 0; k < log10UwBArr[i].length; k++){
+                log10UwBArr[i][k] = 0.0; // default initialization lburns
+           }
            dissEArr[i] = 29.0;  //eV
            for (var kk = 0; kk < 5; kk++){
                logQwABArr[i][kk] = Math.log(300.0);
@@ -2945,9 +3127,10 @@ var logAmu = Math.log(amu);
    //For safety, assign default values where possible
        var nmrtrDissE = 15.0; //prohitively high by default
        var nmrtrLog10UwB = [];
-       nmrtrLog10UwB.length = 2;
-       nmrtrLog10UwB[0] = 0.0;
-       nmrtrLog10UwB[1] = 0.0;
+       nmrtrLog10UwB.length = 5;
+       for (var k = 0; k < nmrtrLog10UwB.length; k++){
+            nmrtrLog10UwB[k] = 0.0; // default initialization lburns
+       }
        var nmrtrLog10UwA = 0.0;
        var nmrtrLogQwAB = [];
        nmrtrLogQwAB.length = 5;
@@ -2978,19 +3161,19 @@ var logAmu = Math.log(amu);
        chiIArr[0] = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
     // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-       log10UwAArr[0] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[0] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
        species = cname[iElem] + "II";
        chiIArr[1] = getIonE(species);
-       log10UwAArr[1] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[1] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
        species = cname[iElem] + "III";
        chiIArr[2] = getIonE(species);
-       log10UwAArr[2] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[2] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
        species = cname[iElem] + "IV";
        chiIArr[3] = getIonE(species);
-       log10UwAArr[3] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[3] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
        //Find any associated molecular species in which element A can participate:
@@ -3007,9 +3190,8 @@ var logAmu = Math.log(amu);
        }
     // console.log("iElem " + iElem + " iMol " + iMol + " cnameMols " + cnameMols[iElem][iMol]);
     // console.log("thisNumMols " + thisNumMols);
-    //FLAG!
     //Trying to account for mols in ionization eq destabilized everything
-    thisNumMols = 0; 
+     thisNumMols = 0;
      if (thisNumMols > 0){
        //Find pointer to molecule in master mname list for each associated molecule:
        for (var iMol = 0; iMol < thisNumMols; iMol++){
@@ -3046,7 +3228,7 @@ var logAmu = Math.log(amu);
           }
           dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
           species = cname[specB_ptr[iMol]] + "I"; //neutral stage
-          log10UwBArr[iMol] = getPartFn(species); //base 10 log_10 U 
+          log10UwBArr[iMol] = getPartFn2(species); //base 10 log_10 U 
           //logQwABArr[iMol] = defaultQwAB;
           logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
           //Compute the reduced mass, muAB, in g:
@@ -3247,8 +3429,9 @@ var logAmu = Math.log(amu);
            for (var j = 0; j < numDeps; j++){
                logNumBArr[i][j] = -49.0; 
            }
-           log10UwBArr[i][0] = 0.0;
-           log10UwBArr[i][1] = 0.0;
+           for (var k = 0; k < log10UwBArr[i].length; k++){
+                log10UwBArr[i][k] = 0.0; // default initialization lburns
+           }
            dissEArr[i] = 29.0;  //eV
            for (var kk = 0; kk < 5; kk++){
                logQwABArr[i][kk] = Math.log(300.0);
@@ -3266,9 +3449,10 @@ var logAmu = Math.log(amu);
    //For safety, assign default values where possible
        var nmrtrDissE = 15.0; //prohitively high by default
        var nmrtrLog10UwB = [];
-       nmrtrLog10UwB.length = 2;
-       nmrtrLog10UwB[0] = 0.0;
-       nmrtrLog10UwB[1] = 0.0;
+       nmrtrLog10UwB.length = 5;
+       for (var k = 0; k < nmrtrLog10UwB.length; k++){
+            nmrtrLog10UwB[k] = 0.0; // default initialization lburns
+       }
        var nmrtrLog10UwA = 0.0;
        var nmrtrLogQwAB = [];
        nmrtrLogQwAB.length = 5;
@@ -3299,19 +3483,19 @@ var logAmu = Math.log(amu);
        chiIArr[0] = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
     // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-       log10UwAArr[0] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[0] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
        species = cname[iElem] + "II";
        chiIArr[1] = getIonE(species);
-       log10UwAArr[1] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[1] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
        species = cname[iElem] + "III";
        chiIArr[2] = getIonE(species);
-       log10UwAArr[2] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[2] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
        species = cname[iElem] + "IV";
        chiIArr[3] = getIonE(species);
-       log10UwAArr[3] = getPartFn(species); //base 10 log_10 U
+       log10UwAArr[3] = getPartFn2(species); //base 10 log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
        //Find any associated moleculear species in which element A can participate:
@@ -3361,7 +3545,7 @@ var logAmu = Math.log(amu);
           }
           dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
           species = cname[specB_ptr[iMol]] + "I"; //neutral stage
-          log10UwBArr[iMol] = getPartFn(species); //base 10 log_10 U 
+          log10UwBArr[iMol] = getPartFn2(species); //base 10 log_10 U 
           //logQwABArr[iMol] = defaultQwAB;
           logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
           //Compute the reduced mass, muAB, in g:
@@ -3414,7 +3598,7 @@ var logAmu = Math.log(amu);
     }
 // Get its partition fn:
     species = cname[specA_ptr] + "I"; //neutral stage
-    var log10UwA = getPartFn(species); //base 10 log_10 U
+    var log10UwA = getPartFn2(species); //base 10 log_10 U
   //console.log("specA_ptr " + specA_ptr + " cname[specA_ptr] " + cname[specA_ptr]); 
   //console.log("log10UwA " + log10UwA[0] + " " + log10UwA[1]);
 //
@@ -3494,7 +3678,7 @@ var logK = Math.log(k);
           dissEArr[im] = getDissE(mname[mname_ptr[im]]);
           //console.log("im " + im + " dissEArr " + dissEArr[im]);
           species = cname[specB_ptr[im]] + "I";
-          log10UwBArr[im] = getPartFn(species); //base 10 log_10 U 
+          log10UwBArr[im] = getPartFn2(species); //base 10 log_10 U 
           //logQwABArr[im] = defaultQwAB;
           logQwABArr[im] = getMolPartFn(mname[mname_ptr[im]]);
           //Compute the reduced mass, muAB, in g:
@@ -3509,8 +3693,9 @@ var logK = Math.log(k);
           if (mname[mname_ptr[im]] == mname[iMol]){
               nmrtrDissE = dissEArr[im];
  //console.log("Main: log10UwBArr[im][0] " + log10UwBArr[im][0] + " log10UwBArr[im][1] " + log10UwBArr[im][1]);
-              nmrtrLog10UwB[0] = log10UwBArr[im][0];
-              nmrtrLog10UwB[1] = log10UwBArr[im][1];
+               for (var k = 0; k < nmrtrLog10UwB.length; k++){
+                   nmrtrLog10UwB[k] = log10UwBArr[im][k]; // default initialization lburns
+              }
               for (var kk = 0; kk < 5; kk++){
                   nmrtrLogQwAB[kk] = logQwABArr[im][kk];
                   //console.log("logQwABArr[im] " + logE*logQwABArr[im][0] + " " + logE*logQwABArr[im][1] + " " + logE*logQwABArr[im][2] + " " + logE*logQwABArr[im][3] + " " + logE*logQwABArr[im][4]);
@@ -3625,7 +3810,7 @@ var logK = Math.log(k);
 //For geometry calculations: phi = 0 is direction of positive x-axis of right-handed 
 // 2D Cartesian coord system in plane of sky with origin at sub-stellar point (phi 
 // increases CCW)
-    var numPhiPerQuad = 9;  
+    var numPhiPerQuad = 6;  
     var numPhi = 4 * numPhiPerQuad; 
     var phi = [];
     phi.length = numPhi;
@@ -3697,7 +3882,8 @@ var logK = Math.log(k);
 //If NO Q branch (deltaLambda = 0): alpP = alpR = 0.5, alpQ = 0.0
 
   //number of wavelength point sampling a JOLA band
-  var jolaNumPoints = 100;
+  //var jolaNumPoints = 100;
+  var jolaNumPoints = 50;
   //var jolaNumPoints = 10;  //test
 
 // branch weights for transitions of DeltaLambda = +/- 1
@@ -4101,204 +4287,528 @@ var logK = Math.log(k);
     //Early-type star line list:
   if (teff > F0Vtemp){ 
 
-    numLines = 12; 
-        
+ //JB   numLines = 12; 
+
+        numLines = 14;
+
+
+                        //JB
+//
+//a variables to count the index it will fall in the numLines array
+                var n = 0;
+/*     //H (37->2) say HOmega
+     listName[n] = "HI<em>&#969</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 365.665;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(6.841e-3);
+     listLogAij[n] = Math.log(9.9657e+01);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HOmega//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+*/
+/*
+    //H (30->2) say HUpshi
+          listName[n] = "HI30";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 366.222;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(1.2889e-4);
+     listLogAij[n] = Math.log(2.8474e+02);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HUpshi//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (27->2) say HPsi
+          listName[n] = "HI27";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 366.608;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(3.807e-4);
+     listLogAij[n] = Math.log(4.8261e+02);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HPsi//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (26->2) say HSigma
+          listName[n] = "HI26";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 366.773;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(1.9882e-4);
+     listLogAij[n] = Math.log(5.80304e+02);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HSigma//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (24->2) say HChi
+          listName[n] = "HI24";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 367.14823;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(2.5352e-4);
+     listLogAij[n] = Math.log(8.7069e+02);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HChi//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+
+        //H (17->2) say HOmicron
+          listName[n] = "HI17";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 369.7157;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(7.2738e-4);
+     listLogAij[n] = Math.log(4.9101e+03);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HOmicron//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (16->2) say HXi
+          listName[n] = "HI16";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 370.3859;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(8.769e-4);
+     listLogAij[n] = Math.log(6.6583e+03);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HXi//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (15->2) say HNu
+          listName[n] = "HI15";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 371.1978;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(1.0708e-3);
+     listLogAij[n] = Math.log(9.2102e+03);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+        //console.log("HNu//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+        //console.log("HNu//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+    //H (14->2) say HMu
+          listName[n] = "HI14";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 372.1946;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(1.3269e-3);
+     listLogAij[n] = Math.log(1.3032e+04);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+     
+   //console.log("HMu//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+
+     //H (13->2) say HLambda
+          listName[n] = "HI13";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 373.4369;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(1.6728e-3);
+     listLogAij[n] = Math.log(1.8927e+04);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("HLambda//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+     n++;
+
+        //H (12->2) say HKappa
+     listName[n] = "HI12";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 375.0151;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(2.1521e-3);
+     listLogAij[n] = Math.log(2.8337e+04);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("HKappa//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+        n++;
+
+        //H (11->2) say HIota
+     listName[n] = "HI11";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 377.0633;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(2.8368e-3);
+     listLogAij[n] = Math.log(4.3972e+04);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("Htheta//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+        n++;
+
+        //H (10->2) say HTheta
+     listName[n] = "HI10";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 379.7909;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(3.8526e-3);
+     listLogAij[n] = Math.log(7.1725e+04);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("Htheta//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+        n++;
+*/
+                        //JB
+//
+     //H (9->2) say Heta
+     listName[n] = "HI9";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 383.5397;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(5.4317e-3);
+     listLogAij[n] = Math.log(1.2156e+05);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("Heta//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+        n++;
+                        //JB
+
+                        //JB
+//
+     //H (8->2) say Hzeta
+     listName[n] = "HI8";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 388.9064;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = Math.log(8.0397e-3);
+     listLogAij[n] = Math.log(2.2148e+05);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+
+        //console.log("Hzeta//  nm: " + listLam0[n]  + " fij: " + listLogf[n]  + " aij: " + listLogAij[n]);
+        n++;
+                        //JB
+
     //CaII K
-    listName[0] = "CaIIHK";
-    listElement[0] = "Ca";
-    listLamLbl[0] = " ";
-    listLam0[0] = 393.366;
-    listA12[0] = eheu[19];
-    listLogf[0] = -0.166;
-    listLogAij[0] = Math.log(1.47e+08);
-    listChiL[0] = 0.0;
-    listMass[0] = getMass(listElement[0]);
-    listLogGammaCol[0] = 0.5;
-    listGw1[0] = 1.0;
-    listGw2[0] = 2.0;
-    listGwL[0] = 2.0;
-    listStage[0] = 1;
-    
+    listName[n] = "CaIIHK";
+    listElement[n] = "Ca";
+    listLamLbl[n] = " ";
+    listLam0[n] = 393.366;
+    listA12[n] = eheu[19];
+    listLogf[n] = -0.166;
+    listLogAij[n] = Math.log(1.47e+08);
+    listChiL[n] = 0.0;
+    listMass[n] = getMass(listElement[0]);
+    listLogGammaCol[n] = 0.5;
+    listGw1[n] = 1.0;
+    listGw2[n] = 2.0;
+    listGwL[n] = 2.0;
+    listStage[n] = 1;
+        //JB
+         n++;
+
      //CaII H
      //listName[1] = "Ca II H";
-     listName[1] = " ";
-     listElement[1] = "Ca";
-     listLamLbl[1] = " ";
-     listLam0[1] = 396.847;
-     listA12[1] = eheu[19];
-     listLogf[1] = -0.482;
-     listLogAij[1] = Math.log(1.4e+08);
-     listChiL[1] = 0.0;
-     listMass[1] = getMass(listElement[1]);
-     listLogGammaCol[1] = 0.5;
-     listGw1[1] = 1.0;
-     listGw2[1] = 2.0;
-     listGwL[1] = 2.0;
-     listStage[1] = 1;
-     
+     listName[n] = " ";
+     listElement[n] = "Ca";
+     listLamLbl[n] = " ";
+     listLam0[n] = 396.847;
+     listA12[n] = eheu[19];
+     listLogf[n] = -0.482;
+     listLogAij[n] = Math.log(1.4e+08);
+     listChiL[n] = 0.0;
+     listMass[n] = getMass(listElement[1]);
+     listLogGammaCol[n] = 0.5;
+     listGw1[n] = 1.0;
+     listGw2[n] = 2.0;
+     listGwL[n] = 2.0;
+     listStage[n] = 1;
+        //JB
+         n++;
+
      //Hepsilon
      //listName[2] = "H I <em>&#949</em>";
-     listName[2] = " ";
-     listElement[2] = "H";
-     listLamLbl[2] = " ";
-     listLam0[2] = 397.1198;
-     listA12[2] = 12.0; //By definition - it's Hydrogen
-     listLogf[2] = logE*Math.log(1.2711e-02);
-     listLogAij[2] = Math.log(4.3889e+05);
-     listChiL[2] = 10.2;
-     listMass[2] = getMass(listElement[2]);
-     listLogGammaCol[2] = 1.0;
-     listGw1[2] = 2.0; // 2n^2
-     listGw2[2] = 1.0;
-     listGwL[2] = 8.0; // 2n^2
-     listStage[2] = 0;
+     listName[n] = "HI<em>&#949</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 397.1198;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = logE*Math.log(1.2711e-02);
+     listLogAij[n] = Math.log(4.3889e+05);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[2]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+        //JB
+          n++;
 
     //He I 4026
-     listName[3] = "HeI";
-     listElement[3] = "He";
-     listLamLbl[3] = "4026";
-     listLam0[3] = 402.73292;
-     listA12[3] = eheu[1];
-     listLogf[3] = logE*Math.log(3.9492e-02);
-     listLogAij[3] = Math.log(1.1601e+07);
-     listChiL[3] = 20.964087;
-     listMass[3] = getMass(listElement[3]);
-     listLogGammaCol[3] = 0.0;
-     listGw1[3] = 1.0;
-     listGw2[3] = 1.0;
-     listGwL[3] = 2.0;
-     listStage[3] = 0;
-
+     listName[n] = "HeI";
+     listElement[n] = "He";
+     listLamLbl[n] = "4026";
+     listLam0[n] = 402.73292;
+     listA12[n] = eheu[1];
+     listLogf[n] = logE*Math.log(3.9492e-02);
+     listLogAij[n] = Math.log(1.1601e+07);
+     listChiL[n] = 20.964087;
+     listMass[n] = getMass(listElement[3]);
+     listLogGammaCol[n] = 0.0;
+     listGw1[n] = 1.0;
+     listGw2[n] = 1.0;
+     listGwL[n] = 2.0;
+     listStage[n] = 0;
+        //JB
+        n++;
 
      //Hdelta
-     listName[4] = "HI<em>&#948</em>";
-     listElement[4] = "H";
-     listLamLbl[4] = " ";
-     listLam0[4] = 410.174;
-     listA12[4] = 12.0; //By definition - it's Hydrogen
-     listLogf[4] = -1.655;
-     listLogAij[4] = Math.log(9.7320e+05);
-     listChiL[4] = 10.2;
-     listMass[4] = getMass(listElement[4]);
-     listLogGammaCol[4] = 1.0;
-     listGw1[4] = 2.0; // 2n^2
-     listGw2[4] = 1.0;
-     listGwL[4] = 8.0; // 2n^2
-     listStage[4] = 0;
-     
-     //Hgamma
-     listName[5] = "HI<em>&#947</em>";
-     listElement[5] = "H";
-     listLamLbl[5] = " ";
-     listLam0[5] = 434.047;
-     listA12[5] = 12.0; //By definition - it's Hydrogen
-     listLogf[5] = -1.350;
-     listLogAij[5] = Math.log(2.5304e+06);
-     listChiL[5] = 10.2;
-     listMass[5] = getMass(listElement[5]);
-     listLogGammaCol[5] = 1.0;
-     listGw1[5] = 2.0; // 2n^2
-     listGw2[5] = 1.0;
-     listGwL[5] = 8.0; // 2n^2
-     listStage[5] = 0;
+     listName[n] = "HI<em>&#948</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 410.174;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = -1.655;
+     listLogAij[n] = Math.log(9.7320e+05);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[4]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+        //JB
+     n++;
 
+     //Hgamma
+     listName[n] = "HI<em>&#947</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 434.047;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = -1.350;
+     listLogAij[n] = Math.log(2.5304e+06);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[5]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+        //JB
+        n++;
 
      //He I 4387
-     listName[6] = "HeI";
-     listElement[6] = "He";
-     listLamLbl[6] = "4388";
-     listLam0[6] = 438.793;
-     listA12[6] = eheu[1];
-     listLogf[6] = -1.364;
-     listLogAij[6] = Math.log(8.9889e+06);
-     listChiL[6] = 21.218;
-     listMass[6] = getMass(listElement[6]);
-     listLogGammaCol[6] = 0.0;
-     listGw1[6] = 1.0;
-     listGw2[6] = 1.0;
-     listGwL[6] = 3.0;
-     listStage[6] = 0;
+     listName[n] = "HeI";
+     listElement[n] = "He";
+     listLamLbl[n] = "4388";
+     listLam0[n] = 438.793;
+     listA12[n] = eheu[1];
+     listLogf[n] = -1.364;
+     listLogAij[n] = Math.log(8.9889e+06);
+     listChiL[n] = 21.218;
+     listMass[n] = getMass(listElement[6]);
+     listLogGammaCol[n] = 0.0;
+     listGw1[n] = 1.0;
+     listGw2[n] = 1.0;
+     listGwL[n] = 3.0;
+     listStage[n] = 0;
+        //JB
+        n++;
 
      //He I 4471
-     listName[7] = "HeI";
-     listElement[7] = "He";
-     listLamLbl[7] = "4471";
-     listLam0[7] = 447.147;
-     listA12[7] = eheu[1];
-     listLogf[7] = -0.986;
-     listLogAij[7] = Math.log(2.4579e+07);
-     listChiL[7] = 20.964;
-     listMass[7] = getMass(listElement[7]);
-     listLogGammaCol[7] = 0.0;
-     listGw1[7] = 1.0;
-     listGw2[7] = 1.0;
-     listGwL[7] = 5.0;
-     listStage[7] = 0;
+     listName[n] = "HeI";
+     listElement[n] = "He";
+     listLamLbl[n] = "4471";
+     listLam0[n] = 447.147;
+     listA12[n] = eheu[1];
+     listLogf[n] = -0.986;
+     listLogAij[n] = Math.log(2.4579e+07);
+     listChiL[n] = 20.964;
+     listMass[n] = getMass(listElement[7]);
+     listLogGammaCol[n] = 0.0;
+     listGw1[n] = 1.0;
+     listGw2[n] = 1.0;
+     listGwL[n] = 5.0;
+     listStage[n] = 0;
+        //JB
+        n++;
 
      //Mg II 4482.2387
      //listName[11] = "4482.387";
-     listName[8] = " ";
-     listElement[8] = "Mg";
-     listLamLbl[8] = " ";
-     listLam0[8] = 448.2387; //nm
-     listA12[8] = eheu[11]; // Grevesse & Sauval 98
-     listLogf[8] = logE*Math.log(9.35e-01);
-     listLogAij[8] = Math.log(2.33e+08);
-     listChiL[8] = 8.863654;
-     listMass[8] = getMass(listElement[8]);
-     listLogGammaCol[8] = 1.0;
-     listGw1[8] = 1.0;
-     listGw2[8] = 1.0;
-     listGwL[8] = 5.0;
-     listStage[8] = 1;
+     listName[n] = " ";
+     listElement[n] = "Mg";
+     listLamLbl[n] = " ";
+     listLam0[n] = 448.2387; //nm
+     listA12[n] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[n] = logE*Math.log(9.35e-01);
+     listLogAij[n] = Math.log(2.33e+08);
+     listChiL[n] = 8.863654;
+     listMass[n] = getMass(listElement[8]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 1.0;
+     listGw2[n] = 1.0;
+     listGwL[n] = 5.0;
+     listStage[n] = 1;
+        //JB
+        n++;
 
      //Mg II 4482.2387
-     listName[9] = "MgII";
-     listElement[9] = "Mg";
-     listLamLbl[9] = "4482";
-     listLam0[9] = 448.2584; //nm
-     listA12[9] = eheu[11]; // Grevesse & Sauval 98
-     listLogf[9] = logE*Math.log(9.81e-01);
-     listLogAij[9] = Math.log(2.17e+08);
-     listChiL[9] = 8.863762;
-     listMass[9] = getMass(listElement[9]);
-     listLogGammaCol[9] = 1.0;
-     listGw1[9] = 1.0;
-     listGw2[9] = 1.0;
-     listGwL[9] = 3.0;
-     listStage[9] = 1;
+     listName[n] = "MgII";
+     listElement[n] = "Mg";
+     listLamLbl[n] = "4482";
+     listLam0[n] = 448.2584; //nm
+     listA12[n] = eheu[11]; // Grevesse & Sauval 98
+     listLogf[n] = logE*Math.log(9.81e-01);
+     listLogAij[n] = Math.log(2.17e+08);
+     listChiL[n] = 8.863762;
+     listMass[n] = getMass(listElement[9]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 1.0;
+     listGw2[n] = 1.0;
+     listGwL[n] = 3.0;
+     listStage[n] = 1;
+        //JB
+        n++;
 
      //Hbeta
-     listName[10] = "HI<em>&#946</em>";
-     listElement[10] = "H";
-     listLamLbl[10] = " ";
-     listLam0[10] = 486.128;
-     listA12[10] = 12.0; //By definition - it's Hydrogen
-     listLogf[10] = -0.914;
-     listLogAij[10] = Math.log(9.6683e+06);
-     listChiL[10] = 10.2;
-     listMass[10] = getMass(listElement[10]);
-     listLogGammaCol[10] = 1.0;
-     listGw1[10] = 2.0; // 2n^2
-     listGw2[10] = 1.0;
-     listGwL[10] = 8.0; // 2n^2
-     listStage[10] = 0;
+     listName[n] = "HI<em>&#946</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 486.128;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = -0.914;
+     listLogAij[n] = Math.log(9.6683e+06);
+     listChiL[n] = 10.2;
+     listMass[n] = getMass(listElement[10]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.0;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
+        //JB
+        n++;
 
      //Halpha
-     listName[11] = "HI<em>&#945</em>";
-     listElement[11] = "H";
-     listLamLbl[11] = " ";
-     listLam0[11] = 656.282;
-     listA12[11] = 12.0; //By definition - it's Hydrogen
-     listLogf[11] = -0.193;
-     listLogAij[11] = Math.log(6.4651e+07);
-     listChiL[11] = 10.1988357;
-     listMass[11] = getMass(listElement[11]);
-     listLogGammaCol[11] = 1.0;
-     listGw1[11] = 2.0; // 2n^2
-     listGw2[11] = 1.007;
-     listGwL[11] = 8.0; // 2n^2
-     listStage[11] = 0;
+     listName[n] = "HI<em>&#945</em>";
+     listElement[n] = "H";
+     listLamLbl[n] = " ";
+     listLam0[n] = 656.282;
+     listA12[n] = 12.0; //By definition - it's Hydrogen
+     listLogf[n] = -0.193;
+     listLogAij[n] = Math.log(6.4651e+07);
+     listChiL[n] = 10.1988357;
+     listMass[n] = getMass(listElement[11]);
+     listLogGammaCol[n] = 1.0;
+     listGw1[n] = 2.0; // 2n^2
+     listGw2[n] = 1.007;
+     listGwL[n] = 8.0; // 2n^2
+     listStage[n] = 0;
 
 
     
@@ -4320,8 +4830,8 @@ var logK = Math.log(k);
     //Notes
     //
     //CAUTION: This treatment expects numPoints (number of wavelengths, lambda) to be the same for *all* spectral lines!
-    var listNumCore = 5; //per wing
-    var listNumWing = 10; // half-core
+    var listNumCore = 5; // half core
+    var listNumWing = 10; // per wing 
     //int numWing = 0;  //debug
     var listNumPoints = 2 * (listNumCore + listNumWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
 
@@ -4505,7 +5015,7 @@ var logK = Math.log(k);
                   species = cname[jj] + "V";
                   logNums_ptr = 6;
                 }
-                thisUwV = getPartFn(species); //base 10 log_10 U
+                thisUwV = getPartFn2(species); //base 10 log_10 U
                  break;   //we found it
                  }
              iAbnd++;
@@ -4532,13 +5042,13 @@ var logK = Math.log(k);
                listLogNums[2][iTau] = numHelp[iTau];
                listLogNums[3][iTau] = -49.0; //upper E-level - not used - fake for testing with gS3 line treatment
             }
-            var listLinePoints = lineGrid(listLam0nm, listMass[iLine], xiT, numDeps, teff, listNumCore, listNumWing,
-                    logGammaCol, tauRos, temp, pGas, tempSun, pGasSun);
+            var listLinePoints = lineGrid(listLam0nm, listMass[iLine], xiT, numDeps, teff, listNumCore, listNumWing, species);
+                    //logGammaCol, tauRos, temp, pGas, tempSun, pGasSun, species);
             // Gaussian + Lorentzian approximation to profile (voigt()):
             // // Real Voigt fn profile (voigt2()):   
             if (species == "HI"){
                listLineProf = stark(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
-                    numDeps, teff, tauRos, temp, pGas, newNe, tempSun, pGasSun, hjertComp); 
+                    numDeps, teff, tauRos, temp, pGas, newNe, tempSun, pGasSun, hjertComp, listName[iLine]); 
             } else {
                listLineProf = voigt(listLinePoints, listLam0nm, listLogAij[iLine], listLogGammaCol[iLine],
                     numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
@@ -4616,7 +5126,7 @@ var logK = Math.log(k);
            jolaAlphQ = jolaAlphQ_DL1; // alpha_Q - weight of Q branch (Delta J = 0)
         }
 
-//console.log("jolaOmega0 " + jolaOmega0 + " jolaRSqu " + jolaRSqu + " jolaB " + jolaB[0] + " " + jolaB[1] + " jolaLambda " + jolaLambda[0] + " " + jolaLambda[1] + " jolaQuantumS " + jolaQuantumS + " jolaS " + jolaS + " jolaLogF " + jolaLogF + " jolaAlphP " + jolaAlphP + " jolaAlphR " + jolaAlphR);
+ //console.log("jolaOmega0 " + jolaOmega0 + " jolaRSqu " + jolaRSqu + " jolaB " + jolaB[0] + " " + jolaB[1] + " jolaLambda " + jolaLambda[0] + " " + jolaLambda[1] + " jolaQuantumS " + jolaQuantumS + " jolaS " + jolaS + " jolaLogF " + logE*jolaLogF + " jolaAlphP " + jolaAlphP + " jolaAlphR " + jolaAlphR);
 
         var jolaPoints = jolaGrid(jolaLambda, jolaNumPoints);
 
@@ -4630,13 +5140,13 @@ var logK = Math.log(k);
         var jolaLogKappaL = jolaKap(logNumJola, dfBydv, jolaPoints,
                   numDeps, temp, rho);
 
-       // for (var iW = 0; iW < jolaNumPoints; iW++){
-       //    for (var iD = 0; iD < numDeps; iD++){
-       //       if (iD%10 == 1){
-       //          console.log("iW " + iW + " iD " + iD + " jolaLogKappaL " + jolaLogKappaL[iW][iD]);
-       //       }
-       //    }
-       // }
+        //for (var iW = 0; iW < jolaNumPoints; iW++){
+        //   for (var iD = 0; iD < numDeps; iD++){
+        //      if (iD%10 == 1){
+        //         console.log("iW " + iW + " iD " + iD + " jolaLogKappaL " + logE*jolaLogKappaL[iW][iD]);
+        //      }
+        //   }
+        //}
 //Q branch if DeltaLambda not equal to 0
         // if (jolaDeltaLambda[iJola] != 0){
          //   dfBydv = jolaProfileQ(jolaOmega0, jolaLogF, jolaB,
@@ -4745,12 +5255,12 @@ var logK = Math.log(k);
 
 
             //// Teff test - Also needed for convection module!:
-            //if (il > 1) {
-            //    lambda2 = lambdaScale[il]; // * 1.0E-7;  // convert nm to cm
-            //    lambda1 = lambdaScale[il - 1]; // * 1.0E-7;  // convert nm to cm
-            //    fluxSurfBol = fluxSurfBol
-            //            + contFluxLam[0] * (lambda2 - lambda1);
-           // }
+            if (il > 1) {
+                lambda2 = lambdaScale[il]; // * 1.0E-7;  // convert nm to cm
+                lambda1 = lambdaScale[il - 1]; // * 1.0E-7;  // convert nm to cm
+                fluxSurfBol = fluxSurfBol
+                        + contFluxLam[0] * (lambda2 - lambda1);
+            }
         } //il loop
         contFlux = flux3(contIntens, lambdaScale, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
@@ -4782,7 +5292,6 @@ var logK = Math.log(k);
                 masterIntens[il][it] = masterIntensLam[it];
             } //it loop - thetas
         } //il loop
-
             masterFlux = flux3(masterIntens, masterLams, cosTheta, phi, cgsRadius, omegaSini, macroVkm);
 
             //// Teff test - Also needed for convection module!:
@@ -4791,7 +5300,7 @@ var logK = Math.log(k);
                 lambda2 = masterLams[il]; // * 1.0E-7;  // convert nm to cm
                 lambda1 = masterLams[il - 1]; // * 1.0E-7;  // convert nm to cm
                 fluxSurfBol = fluxSurfBol
-                        + masterFlux[0][il] * (lambda2 - lambda1);
+                        + masterFluxLam[0] * (lambda2 - lambda1);
             }
         } 
         var sigma = 5.670373E-5; //Stefan-Boltzmann constant ergs/s/cm^2/K^4  
@@ -4946,7 +5455,7 @@ var logK = Math.log(k);
         storeName = "zScale";
         storeValue = String(zScale);
         sessionStorage.setItem(storeName, storeValue);
-        storeName = "massStar";
+        storeName = "starMass";
         storeValue = String(massStar);
         sessionStorage.setItem(storeName, storeValue);
     } else {
@@ -4974,8 +5483,9 @@ var logK = Math.log(k);
     var numWing = 15; //per wing 
     var numPoints = 2 * (numCore + numWing) - 1; // + 1;  //Extra wavelength point at end for monochromatic continuum tau scale
     //linePoints: Row 0 in cm (will need to be in nm for Plack.planck), Row 1 in Doppler widths
+    species = "Ca"; //Anything but H - doesn't really matter for now - ??
     var linePoints = lineGrid(lam0, mass, xiT, numDeps, teff, numCore, numWing,
-            logGammaCol, tauRos, temp, pGas, tempSun, pGasSun); //cm
+            logGammaCol, tauRos, temp, pGas, tempSun, pGasSun, species); //cm
 
 // Get Einstein coefficinet for spontaneous de-excitation from f_ij to compute natural 
 // (radiation) roadening:  Assumes ration of statisitcal weight, g_j/g_i is unity
@@ -5030,19 +5540,20 @@ var logEv = Math.log(eV);
    for (var i = 0; i < numDeps; i++){
       thisLogN[i] = logE10*(A12 - 12.0) + logNH[i];
    }
+//Below need to make log10UwAArr a 2 by 5 array instead of 2 by 2 lburns
 //load arrays for stagePops2():
        chiIArr[0] = chiI1;
        chiIArr[1] = chiI2;
        chiIArr[2] = chiI3;
        chiIArr[3] = chiI4;
-       log10UwAArr[0][0] = log10Gw1V[0]; 
-       log10UwAArr[0][1] = log10Gw1V[1]; 
-       log10UwAArr[1][0] = log10Gw2V[0]; 
-       log10UwAArr[1][1] = log10Gw2V[1]; 
-       log10UwAArr[2][0] = log10Gw3V[0]; 
-       log10UwAArr[2][1] = log10Gw3V[1]; 
-       log10UwAArr[3][0] = log10Gw4V[0]; 
-       log10UwAArr[3][1] = log10Gw4V[1]; 
+    // NEW All 4 Ionization Stages assigned values here: lburns 
+       for (var k = 0; k < log10Gw1V.length; k++){
+           log10UwAArr[0][k] = log10Gw1V[k];
+           log10UwAArr[1][k] = log10Gw2V[k];
+           log10UwAArr[2][k] = log10Gw3V[k];
+           log10UwAArr[3][k] = log10Gw4V[k];
+       }
+
 
 //One phantom molecule:
     var fakeNumMols = 1;
@@ -5059,9 +5570,10 @@ var logEv = Math.log(eV);
     var fakeLog10UwBArr = [];
     fakeLog10UwBArr.length = 1;
     fakeLog10UwBArr[0] = [];
-    fakeLog10UwBArr[0].length = 2;
-    fakeLog10UwBArr[0][0] = 0.0;
-    fakeLog10UwBArr[0][1] = 0.0;
+    fakeLog10UwBArr[0].length = 5;
+    for (var k = 0; k < fakeLog10UwBArr[0].length; k++){
+       fakeLog10UwBArr[0][k] = 0.0;
+    }
     var fakeLogQwABArr = [];
     fakeLogQwABArr.length = fakeNumMols;
     for (var im = 0; im < fakeNumMols; im++){
@@ -5278,7 +5790,7 @@ Spectral line \n\
             + " <span title='picometers'>\n\
 <a href='http://en.wikipedia.org/wiki/Picometre' target='_blank'>pm</a>\n\
 </span>",
-            180, 40, lineColor, textId);
+            360, 40, lineColor, textId);
     ////remain = (Wlambda * 1000.0) % 10;
     ////roundNum = (Wlambda) - (remain / 1000.0);
 
@@ -5294,6 +5806,8 @@ Spectral line \n\
     var roundNum2 = colors[2].toFixed(2);
     var roundNum3 = colors[3].toFixed(2);
     var roundNum4 = colors[4].toFixed(2);
+    var roundNum5 = colors[5].toFixed(2);// lburns
+    var roundNum6 = colors[6].toFixed(2);//lburns
     txtPrint("<a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins U-B photometric color index' target='_blank'>\n\
 <span style='color:purple'>U</span>-" +
             "<span style='color:blue'>B\n\
@@ -5319,7 +5833,20 @@ Spectral line \n\
 <span style='color:red'>R</span>-" +
             "<span style='color:brown'>I\n\
 </span>\n\
-</a>: " + roundNum4, 180 + colr * xTab, 15, lineColor, textId);
+</a>: " 
+       + roundNum4, 180 + colr * xTab, 15, lineColor, textId);
+//Added another txtPrint function to display V-K and J-K. Adjusted spectralLine over to fit in these new colors. lburns 06
+    txtPrint("<a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins V-K photometric color index' target='_blank'>\n\
+<span style='color:#00FF88'>V</span>-" +
+            "<span style='color:sienna'>K\n\
+</span>\n\
+</a>: " + roundNum5
+            + " <a href='http://en.wikipedia.org/wiki/UBV_photometric_system' title='Johnson-Cousins J-K photometric color index' target='_blank'>\n\
+<span style='color:firebrick'>J</span>-" +
+            "<span style='color:sienna'>K\n\
+</span>\n\
+</a>: " + roundNum6, 180, 40, lineColor, textId);
+
     // Echo back the *actual* input parameters:
     var warning = "";
     if (teff < 6000) {
@@ -5331,27 +5858,321 @@ Spectral line \n\
         warning = "<span style='color:blue'>Hot star mode</span>";
         txtPrint(warning, 600, 10, lineColor, textId);
     }
-
+    //Add subclass to each spectral class (lburns)
     var spectralClass = " ";
-    var luminClass = "V";
+    var subClass = " ";	//Create a variable for the subclass of the star. lburns
+    var luminClass = "V";//defaults to V
+//Determine the spectralClass and subClass of main sequence stars, subdwarfs and white dwarfs
+//var luminClass = "V" or luminClass = "VI" or luminClass = "WD"
+if (((logg >= 4.0) && (logg < 5.0)) || ((logg >= 5.0) && (logg < 6.0)) || (logg >= 5.0)) {
     if (teff < 3000.0) {
         spectralClass = "L";
     } else if ((teff >= 3000.0) && (teff < 3900.0)) {
         spectralClass = "M";
+	if ((teff >= 3000.0) && (teff <= 3030.0)) {
+	    subClass = "6";
+	} else if ((teff > 3030.0) && (teff <= 3170.0)) {
+	    subClass = "5";
+	} else if ((teff > 3170.0) && (teff <= 3290.0)) {
+	    subClass = "4";
+	} else if ((teff > 3290.0) && (teff <= 3400.0)) {
+	    subClass = "3";
+	} else if ((teff > 3400.0) && (teff <= 3520.0)) {
+	    subClass = "2";
+	} else if ((teff > 3520.0) && (teff <= 3660.0)) {
+	    subClass = "1";
+	} else if ((teff > 3660.0) && (teff < 3900.0)) {
+	    subClass = "0";
+	}
     } else if ((teff >= 3900.0) && (teff < 5200.0)) {
         spectralClass = "K";
+	if ((teff >= 3900.0) && (teff <= 4150.0)) {
+	    subClass = "7";
+	} else if ((teff > 4150.0) && (teff <= 4410.0)) {
+	    subClass = "5";
+	} else if ((teff > 4410.0) && (teff <= 4540.0)) {
+	    subClass = "4";
+	} else if ((teff > 4540.0) && (teff <= 4690.0)) {
+	    subClass = "3";
+	} else if ((teff > 4690.0) && (teff <= 4990.0)) {
+	    subClass = "1";
+	} else if ((teff > 4990.0) && (teff < 5200.0)) {
+	    subClass = "0";
+	}
     } else if ((teff >= 5200.0) && (teff < 5950.0)) {
         spectralClass = "G";
+	if ((teff >= 5200.0) && (teff <= 5310.0)) {
+	    subClass = "8";
+	} else if ((teff > 5310.0) && (teff <= 5790.0)) {
+	    subClass = "2";
+	} else if ((teff > 5790.0) && (teff < 5950.0)) {
+	    subClass = "0";
+	}
     } else if ((teff >= 5950.0) && (teff < 7300.0)) {
         spectralClass = "F";
+	if ((teff >= 5950.0) && (teff <= 6250.0)) {
+	    subClass = "8";
+	} else if ((teff > 6250.0) && (teff <= 6650.0)) {
+	    subClass = "5";
+	} else if ((teff > 6650.0) && (teff <= 7050.0)) {
+	    subClass = "2";
+	} else if ((teff > 7050.0) && (teff < 7300.0)) {
+	    subClass = "0";
+	}
     } else if ((teff >= 7300.0) && (teff < 9800.0)) {
         spectralClass = "A";
+	if ((teff >= 7300.0) && (teff <= 7600.0)) {
+	    subClass = "8";
+	} else if ((teff > 7600.0) && (teff <= 8190.0)) {
+	    subClass = "5";
+	} else if ((teff > 8190.0) && (teff <= 9020.0)) {
+	    subClass = "2";
+	} else if ((teff > 9020.0) && (teff <= 9400.0)) {
+	    subClass = "1";
+	} else if ((teff > 9400.0) && (teff < 9800.0)) {
+	    subClass = "0";
+	}
     } else if ((teff >= 9800.0) && (teff < 30000.0)) {
         spectralClass = "B";
+	if ((teff >= 9300.0) && (teff <= 10500.0)) {
+	    subClass = "9";
+	} else if ((teff > 10500.0) && (teff <= 11400.0)) {
+	    subClass = "8";
+	} else if ((teff > 11400.0) && (teff <= 12500.0)) {
+	    subClass = "7";
+	} else if ((teff > 12500.0) && (teff <= 13700.0)) {
+	    subClass = "6";
+	} else if ((teff > 13700.0) && (teff <= 15200.0)) {
+	    subClass = "5";
+	} else if ((teff > 15200.0) && (teff <= 18800.0)) {
+	    subClass = "3";
+	} else if ((teff > 18800.0) && (teff <= 20900.0)) {
+	    subClass = "2";
+	} else if ((teff > 20900.0) && (teff <= 25400.0)) {
+	    subClass = "1";
+	} else if ((teff > 25400.0) && (teff < 30000.0)) {
+	    subClass = "0";
+	}
     } else if (teff >= 30000.0) {
         spectralClass = "O";
+	if ((teff >= 30000.0) && (teff <= 35800.0)) {
+	    subClass = "8";
+	} else if ((teff > 35800.0) && (teff <= 37500.0)) {
+	    subClass = "7";
+	} else if ((teff > 37500.0) && (teff <= 39500.0)) {
+	    subClass = "6";
+	} else if ((teff > 39500.0) && (teff <= 42000.0)) {
+	    subClass = "5"; 
+	} 
     }
+}
+//Determine the spectralClass and subClass of giants and subgiants. lburns
+//var luminClass = "III" or luminClass = "IV"
+if (((logg >= 1.5) && (logg < 3.0)) || ((logg >= 3.0) && (logg < 4.0))) { 
+    if (teff < 3000.0) {
+	spectralClass = "L";
+	} else if ((teff >= 3000.0) && (teff < 3700.0))  {
+	spectralClass = "M";
+	if ((teff >= 3000.0) && (teff <= 3330.0)) {
+	    subClass = "6";
+	} else if ((teff > 3330.0) && (teff <= 3380.0)) {
+	    subclass = "5";
+	} else if ((teff > 3380.0) && (teff <= 3440.0)) {
+	    subClass = "4";
+	} else if ((teff > 3440.0) && (teff <= 3480.0)) {
+	    subClass = "3";
+	} else if ((teff > 3480.0) && (teff <= 3540.0)) {
+	    subClass = "2";
+	} else if ((teff > 3540.0) && (teff <= 3600.0)) {
+	    subClass = "1";
+	} else if ((teff > 3600.0) && (teff < 3700.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 3700.0) && (teff < 4700.0)) {
+	spectralClass = "K";
+	if ((teff >= 3700.0) && (teff <= 3870.0)) {
+	    subClass = "7";
+	} else if ((teff > 3870.0) && (teff <= 4050.0)) {
+	    subClass = "5";
+	} else if ((teff > 4050.0) && (teff <= 4150.0)) {
+	    subClass = "4";
+	} else if ((teff > 4150.0) && (teff <= 4260.0)) {
+	    subClass = "3";
+	} else if ((teff > 4260.0) && (teff <= 4510.0)) {
+	    subClass = "1";
+	} else if ((teff > 4510.0) && (teff < 4700.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 4700.0) && (teff < 5500.0)) {
+	spectralClass = "G";
+	if ((teff >= 4700.0) && (teff <= 4800.0)) {
+	    subClass = "8";
+	} else if ((teff > 4800.0) && (teff <= 5300.0)) {
+	    subClass = "2";
+	} else if ((teff > 5300.0) && (teff < 5500.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 5500.0) && (teff < 7500.0)) {
+	spectralClass = "F";
+	if ((teff >= 5500.0) && (teff <= 6410.0)) {
+	    subClass = "5";
+	} else if ((teff > 6410.0) && (teff <= 7000.0)) {
+	    subClass = "2";
+	} else if ((teff > 7000.0) && (teff < 7500.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 7500.0) && (teff < 10300.0)) {
+	spectralClass = "A";
+	if ((teff >= 7500.0) && (teff <= 7830.0)) {
+	    subClass = "8";
+	} else if ((teff > 7830.0) && (teff <= 8550.0)) {
+	    subClass = "5";
+	} else if ((teff > 8550.0) && (teff <= 9460.0)) {
+	    subClass = "2";
+	} else if ((teff > 9460.0) && (teff <= 9820.0)) {
+	    subClass = "1";
+	} else if ((teff > 9820.0) && (teff < 10300.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 10300.0) && (teff < 29300.0)) {
+	spectralClass = "B";
+	if ((teff >= 10300.0) && (teff <= 10900.0)) {
+	    subClass = "9";
+	} else if ((teff > 10900.0) && (teff <= 11700.0)) {
+	    subClass = "8";
+	} else if ((teff > 11700.0) && (teff <= 12700.0)) {
+	    subClass = "7";
+	} else if ((teff > 12700.0) && (teff <= 13800.0)) {
+	    subClass = "6";
+	} else if ((teff > 13800.0) && (teff <= 15100.0)) {
+	    subClass = "5";
+	} else if ((teff > 15100.0) && (teff <= 18300.0)) {
+	    subClass = "3";
+	} else if ((teff > 18300.0) && (teff <= 20200.0)) {
+	    subClass = "2";
+	} else if ((teff > 20200.0) && (teff <= 24500.0)) {
+	    subClass = "1";
+	} else if ((teff > 24500.0) && (teff < 29300.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 29300.0) && (teff < 40000.0)) {
+	spectralClass = "O";
+	if ((teff >= 29300.0) && (teff <= 35000.0)) {
+	    subClass = "8";
+	} else if ((teff > 35000.0) && (teff <= 36500.0)) {
+	    subClass = "7";
+	} else if ((teff > 36500.0) && (teff <= 37800.0)) {
+	    subClass = "6";
+	} else if ((teff > 37800.0) && (teff < 40000.0)) {
+	    subClass = "5"; 
+	}
+    }
+} 
 
+//Determine the spectralClass and subClass of supergiants and bright giants. lburns
+//var luminClass = "I" or luminClass = "II"
+if (((logg >= 0.0) && (logg < 1.0)) || ((logg >= 1.0) && (logg < 1.5))) {
+    if (teff < 2700.0) {
+	spectralClass = "L";
+	} else if ((teff >= 2700.0) && (teff < 3650.0)) {
+	spectralClass = "M";
+	if ((teff >= 2700.0) && (teff <= 2710.0)) {
+	    subClass = "6";
+	} else if ((teff > 2710.0) && (teff <= 2880.0)) {
+	    subClass = "5";
+	} else if ((teff > 2880.0) && (teff <= 3060.0)) {
+	    subClass = "4";
+	} else if ((teff > 3060.0) && (teff <= 3210.0)) {
+	    subClass = "3";
+	} else if ((teff > 3210.0) && (teff <= 3370.0)) {
+	    subClass = "2";
+	} else if ((teff > 3370.0) && (teff <= 3490.0)) {
+	    subClass = "1";
+	} else if ((teff > 3490.0) && (teff < 3650.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 3650.0) && (teff < 4600.0)) {
+	spectralClass = "K"; 
+	if ((teff >= 3650.0) && (teff <= 3830.0)) {
+	    subClass = "7";
+	} else if ((teff > 3830.0) && (teff <= 3990.0)) {
+	    subClass = "5";
+	} else if ((teff > 3990.0) && (teff <= 4090.0)) {
+	    subClass = "4";
+	} else if ((teff > 4090.0) && (teff <= 4190.0)) {
+	    subClass = "3";
+	} else if ((teff > 4190.0) && (teff <= 4430.0)) {
+	    subClass = "1";
+	} else if ((teff > 4430.0) && (teff < 4600.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 4600.0) && (teff < 5500.0)) {
+	spectralClass = "G";
+	if ((teff >= 4600.0) && (teff <= 4700.0)) {
+	    subClass = "8";
+	} else if ((teff > 4700.0) && (teff <= 5190.0)) {
+	    subClass = "2";
+	} else if ((teff > 5190.0) && (teff < 5500.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 5500.0) && (teff < 7500.0)) {
+	spectralClass = "F";
+	if ((teff >= 5500.0) && (teff <= 5750.0)) {
+	    subClass = "8";
+	} else if ((teff > 5750.0) && (teff <= 6370.0)) {
+	    subClass = "5";
+	} else if ((teff > 6370.0) && (teff <= 7030.0)) {
+	    subClass = "2";
+	} else if ((teff > 7030.0) && (teff < 7500.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 7500.0) && (teff < 10000.0)) {
+	spectralClass = "A";
+	if ((teff >= 7500.0) && (teff <= 7910.0)) {
+	    subClass = "8";
+	} else if ((teff > 7910.0) && (teff <= 8610.0)) {
+	    subClass = "5";
+	} else if ((teff > 8610.0) && (teff <= 9380.0)) {
+	    subClass = "2";
+	} else if ((teff > 9380.0) && (teff < 10000.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 10000.0) && (teff < 27000.0)) {
+	spectralClass = "B";
+	if ((teff >= 10000.0) && (teff <= 10500.0)) {
+	    subClass = "9";
+	} else if ((teff > 10500.0) && (teff <= 11100.0)) {
+	    subClass = "8";
+	} else if ((teff > 11100.0) && (teff <= 11800.0)) {
+	    subClass = "7";
+	} else if ((teff > 11800.0) && (teff <= 12600.0)) {
+	    subClass = "6";
+	} else if ((teff > 12600.0) && (teff <= 13600.0)) {
+	    subClass = "5";
+	} else if ((teff > 13600.0) && (teff <= 16000.0)) {
+	    subClass = "3";
+	} else if ((teff > 16000.0) && (teff <= 17600.0)) {
+	    subClass = "2";
+	} else if ((teff > 17600.0) && (teff <= 21400.0)) {
+	    subClass = "1";
+	} else if ((teff > 21400.0) && (teff < 27000.0)) {
+	    subClass = "0";
+	}
+    } else if ((teff >= 27000.0) && (teff < 42000.0)) {
+	spectralClass = "O";
+	if ((teff >= 27000.0) && (teff <= 34000.0)) {
+	    subClass = "8";
+	} else if ((teff > 34000.0) && (teff <= 36200.0)) {
+	    subClass = "7";
+	} else if ((teff > 36200.0) && (teff <= 38500.0)) {
+	    subClass = "6";
+	} else if ((teff > 38500.0) && (teff < 42000.0)) {
+	    subClass = "5";
+	}
+    } 	     
+}
+
+//Determine luminClass based on logg
     if ((logg >= 0.0) && (logg < 1.0)) {
         luminClass = "I";
     } else if ((logg >= 1.0) && (logg < 1.5)) {
@@ -5369,7 +6190,7 @@ Spectral line \n\
     }
 
     var spectralType = "<a href='https://en.wikipedia.org/wiki/Stellar_classification' title='MK Spectral type' target='_blank'>" +
-            spectralClass + " " + luminClass +
+            spectralClass + subClass +  " " + luminClass +
             "</a>";
     txtPrint(spectralType, 600, 40, lineColor, textId);
     xTab = 140;
@@ -5441,6 +6262,9 @@ Spectral line \n\
 
 // **********  Basic canvas parameters: These are numbers in px - needed for calculations:
 // All plots and other output must fit within this region to be gray-washed between runs
+
+
+//June 2017 - Graphics converted from <canvas> to scale-invariant <SVG> by Jason Bayer
 
 // **************************
 //
@@ -5523,11 +6347,12 @@ Spectral line \n\
 //
 //  function washer() creates and inserts a panel into the HTML doc 
 //   AND erases it by "gray-washing" it upon each re-execution of the script 
-    var washer = function(plotRow, plotCol, wColor, areaId, cnvsId) {
-        // Very first thing on each load: gray-wash the canvas!!
 
+        var washer = function(plotRow, plotCol, wColor, areaId, SVGId) {
+                                //JB
+        // Very first thing on each load: gray-wash the canvas!!
 // Browser viewport coordinates for upper left corner of panel:
-        panelX = xOffset + plotCol * spacingX; 
+        panelX = xOffset + plotCol * spacingX;
         panelY = yOffsetText + yRangeText +
              yOffset + plotRow * spacingY;
         panelXStr = numToPxStrng(panelX);
@@ -5542,23 +6367,41 @@ Spectral line \n\
         areaId.style.backgroundColor = wColor;
 //
 //script the <canvas>:
-        cnvsId.style.position = "absolute";
-        cnvsId.style.width = panelWidthStr;
-        cnvsId.style.height = panelHeightStr;
-        //cnvsId.style.marginTop = panelYStr;
-        //cnvsId.style.marginLeft = panelXStr;
-        cnvsId.style.opacity = "1.0";
-        cnvsId.style.backgroundColor = wColor;
-        cnvsId.style.zIndex = 0;
-        //cnvsId.style.border = "1px gray solid";
-        //Wash the canvas:
-        areaId.appendChild(cnvsId);
+                        //JB
+        SVGId.style.position = "absolute";
+        SVGId.style.width = panelWidthStr;
+        SVGId.style.height = panelHeightStr;
+        SVGId.style.opacity = "1.0";
+        SVGId.style.backgroundColor = wColor;
+        SVGId.style.zIndex = 0;
+        areaId.appendChild(SVGId);
 
+//loop through all children of the SVG and remove them
+//        while(SVGId.lastChild){
+//                SVGId.removeChild(SVGId.lastChild);
+//        }
+
+//.empty() rids of all children
+                $("#"+SVGId.id).empty();
+
+        areaId.appendChild(SVGId);
+
+        document.body.appendChild(areaId);
+                        //JB
         var panelOrigin = [panelX, panelY];
 
         return panelOrigin;
 
     };
+
+//function to rid of the coordinate display
+function deleteText(SVG){
+if(SVG.contains(document.getElementById("subtext"))){
+SVG.removeChild(document.getElementById("subtext"));
+};
+
+}
+
 
 //
 //
@@ -5688,23 +6531,31 @@ Spectral line \n\
 //and returns the DEVICE y-coordinate (yShift) for further use by calling routine
 // (such as placing an accompanying annotation)
 //
-    var XBar = function(yVal, minYDataIn, maxYDataIn, barWidthCnvs, barHeightCnvs,
-            xFinesse, color, areaId, cnvsCtx) {
-
+    var XBar = function(yVal, minYDataIn, maxYDataIn, barWidthCnvs, barHeightCnvs,xFinesse, color, areaId, SVG) {
+                                        //JB
         var yBarPosCnvs = yAxisLength * (yVal - minYDataIn) / (maxYDataIn - minYDataIn);
         //       xTickPos = xTickPos;
 
+        //JB var xBarPosCnvs = xAxisLength * (xVal - minXDataIn) / (maxXDataIn - minXDataIn) ;
         var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yBarPosCnvs;
 
 // Make the y-tick mark, Teff:
-        cnvsCtx.beginPath();
-        cnvsCtx.strokeStyle=color; 
-        cnvsCtx.moveTo(yAxisXCnvs, yShiftCnvs);
-        cnvsCtx.lineTo(yAxisXCnvs + barWidthCnvs, yShiftCnvs);
-        cnvsCtx.stroke();  
+                                //JB
+        var tickY = document.createElementNS(xmlW3,'polyline');
+        tickY.setAttribute('stroke',color);
+        //set points the line will follow
+        var pointsTY=yAxisXCnvs+","+yShiftCnvs+" "+(yAxisXCnvs + barWidthCnvs)+","+yShiftCnvs+" ";
+        tickY.setAttribute('points',(yAxisXCnvs+","+yShiftCnvs+" "+(yAxisXCnvs + barWidthCnvs)+","+yShiftCnvs) + " " );
+        //console.log(pointsTY);
+        //console.log(typeof(pointsTY));
+    tickY.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(tickY);
+                                //JB
 //
         return yShiftCnvs;
     };
+    //
+
     //
     //
     //
@@ -5718,22 +6569,43 @@ Spectral line \n\
 // (such as placing an accompanying annotation)
 // CAUTION: input parameter barHeightCnvs gets ADDED to input parameter yFinesse
 // and bar will be drawn DOWNWARD from (yAxisYCnvs + yFinesse)
-    var YBar = function(xVal, minXDataIn, maxXDataIn, barWidthCnvs, barHeightCnvs,
-            yFinesse, color, areaId, cnvsCtx) {
 
+    var YBar = function(xVal, minXDataIn, maxXDataIn, barWidthCnvs, barHeightCnvs,
+            yFinesse, color, areaId, SVG) {
+                                        //JB
         var xBarPosCnvs = xAxisLength * (xVal - minXDataIn) / (maxXDataIn - minXDataIn);
         var xShiftCnvs = xAxisXCnvs + xBarPosCnvs;
-        var yBarPosCnvs = yAxisYCnvs + yFinesse; 
+        var yBarPosCnvs = yAxisYCnvs + yFinesse;
 
 // Make the x-tick mark, Teff:
-        cnvsCtx.beginPath();
-        cnvsCtx.strokeStyle=color; 
-        cnvsCtx.moveTo(xShiftCnvs, yBarPosCnvs);
-        cnvsCtx.lineTo(xShiftCnvs, yBarPosCnvs + barHeightCnvs);
-        cnvsCtx.stroke();  
-        
+                                        //JB
+        var tickX = document.createElementNS(xmlW3,'polyline');
+        tickX.setAttribute('stroke',color);
+//set points the line will follow
+        tickX.setAttribute('points',(xShiftCnvs+","+yBarPosCnvs+" "+xShiftCnvs+","+(yBarPosCnvs + barHeightCnvs)));
+if(SVG==SVGTen){
+tickX.setAttribute('id','plineP10');
+}
+        tickX.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(tickX);
+                                        //JB
         return xShiftCnvs;
     };
+
+//return the x position without creating a bar
+    var YBarXVal = function(xVal, minXDataIn, maxXDataIn, barWidthCnvs, barHeightCnvs,yFinesse, color, areaId, SVG) {
+                                        //JB
+        var xBarPosCnvs = xAxisLength * (xVal - minXDataIn) / (maxXDataIn - minXDataIn);
+        var xShiftCnvs = xAxisXCnvs + xBarPosCnvs;
+        var yBarPosCnvs = yAxisYCnvs + yFinesse;
+
+// Make the x-tick mark, Teff:
+        return xShiftCnvs;
+    };
+                                        //JB
+
+
+
     //
     //
     //
@@ -5746,8 +6618,8 @@ Spectral line \n\
 
     var XAxis = function(panelX, panelY,
             minXDataIn, maxXDataIn, xAxisName, fineness,
-            areaId, cnvsCtx) {
-
+            areaId, SVG) {
+                                //JB
         var axisParams = [];
         axisParams.length = 8;
         // Variables to handle normalization and rounding:
@@ -5755,14 +6627,20 @@ Spectral line \n\
         numParts.length = 2;
 
         //axisParams[5] = xLowerYOffset;
-//
-        cnvsCtx.beginPath();
-        cnvsCtx.strokeStyle=lineColor; //black
-        cnvsCtx.fillStyle=lineColor; //black
-        cnvsCtx.moveTo(xAxisXCnvs, xAxisYCnvs);
-        cnvsCtx.lineTo(xAxisXCnvs + xAxisLength, xAxisYCnvs);
-        cnvsCtx.stroke();  
-//
+
+                                //JB
+        var XAx = document.createElementNS(xmlW3,'polyline');
+        XAx.setAttribute('stroke',lineColor);
+//set points the line will follow
+        XAx.setAttribute('points',xAxisXCnvs+","+xAxisYCnvs+" "+(xAxisXCnvs+xAxisLength)+","+xAxisYCnvs)
+//      XAx.setAttribute('x0',xAxisXCnvs);
+//        XAx.setAttribute('x1',xAxisXCnvs+xAxisLength,);
+//        XAx.setAttribute('y0',xAxisYCnvs);
+//        XAx.setAttribute('y1',xAxisYCnvs);
+        XAx.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(XAx);
+                                //JB
+        //console.log("minXDataIn, maxXDataIn " + minXDataIn + ", " + maxXDataIn);
         numParts = standForm(minXDataIn);
         //minXData = mantissa * Math.pow(10.0, numParts[1]);
         var mantissa0 = numParts[0];
@@ -5772,6 +6650,8 @@ Spectral line \n\
         //var rangeXData = maxXData - minXData;
         var reverse = false; //initialization
         var rangeXData = mantissa1 - mantissa0;
+        //console.log("XAxis: mantissa1 " + mantissa1 + " mantissa0 " + mantissa0);
+        //console.log("XAxis: rangeXData " + rangeXData);
         //Catch axes that are supposed to be backwards
         if (rangeXData < 0.0) {
             rangeXData = -1.0 * rangeXData;
@@ -5782,8 +6662,10 @@ Spectral line \n\
             deltaXData = 20000.0;
         } else if ((rangeXData >= 20000.0) && (rangeXData < 100000.0)) {
             deltaXData = 20000.0;
-        } else if ((rangeXData >= 1000.0) && (rangeXData < 20000.0)) {
+        } else if ((rangeXData >= 5000.0) && (rangeXData < 20000.0)) {
             deltaXData = 2000.0;
+        } else if ((rangeXData >= 1000.0) && (rangeXData < 5000.0)) {
+            deltaXData = 500.0;
         } else if ((rangeXData >= 250.0) && (rangeXData < 1000.0)) {
             deltaXData = 200.0;
         } else if ((rangeXData >= 100.0) && (rangeXData < 250.0)) {
@@ -5838,6 +6720,9 @@ Spectral line \n\
         var deltaXPxl = panelWidth / (numXTicks - 1);
         var deltaXPxlCnvs = xAxisLength / (numXTicks - 1);
 
+        //console.log("deltaXData " + deltaXData);
+        //console.log("XAxis: mantissa1new " + mantissa1new + " mantissa0new " + mantissa0new);
+        //console.log("XAxis: rangeXData2 " + rangeXData2);
         axisParams[1] = rangeXData2;
         axisParams[2] = deltaXData;
         axisParams[3] = deltaXPxl;
@@ -5868,17 +6753,32 @@ Spectral line \n\
             var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 // Make the x-tick mark, Teff:
 
-            cnvsCtx.beginPath();
-            cnvsCtx.fillStyle=lineColor; //black
-            cnvsCtx.strokeStyle=lineColor; //black
-            cnvsCtx.moveTo(xShiftCnvs, xAxisYCnvs + xTickYOffset);
-            cnvsCtx.lineTo(xShiftCnvs, xAxisYCnvs + xTickYOffset + tickLength);
-            cnvsCtx.stroke();            //test
+                                //JB
+        var Xt = document.createElementNS(xmlW3,'polyline');
+        Xt.setAttribute('stroke',lineColor);
+//set points the line will follow
+        Xt.setAttribute('points',xShiftCnvs+","+(xAxisYCnvs + xTickYOffset)+" "+xShiftCnvs+","+(xAxisYCnvs + xTickYOffset + tickLength));
+//      Xt.setAttribute('x0',xShiftCnvs);
+//      Xt.setAttribute('x1',xShiftCnvs);
+//      Xt.setAttribute('y0',xAxisYCnvs + xTickYOffset);
+//      Xt.setAttribute('y1',xAxisYCnvs + xTickYOffset + tickLength);
+    Xt.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(Xt);
+                                //JB
 
             //Make the tick label, Teff:
-            cnvsCtx.font="normal normal normal 8pt arial";
-            cnvsCtx.fillText(xTickValStr, xShiftCnvs, xAxisYCnvs + xValYOffset);
-            
+                                //JB
+            var text2 = document.createElementNS(xmlW3,'text');
+            text2.setAttribute('x', xShiftCnvs);
+            text2.setAttribute('y',  xAxisYCnvs + xValYOffset);
+            text2.setAttribute('id',('text'+(i).toString()));
+            text2.setAttribute('style', "font-style:normal;font-size:8px;");
+            text2.textContent=xTickValStr;
+            text2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVG.appendChild(text2);
+
+                                //JB
+
         }  // end x-tickmark loop
 
 
@@ -5889,12 +6789,10 @@ Spectral line \n\
         txtPrint("<span style='font-size:small'>" + xAxisName + "</span>",
                 xAxisNameOffsetX, xAxisNameOffsetY, lineColor, areaId);
 
-     // cnvsCtx.font="normal normal normal 12pt arial";
-     // cnvsCtx.fillText(xAxisName, xNameXOffsetThisCnvs, xNameYOffsetCnvs);
-        
         return axisParams;
 
     };
+
 
     //
     //
@@ -5904,10 +6802,9 @@ Spectral line \n\
     //
     //
 
-    var YAxis = function(panelX, panelY,
-            minYDataIn, maxYDataIn, yAxisName,
-            areaId, cnvsCtx) {
-
+                        var pointsYA = "";
+    var YAxis = function(panelX, panelY,minYDataIn, maxYDataIn, yAxisName, fineness,areaId, SVG) {
+                        //JB
         var axisParams = [];
         axisParams.length = 8;
         // Variables to handle normalization and rounding:
@@ -5916,14 +6813,18 @@ Spectral line \n\
 
         //axisParams[5] = xLowerYOffset;
         // Create the LEFT y-axis element and set its style attributes:
+                                //JB
+        var YAx = document.createElementNS(xmlW3,'polyline');
+        YAx.setAttribute('stroke',lineColor);
+//set the points that the line will follow
+        pointsYA = yAxisXCnvs+","+yAxisYCnvs+" "+yAxisXCnvs+","+(yAxisYCnvs+yAxisLength);
+        YAx.setAttribute('points',pointsYA);
+        //console.log(pointsYA);
+        //console.log(typeof(pointsYA));
 
-        cnvsCtx.beginPath();
-        cnvsCtx.fillStyle=lineColor; //black
-        cnvsCtx.strokeStyle=lineColor; //black
-        cnvsCtx.moveTo(yAxisXCnvs, yAxisYCnvs);
-        cnvsCtx.lineTo(yAxisXCnvs, yAxisYCnvs + yAxisLength);
-        cnvsCtx.stroke();  
-        
+    YAx.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(YAx);
+                                //JB
         numParts = standForm(minYDataIn);
         //minYData = mantissa * Math.pow(10.0, numParts[1]);
         var mantissa0 = numParts[0];
@@ -5989,8 +6890,9 @@ Spectral line \n\
         axisParams[6] = minYData2;
         axisParams[7] = maxYData2;
         //
-        cnvsCtx.fillStyle=lineColor; //black
+        SVG.setAttribute('fill',lineColor);
         var ii;
+        var pointsYt="";
         for (var i = 0; i < numYTicks; i++) {
 
             ii = 1.0 * i;
@@ -6004,17 +6906,29 @@ Spectral line \n\
             // vertical position in pixels - data values increase upward:
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
 // Make the y-tick mark, Teff:
-           cnvsCtx.beginPath();
-           cnvsCtx.fillStyle=lineColor; //black
-           cnvsCtx.strokeStyle=lineColor; //black
-           cnvsCtx.moveTo(yAxisXCnvs + yTickXOffset, yShiftCnvs);
-           cnvsCtx.lineTo(yAxisXCnvs + yTickXOffset + tickLength, yShiftCnvs);
-           cnvsCtx.stroke();    
-            
-
+                                //JB
+        var Yt = document.createElementNS(xmlW3,'polyline');
+        Yt.setAttribute('id',"Yt"+i);
+        Yt.setAttribute('stroke',lineColor);
+//set the points that the line will follow
+        Yt.setAttribute('points', ((yAxisXCnvs + yTickXOffset)+","+yShiftCnvs+" "+(yAxisXCnvs + yTickXOffset + tickLength)+","+yShiftCnvs));
+//        Yt.setAttribute('x0',yAxisXCnvs+yTickXOffset);
+//        Yt.setAttribute('x1',yAxisXCnvs+yTickXOffset+tickLength);
+//        Yt.setAttribute('y0',yShiftCnvs);
+//        Yt.setAttribute('y1',yShiftCnvs);
+    Yt.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        SVG.appendChild(Yt);
+                                //JB
             //Make the y-tick label:
-         cnvsCtx.font="normal normal normal 8pt arial";
-         cnvsCtx.fillText(yTickValStr, yAxisXCnvs + yValXOffset, yShiftCnvs);
+            var text3 = document.createElementNS(xmlW3,'text');
+            //text3.setAttribute('id',text3);
+            text3.setAttribute('x',yAxisXCnvs + yValXOffset);
+            text3.setAttribute('y',yShiftCnvs);
+            text3.setAttribute('id','text'+(i+4));
+            text3.setAttribute('style', "front-style:normal;font-size:8px;");
+            text3.textContent=yTickValStr;
+            text3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVG.appendChild(text3);
 
         }  // end y-tickmark loop, j
 
@@ -6023,12 +6937,15 @@ Spectral line \n\
 //Axis label still need to be html so we can use mark-up
         yAxisNameX = panelX + yAxisNameOffsetX;
         yAxisNameY = panelY + yAxisNameOffsetY;
-        txtPrint("<span style='font-size:x-small'>" + yAxisName + "</span>",
-                yAxisNameOffsetX, yAxisNameOffsetY, lineColor, areaId);
+
+
+//    txtPrint("<span style='font-size:x-small'>" + yAxisName + "</span>",         yAxisNameOffsetX, yAxisNameOffsetY, lineColor, areaId);
+    txtPrintYAx("<span style='font-size:x-small'>" + yAxisName + "</span>",         yAxisNameOffsetX, yAxisNameOffsetY, lineColor, areaId);
 
         return axisParams;
 
     };
+
 
     //   var testVal = -1.26832e7;
 //
@@ -6053,6 +6970,7 @@ Spectral line \n\
 //      
 //
     //
+
 //
 //  *****   PLOT SEVEN / PLOT 7
 //
@@ -6072,11 +6990,13 @@ Spectral line \n\
        } else {
            wDiskColor = wDefaultColor;
        }
-        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotSevenId, cnvsSevenId);
-        panelX = panelOrigin[0];
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDiskColor, newPlotSevenId, SVGSeven);
+				//JB
+	panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSevenCtx.fillStyle = wDiskColor;
-        cnvsSevenCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+	SVGSeven.setAttribute('fill',wDiskColor);
 
         var thet1, thet2;
         var thet3;
@@ -6085,22 +7005,35 @@ Spectral line \n\
         titleY = panelY + titleOffsetY;
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>White light disk</a></span> <br />\n\
      <span style='font-size:small'>(Logarithmic radius) </span>",
-                titleOffsetX, titleOffsetY, lineColor, plotSevenId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotSevenId);
             txtPrint("<span style='font-size:normal; color:black'><em>&#952</em> = </span>",
-                150 + titleOffsetX, titleOffsetY, lineColor, plotSevenId);
+                150 + titleOffsetX, titleOffsetY, lineColor, newPlotSevenId);
+                                //JB
+            var yCenterCnvs = panelHeight / 2; 
+            var xCenterCnvs = panelWidth / 2;
+				//JB
 
+	var radius = Math.ceil(radiusPx * Math.sin(Math.acos(cosTheta[1][10])));
+
+                        
+				//JB
+//console.log(numThetas);
+				
 // Adjust position to center star:
 // Radius is really the *diameter* of the symbol
-            var yCenterCnvs = panelHeight / 2; 
-            var xCenterCnvs = panelWidth / 2; 
-        //  Loop over limb darkening sub-disks - largest to smallest
-        for (var i = numThetas - 1; i >= 1; i--) {
 
+        //  Loop over limb darkening sub-disks - largest to smallest
+         for (var i = numThetas - 1; i >= 1; i--) {
+//	for (var i = numThetas - 1; i <= 1; i++) {
+	
             ii = 1.0 * i;
+
             // LTE Eddington-Barbier limb darkening: I(Tau=0, cos(theta)=t) = B(T(Tau=t))
             var cosFctr = cosTheta[1][i];
-            var radiusPxICnvs = Math.ceil(radiusPx * Math.sin(Math.acos(cosFctr)));
+
             var cosFctrNext = cosTheta[1][i-1];
+			
+            var radiusPxICnvs = Math.ceil(radiusPx * Math.sin(Math.acos(cosFctr)));
             var radiusPxICnvsNext = Math.ceil(radiusPx * Math.sin(Math.acos(cosFctrNext)));
 
             rrI = Math.ceil(brightScale * (bandIntens[4][i] / bvr) / rgbVega[0]); // / vegaBVR[2]);
@@ -6112,28 +7045,71 @@ Spectral line \n\
 
             var RGBHex = colHex(rrI, ggI, bbI);
             var RGBHexNext = colHex(rrINext, ggINext, bbINext);
-            cnvsSevenCtx.beginPath();
-            //cnvsSevenCtx.strokeStyle = RGBHex;
-            var grd=cnvsSevenCtx.createRadialGradient(xCenterCnvs, yCenterCnvs, radiusPxICnvs,
-                      xCenterCnvs, yCenterCnvs, radiusPxICnvsNext);
-            grd.addColorStop(0, RGBHex);
-            grd.addColorStop(1, RGBHexNext);
-//            cnvsSevenCtx.fillStyle=RGBHex;
-            cnvsSevenCtx.fillStyle = grd;
-            cnvsSevenCtx.arc(xCenterCnvs, yCenterCnvs, radiusPxICnvs, 0, 2*Math.PI);
-            //cnvsSevenCtx.stroke();
-            cnvsSevenCtx.fill();
+ 				//JB
+ 				
+
+//	if((radiusPxICnvs==radiusPxICnvsNext)){ radiusPxICnvsNext = radiusPxICnvs - 0.9*i/3;}
+
+//create circle for each theta
+        var circ = document.createElementNS(xmlW3,'circle');
+        circ.setAttribute('cx',xCenterCnvs);
+        circ.setAttribute('cy',yCenterCnvs);
+        circ.setAttribute('r',radiusPxICnvs);
+        circ.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+//create gradient for each circle
+	var grd = document.createElementNS(xmlW3,'radialGradient');
+	grd.setAttribute('id','grd'+i);
+        grd.setAttribute('cx',.5);
+        grd.setAttribute('cy',.5);
+        grd.setAttribute('r',.5);
+        grd.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);			
+
+       // console.log(radiusPxICnvsNext/radius);
+	
+        var gradN1 = document.createElementNS(xmlW3,'stop');
+        gradN1.setAttribute('offset',1);
+        gradN1.setAttribute('stop-color',RGBHex);
+	gradN1.setAttribute('stop-opacity',1);
+
+        // console.log(radiusPxICnvsNext/radiusPxICnvs);
+
+        var gradN2 = document.createElementNS(xmlW3,'stop');
+        gradN2.setAttribute('offset',radiusPxICnvsNext/radiusPxICnvs)//"0%");
+        gradN2.setAttribute('stop-color',RGBHexNext);
+	gradN2.setAttribute('stop-opacity',1);
+
+	gradN1.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        gradN2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+        SVGSeven.appendChild(grd);
+        grd.appendChild(gradN2);
+        grd.appendChild(gradN1);
+       
+ SVGSeven.appendChild(grd);
+
+ circ.setAttribute('fill',"url(#grd"+i+")");
+
+ SVGSeven.appendChild(circ);
+       
+ 				//
+ 				//JB
             //
             //Angle indicators
             if ((i % 2) === 0) {
                 thet1 = 180.0 * Math.acos(cosTheta[1][i]) / Math.PI;
                 thet2 = thet1.toPrecision(2);
                 thet3 = thet2.toString(10);
+				//JB
                 txtPrint("<span style='font-size:small; background-color:#888888'>" + thet3 + "</span>",
-                        150 + titleOffsetX + (i + 2) * 10, titleOffsetY, RGBHex, plotSevenId);
-            }
+                        150 + titleOffsetX + (i + 2) * 10, titleOffsetY, RGBHex, newPlotSevenId);
+
+				//JB    
+
+	}
 //
         }
+//	document.body.appendChild(SVGSeven);
 
     }
 
@@ -6159,11 +7135,15 @@ Spectral line \n\
 //        radiusPx = Math.ceil(radiusPx);
         var thet1, thet2;
         var thet3;
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTwelveId, cnvsTwelveId);
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotTwelveId, SVGTwelve);
+				
+				//JB
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsTwelveCtx.fillStyle = wDefaultColor;
-        cnvsTwelveCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+	SVGTwelve.setAttribute('fill',wDefaultColor);
+				//JB
         // Add title annotation:
 
         //var titleYPos = xLowerYOffset - 1.15 * yRange;
@@ -6171,14 +7151,17 @@ Spectral line \n\
 
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>Gaussian filter</a></span><span style='font-size:small'> &#955 = " + diskLambda + " nm</span> </br>\n\
      <span style='font-size:small'>(Logarithmic radius) </span>",
-                titleOffsetX, titleOffsetY + 20, lineColor, plotTwelveId);
+                titleOffsetX, titleOffsetY + 20, lineColor, newPlotTwelveId);
         txtPrint("<span style='font-size:normal; color:black'><em>&#952</em> = </span>",
-                220 + titleOffsetX, titleOffsetY + 20, lineColor, plotTwelveId);
+                220 + titleOffsetX, titleOffsetY + 20, lineColor, newPlotTwelveId);
         var ilLam0 = lamPoint(numMaster, masterLams, 1.0e-7 * diskLambda);
         var lambdanm = masterLams[ilLam0] * 1.0e7; //cm to nm
         //console.log("PLOT TWELVE: ilLam0=" + ilLam0 + " lambdanm " + lambdanm);
+ 
+					//JB
         var minZData = 0.0;
         //var maxZData = masterIntens[ilLam0][0] / norm;
         var maxZData = tuneBandIntens[0] / norm;
@@ -6211,31 +7194,67 @@ Spectral line \n\
 
             RGBHex = lambdaToRGB(lambdanm, zLevel);
             RGBHexNext = lambdaToRGB(lambdanm, zLevelNext);
+				//JB
+//create circle for each theta
+        var circ = document.createElementNS(xmlW3,'circle');
+        circ.setAttribute('cx',xCenterCnvs);
+        circ.setAttribute('cy',yCenterCnvs);
+        circ.setAttribute('r',radiusPxICnvs);
+        circ.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
 
-            cnvsTwelveCtx.beginPath();
-            //cnvsSevenCtx.strokeStyle = RGBHex;
-            var grd=cnvsTwelveCtx.createRadialGradient(xCenterCnvs, yCenterCnvs, radiusPxICnvs,
-                      xCenterCnvs, yCenterCnvs, radiusPxICnvsNext);
-            grd.addColorStop(0, RGBHex);
-            grd.addColorStop(1, RGBHexNext);
-//            cnvsSevenCtx.fillStyle=RGBHex;
-            cnvsTwelveCtx.fillStyle = grd;
-            cnvsTwelveCtx.arc(xCenterCnvs, yCenterCnvs, radiusPxICnvs, 0, 2*Math.PI);
-            //cnvsSevenCtx.stroke();
-            cnvsTwelveCtx.fill();
+//create gradient for each circle
+	var grd = document.createElementNS(xmlW3,'radialGradient');
+	grd.setAttribute('id','grd'+i+20);
+        grd.setAttribute('cx',.5);
+        grd.setAttribute('cy',.5);
+        grd.setAttribute('r',.5);
+        grd.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);			
+
+       // console.log(radiusPxICnvsNext/radius);
+	
+        var gradN1 = document.createElementNS(xmlW3,'stop');
+        gradN1.setAttribute('offset',1);
+        gradN1.setAttribute('stop-color',RGBHex);
+	gradN1.setAttribute('stop-opacity',1);
+
+       //  console.log(radiusPxICnvsNext/radiusPxICnvs);
+
+        var gradN2 = document.createElementNS(xmlW3,'stop');
+        gradN2.setAttribute('offset',radiusPxICnvsNext/radiusPxICnvs)//"0%");
+        gradN2.setAttribute('stop-color',RGBHexNext);
+	gradN2.setAttribute('stop-opacity',1);
+
+	gradN1.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+        gradN2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+        SVGTwelve.appendChild(grd);
+        grd.appendChild(gradN2);
+        grd.appendChild(gradN1);
+       
+ 
+ SVGTwelve.appendChild(grd);
+
+ circ.setAttribute('fill',"url(#grd"+i+20+")");
+
+ SVGTwelve.appendChild(circ);
+       
+				//JB
             //
             //Angle indicators
             if ((i % 2) === 0) {
                 thet1 = 180.0 * Math.acos(cosTheta[1][i]) / Math.PI;
                 thet2 = thet1.toPrecision(2);
                 thet3 = thet2.toString(10);
+					//JB
                 txtPrint("<span style='font-size:small; background-color:#888888'>" + thet3 + "</span>",
-                       220 + titleOffsetX + (i + 2) * 10, titleOffsetY + 20, RGBHex, plotTwelveId);
+                       220 + titleOffsetX + (i + 2) * 10, titleOffsetY + 20, RGBHex, newPlotTwelveId);
+
+					//JB
             }
 //
         }
     }
-
+                               
     //
     //
     //  *****   PLOT TEN / PLOT 10
@@ -6249,6 +7268,9 @@ Spectral line \n\
         var plotCol = 1;
 
         var minXData = 380.0; // (nm) blue
+        if($("[name='Teff']").val() >= 7000){
+         minXData = 360.0;
+        }
         var maxXData = 680.0; // (nm) red
         //var midXData = (minXData + maxXData) / 2.0;  // "green"
 
@@ -6286,15 +7308,19 @@ Spectral line \n\
 
         
         var fineness = "normal";
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTenId, cnvsTenId);
+				//JB
+	        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotTenId, SVGTen);
+				//JB
+
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsTenCtx.fillStyle = wDefaultColor;
-        cnvsTenCtx.fillRect(0, 0, panelWidth, panelHeight);
-        var xAxisParams = XAxis(panelX, panelY,
-                minXData, maxXData, xAxisName, fineness,
-                plotTenId, cnvsTenCtx);
+				//JB
+//	SVGTen.setAttribute('fill',wDefaultColor);
+				//JB
+				//JB
+        var xAxisParams = XAxis(panelX, panelY, minXData, maxXData, xAxisName, fineness, newPlotTenId, SVGTen);
 
+				//JB
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
         var rangeXData = xAxisParams[1];
@@ -6322,16 +7348,18 @@ Spectral line \n\
         //txtPrint(" ", legendXPos, legendYPos + 10, zeroInt, zeroInt, zeroInt, plotTenId);
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("<span style='font-size:normal; color:blue'><a href='https://en.wikipedia.org/wiki/Visible_spectrum' target='_blank'>\n\
      Visual spectrum</a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotTenId);
-
+                titleOffsetX, titleOffsetY, lineColor, newPlotTenId);
+					//JB
      var TiOString = "Off";
      if (ifTiO == 1){
         TiOString = "On";
      }
-     txtPrint("TiO bands: " + TiOString, titleOffsetX + 10, titleOffsetY+35, lineColor, plotTenId);
-
+					//JB
+     txtPrint("TiO bands: " + TiOString, titleOffsetX + 10, titleOffsetY+35, lineColor, newPlotTenId);
+					//JB
         var xShift, zShift, xShiftDum, zLevel;
         var RGBHex; //, r255, g255, b255;
         var rangeXData = 1.0e7 * (masterLams[ilLam1] - masterLams[ilLam0]);
@@ -6346,48 +7374,194 @@ Spectral line \n\
         //console.log("ilLam0 " + ilLam0 + " ilLam1 " + ilLam1);
         yFinesse = -160;
         var thisYPos = xAxisYCnvs + yFinesse;
-        for (var i = ilLam0 + 1; i < ilLam1; i++) {
+
+                              //JB
+
+//create a single rectangle to hold the gradient of the spectrum
+//create said gradient
+        var grd = document.createElementNS(xmlW3,'linearGradient');
+        var rect = document.createElementNS(xmlW3,'rect');
+
+        grd.setAttribute('id','grd');
+        var grdId = document.getElementById(grd);
+
+        rect.setAttribute('x',0);
+        rect.setAttribute('y',125);
+        rect.setAttribute('height',75);
+        rect.setAttribute('id','rect');
+        var rectId = document.getElementById('rect');
+        rect.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+        SVGTen.appendChild(rect);
+
+
+        grd.setAttribute('x1',0);
+        grd.setAttribute('x2',"1");
+        grd.setAttribute('y1',0);
+        grd.setAttribute('y2',0);
+        grd.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+
+
+
+/*create text box that displays the coordinates and set the coordinates 
+ * (x position in nm)  equal to the text content
+*/
+      var textP10 = document.createElementNS(xmlW3,'text');
+//    textP10.setAttribute('id',"textP10");
+      textP10.setAttribute('x',275);
+        textP10.setAttribute('y',275);
+        textP10.setAttribute('font-size',"10");
+      textP10.setAttribute('id',"subtext");
+      textP10.textContent=("(?[nm])");
+      textP10.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGTen.appendChild(textP10);
+
+
+
+//function that sets the text content to the x postion (in nm) on the spectrum
+      function convertTextP10(X){
+      
+      //var Y = y;
+      if(X!=0){
+
+      textP10.textContent=("("+X.toFixed(4).toString()+" [nm])");
+      //console.log(text.textContent)
+      SVGTen.appendChild(textP10);
+      }else{
+
+        textP10.textContent="(?[nm])";
+        SVGTen.appendChild(textP10);
+      
+      }
+              }
+
+
+//variables specifically for plot 10
+var xMinP10 = minXData;
+var xMaxP10 = maxXData;
+var yMinP10 = minYData;
+var yMaxP10 = maxYData;
+var scaleP10 = (xMaxP10-xMinP10)/xAxisLength; 
+
+//create event listeners that display the x position (in nm) in the text box
+ rect.addEventListener("mousemove",function(){convertTextP10(xMinP10+scaleP10*(event.offsetX-xAxisXCnvs));},false);
+ rect.addEventListener("mouseout",function(){convertTextP10(0);},false);
+                              
+                              
+////variable to get the text input box's value for the filter                   
+//        var filter = document.getElementById('diskLam');
+
+//function to set filter input box. Is called upon click
+      function setP10 (XV){
+//set x value in nm of the filter bar to diskLam, the input box
+              filter.value = XV.toFixed(4);
+                      
+}
+
+////set x position of the filter label  
+//      t.style.marginLeft=xPosition;
+
+                              
+                              //JB
+
+//variables needed in the loop, mostly for scaling/converting to nm
+var firstNm = 0;//masterLams[ilLam0-1]*1.0e7;
+var offset = 0;//xAxisXCnvs +  xAxisLength * (firstNm*1.25 - minXData) / (maxXData - minXData);
+//var max = 0;//.75*(lastNm-firstNm);
+var lastNm = masterLams[ilLam1]*1.0e7;
+var count = 0;
+
+                              //JB
+        for (var i = ilLam0 - 1; i < ilLam1+1; i++) {
 
             var nextLambdanm = masterLams[i] * 1.0e7; //cm to nm
-            //logLambdanm = 7.0 + logTen(masterLams[i]);
 
-            //barWidth = Math.max(1, Math.ceil(xRange * (lambdanm - lastLambdanm) / rangeXData));
-            //barWidth = xRange * (nextLambdanm - lambdanm) / rangeXData;
-            //Try calculating the barWidth (device coordinates) in *EXACTLY* the same way as YBar calcualtes its x-position:
-            //xBarShift0 = xRange * (lambdanm - minXData) / (maxXData - minXData);
-            //xBarShift1 = xRange * (nextLambdanm - minXData) / (maxXData - minXData);
             xBarShift0 = xAxisLength * (lambdanm - minXData) / (maxXData - minXData);
             xBarShift1 = xAxisLength * (nextLambdanm - minXData) / (maxXData - minXData);
             barWidth = xBarShift1 - xBarShift0; //in device pixels
 
-            if (barWidth > 0.5) {
-
+if (barWidth > 0.5) {
+count ++;     
                 barWidth = barWidth + 1.0;
-//logarithmic z:
-                //zLevel = (logE * masterFlux[1][i] - minZData) / rangeZData;
-//linear z:
-
-
                 zLevel = ((masterFlux[0][i] / norm) - minZData) / rangeZData;
-                //console.log("lambdanm " + lambdanm + " zLevel " + zLevel);
-
             var nextRGBHex = lambdaToRGB(lambdanm, zLevel);
 
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / (maxXData - minXData);
         var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        var grd = cnvsTenCtx.createLinearGradient(xShiftCnvs, thisYPos, xShiftCnvs+barWidth, thisYPos);
-        grd.addColorStop(0, RGBHex);
-        grd.addColorStop(1, nextRGBHex);
-        cnvsTenCtx.fillStyle = grd;
 
-        cnvsTenCtx.fillRect(xShiftCnvs, thisYPos, barWidth, barHeight);
+                              //JB
+/*for the first iteration, make the offest equal to its xShift 
+ *(for the rectangle)
+*/
+      if(count==1){
+              firstNm = lambdanm;
+              offset = xShiftCnvs;
+      }
+
+                              //JB
+
+
+//create TWO stops per loop and add the to the gradient
+
+
+/*the .75 is equivilant to ((maxXData-minXData)/xAxisLength),
+ * but for some reason this caused an issue, therefore the .75 was hard set.
+ * ALSO, max was needed to accurately determine the where the offset 
+ * started/ended, but it couldn't be set until the last interation of the loop,
+ * therefore it is also hard set.
+*/
+
+        var gradN = document.createElementNS(xmlW3,'stop');
+        gradN.setAttribute('offset',((xShiftCnvs-offset)/(.75*(lastNm-firstNm))));
+        gradN.setAttribute('stop-color',RGBHex);
+        gradN.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+        var gradN2 = document.createElementNS(xmlW3,'stop');
+        gradN2.setAttribute('offset',((xShiftCnvs+barWidth-offset)/(.75*(lastNm-firstNm))));
+        gradN2.setAttribute('stop-color',nextRGBHex);
+        gradN2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+        grd.appendChild(gradN);
+        grd.appendChild(gradN2);
+        SVGTen.appendChild(grd);
+
+                      //JB
+//
+/*THIS CODE IS USED TO CREATE SEPERATE RECTANGLES WITH THEIR OWN GRADIENTS 
+ * (ABOVE HAS MANY STOPS AND A SINGLE GRADIENT)
+*/
+//
+//!function I(ii){
+//        var   trueCoord = lastNm;
+//}(i);
+//                lambdanm = nextLambdanm;
+//                RGBHex = nextRGBHex;
+//            }  //barWidth condition
+//        }  // i loop (wavelength)
+
+                              //JB
+
                 //console.log("lambdanm " + lambdanm + " nextLambdanm " + nextLambdanm + " xShiftDum " + xShiftDum + " barWidth " + barWidth);
+
+
+
+
 
                 lambdanm = nextLambdanm;
                 RGBHex = nextRGBHex;
             }  //barWidth condition
-
         }  // i loop (wavelength)
+
+/*lastly, fill the rect element with the appropriate gradient and set the 
+ *  *starting and stopping postions of the rect on the SVG
+ *  */
+//console.log(offset);
+        rect.setAttribute('x',offset);
+        rect.setAttribute('width',xShiftCnvs-offset);
+        rect.setAttribute('fill',"url(#grd)");
+        SVGTen.appendChild(rect);
+
 
 //Spectral line labels and pointers:
         barWidth = 1.0;
@@ -6420,14 +7594,23 @@ Spectral line \n\
             //lamLblStr = lamLblNum.toString(10);
             //lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
             lamLbl = "<span style='font-size: xx-small'>" + listLamLbl[i] + "</span>";
-            txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
-            txtPrint(lamLbl, xPos, yPos + 10, RGBHex, plotTenId);
-            //Make the tick label, Teff:
 
-            //cnvsTenCtx.fillStyle = lineColor;
-            //cnvsTenCtx.font="normal normal normal 8pt arial";
-            //cnvsTenCtx.fillText(listName[i], xPos, yPos);
-            //cnvsTenCtx.fillText(lamLblStr, xPos, yPos+10);
+                                      //JB
+            if (listLam0[i].toPrecision(4)<380){
+            //  xPos = 25;
+            //  yPos = 100 + 10*i;
+      //var nmLbl = "<span style='font-size: xx-small'>  (" + lamLblNum + "[nm])</span>";       
+        //  txtPrintYAx(nameLbl , xPos, yPos, RGBHex, newPlotTenId);
+         // txtPrintYAx(nmLbl , xPos+25, yPos, RGBHex, newPlotTenId);
+              }else{
+
+          txtPrintYAx(nameLbl , xPos, yPos, RGBHex, newPlotTenId);
+          txtPrintYAx(lamLbl, xPos, yPos + 10, RGBHex, newPlotTenId);
+              }
+          
+                                      //JB
+
+            //Make the tick label, Teff:
 
             if (listName[i] != " "){
                iCount++;
@@ -6491,7 +7674,11 @@ Spectral line \n\
             //lamLblStr = lamLblNum.toString(10);
             //lamLbl = "<span style='font-size: xx-small'>" + lamLblStr + "</span>";
             //RGBHex = colHex(r255, g255, b255);
-            txtPrint(nameLbl, xPos + xAxisXCnvs, (yPos - 10), RGBHex, plotTenId);
+					//JB
+
+            txtPrint(nameLbl, xPos + xAxisXCnvs, (yPos - 10), RGBHex, newPlotTenId);
+
+					//JB
             //txtPrint(nameLbl, xPos, yPos, RGBHex, plotTenId);
             //txtPrint(lamLbl, xPos + xAxisXCnvs, yPos, RGBHex, plotTenId);
             //xShiftDum = YBar(lambda0, minXData, maxXData, thisXAxisLength, barWidth, barHeight,
@@ -6506,177 +7693,132 @@ Spectral line \n\
             barHeight = 108;
             barWidth = 2;
             RGBHex = "#FF0000";
-            if ( (diskLambda > 380.0) && (diskLambda < 680.0) ){
-                 xShiftDum = YBar(diskLambda, minXData, maxXData, 
-                               barWidth, barHeight,
-                               barFinesse-60, RGBHex, plotTenId, cnvsTenCtx);
-                 txtPrint("<span style='font-size:xx-small'>Filter</span>",
-                       xShiftDum, yAxisYCnvs, RGBHex, plotTenId);
-            }
+
+                                      //JB
+
+/*variables needed to create the filter bar on the SVG 
+ * (need to be different form the variables already declared
+*/
+var barFinesseFilter = yAxisYCnvs;
+var barHeightFilter = 108;
+var barWidthFilter = 2;
+var RGBHexFilter = "#FF0000";
+var barYStart = 110;
+var barYEnd = 218;
+var xPosition = "225px";//((filter.value/scaleP10)-xAxisXCnvs).toString();
+
+/*function to change the points/positon of the filter text (p element) and
+ *  the filter bar (polyline created onLoad and initialized based on a 500nm filter) 
+*/
+function animateLine(line){
+
+line.setAttribute('points', event.offsetX.toFixed(4) + "," + barYStart + " " + event.offsetX.toFixed(4) + "," + barYEnd);
+//console.log(event.offsetX.toFixed(4));
+
+t.style.marginLeft=((event.offsetX).toString())+"px";
+
+xPosition = (event.offsetX).toString()+"px";
+
+//console.log(xPosition);
+
+newPlotTenId.appendChild(t);
+
+//SVG10.appendChild(rect);
+}
+
+                                      //JB
+
+            if ( (diskLambda > minXData) && (diskLambda < maxXData) ){
+
+                 xShiftDum = YBar(diskLambda, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen);
+//console.log(rectId);
+
+
+//variable to get the text input box's value for the filter                   
+        var filter = document.getElementById('diskLam');
+
+//create a p element the display the word Filter above the filter line
+      var t = document.createElement("p");
+      t.style.position="absolute";
+      t.style.display="block";
+      t.style.width="750px";
+      t.style.marginTop=yAxisYCnvs.toString()+"px";   
+      t.style.color="red";
+ //set the x position of the filter label                             
+      t.style.marginLeft=YBarXVal(diskLambda, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen).toString()+"px";
+      t.innerHTML="<span style='font-size:xx-small'>Filter</span>";
+      newPlotTenId.appendChild(t);                            
+      document.body.appendChild(newPlotTenId);
+//console.log(YBarXVal(diskLambda, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen));
+
+                                      //JB
+
+              } else if (diskLambda>maxXData){
+                              //JB
+
+                 xShiftDum = YBar(680, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen);
+//variable to get the text input box's value for the filter                   
+        var filter = document.getElementById('diskLam');
+
+//create a p element the display the word Filter above the filter line
+      var t = document.createElement("p");
+      t.style.position="absolute";
+      t.style.display="block";
+      t.style.width="750px";
+      t.style.marginTop=yAxisYCnvs.toString()+"px";   
+      t.style.color="red";
+ //set the x position of the filter label                             
+      t.style.marginLeft=YBarXVal(680, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen).toString()+"px";
+      t.innerHTML="<span style='font-size:xx-small'>Filter</span>";
+      newPlotTenId.appendChild(t);                            
+      document.body.appendChild(newPlotTenId);
+console.log(YBarXVal(680, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen));
+
+
+      } else {
+                              //JB
+
+                 xShiftDum = YBar(minXData, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen);
+//variable to get the text input box's value for the filter                   
+        var filter = document.getElementById('diskLam');
+
+//create a p element the display the word Filter above the filter line
+      var t = document.createElement("p");
+      t.style.position="absolute";
+      t.style.display="block";
+      t.style.width="750px";
+      t.style.marginTop=yAxisYCnvs.toString()+"px";   
+      t.style.color="red";
+ //set the x position of the filter label                             
+      t.style.marginLeft=YBarXVal(minXData, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen).toString()+"px";
+      t.innerHTML="<span style='font-size:xx-small'>Filter</span>";
+      newPlotTenId.appendChild(t);                            
+      document.body.appendChild(newPlotTenId);
+console.log(YBarXVal(minXData, minXData, maxXData, barWidth, barHeight, yAxisYCnvs-60, RGBHex, newPlotTenId, SVGTen));
+
+
+              }
+
+                                      //JB
+
+/*Take the line created with YBar (has a given Id) and add an event listener
+ *  to the rectangle that changes the postition of the line and also sets the
+ *  filter input text box.
+*/
+var lineIn = document.getElementById("plineP10");
+//console.log(lineIn);
+ rect.addEventListener("click",function(){setP10(xMinP10+scaleP10*(event.offsetX-xAxisXCnvs));animateLine(lineIn);},false);
+                              //JB
+////a header for all lines with wavelengths less than 360 nm
+//          txtPrint("<span style='font-size:x-small'> <u>Lines with &#955</u> <sub>0</sub> <u><= 380[nm]</u></span>" , 15, 85, "black", newPlotTenId);
+//                              //JB
+
 
 
     } //end PLOT TEN
 
-//
-//
-//  *****   PLOT ELEVEN / PLOT 11
-//
-//
-// Plot Eleven: Life Zone
 
-    if (ifLineOnly === false) {
-
-        var plotRow = 0;
-        var plotCol = 2;
-
-//background color needs to be finessed so that white-ish stars will stand out:
-       if (teff > 6000.0){
-  //hotter white or blue-white star - darken the background (default background in #F0F0F0
-           wDiskColor = "#808080";  
-       } else {
-           wDiskColor = wDefaultColor;
-       }
-
-        // Calculation of steam line and ice line:
-
-        //Assuming liquid salt-free water at one atmospheric pGasressure is necessary:
-        //var atmosPres = 101.0;  // test - kPa
-//        var steamTemp = waterPhase(atmosPress);
-       var steamTemp = solventPhase(atmosPress, phaseA, phaseB, phaseC);
-        //console.log("steamTemp " + steamTemp); // + " steamTemp2 " + steamTemp2);
-        //var steamTemp = 373.0; // K = 100 C
-        //var iceTemp = 273.0; //K = 0 C
-        var iceTemp = tripleTemp; 
-
-        steamTemp = steamTemp - greenHouse;
-        iceTemp = iceTemp - greenHouse;
-        var logSteamLine, logIceLine;
-        var au = 1.4960e13; // 1 AU in cm
-        var rSun = 6.955e10; // solar radii to cm
-        var log1AULine = logAu - logRSun; // 1 AU in solar radii
-        //Steam line:
-        //Set steamTemp equal to planetary surface temp and find distance that balances stellar irradiance 
-        //absorbed by planetary cross-section with planet's bolometric thermal emission:
-        //Everything in solar units -> distance, d, in solar radii
-        logSteamLine = 2.0 * (Math.log(teff) - Math.log(steamTemp)) + logRadius + 0.5 * Math.log(1.0 - albedo);
-        //now the same for the ice line:
-        logIceLine = 2.0 * (Math.log(teff) - Math.log(iceTemp)) + logRadius + 0.5 * Math.log(1.0 - albedo);
-        var iceLineAU = Math.exp(logIceLine) * rSun / au;
-        var steamLineAU = Math.exp(logSteamLine) * rSun / au;
-        iceLineAU = iceLineAU.toPrecision(3);
-        steamLineAU = steamLineAU.toPrecision(3);
-        var steamTempRound = steamTemp.toPrecision(3);
-
-        // Convert solar radii to pixels:
-
-        var radiusScale = 20; //solar_radii-to-pixels!
-        var logScale = 20; //amplification factor for log pixels
-
-        // 
-        // Star radius in pixels:
-
-        //    var radiusPx = (radiusScale * radius);  //linear radius
-        var radiusPx = logScale * logTen(radiusScale * radius); //logarithmic radius
-
-        radiusPx = Math.ceil(radiusPx);
-        var radiusPxSteam = logScale * logTen(radiusScale * radius * Math.exp(logSteamLine));
-        radiusPxSteam = Math.ceil(radiusPxSteam);
-        var radiusPxIce = logScale * logTen(radiusScale * radius * Math.exp(logIceLine));
-        radiusPxIce = Math.ceil(radiusPxIce);
-        var radiusPx1AU = logScale * logTen(radiusScale * radius * Math.exp(log1AULine));
-        radiusPx1AU = Math.ceil(radiusPx1AU);
-        // Key radii in order of *DECREASING* size (important!):
-        var numZone = 7;
-        var radii = [];
-        radii.length = numZone;
-        rrI = saveRGB[0];
-        ggI = saveRGB[1];
-        bbI = saveRGB[2];
-        var starRGBHex = "rgb(" + rrI + "," + ggI + "," + bbI + ")";
-        var colors = [];
-        colors.length = numZone;
-        if (radiusPx1AU > (radiusPxIce + 3)){
-           radii = [radiusPx1AU+1, radiusPx1AU, radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
-           colors = ["#000000", wDiskColor, "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
-        }
-        if ( (radiusPx1AU >= radiusPxIce) && (radiusPx1AU < (radiusPxIce + 3)) ){
-           radii = [radiusPxIce + 3, radiusPx1AU, radiusPx1AU-1, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
-           colors = ["#0000FF", "#000000", "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
-        }
-        if ( (radiusPx1AU >= radiusPxSteam) && (radiusPx1AU < radiusPxIce) ){
-           radii = [radiusPxIce + 3, radiusPxIce, radiusPx1AU+1, radiusPx1AU, radiusPxSteam, radiusPxSteam - 3, radiusPx];
-           colors = ["#0000FF", "#00FF88", "#000000", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
-        }
-        if ( (radiusPx1AU >= (radiusPxSteam - 3)) && (radiusPx1AU < radiusPxSteam) ){
-           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPx1AU+1, radiusPx1AU, radiusPxSteam - 3, radiusPx];
-           colors = ["#0000FF", "#00FF88", "#FF0000", "#000000", "#FF0000", wDiskColor, starRGBHex];
-        }
-        if ( (radiusPx1AU >= radiusPx) && (radiusPx1AU < (radiusPxSteam - 3)) ){
-           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx1AU, radiusPx1AU-1,  radiusPx];
-           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, "#000000", wDiskColor, starRGBHex];
-        }
-        if (radiusPx1AU <= radiusPx){
-           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx, radiusPx1AU, radiusPx1AU-1];
-           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex, "#000000", starRGBHex];
-        }
-        //
-        //var titleYPos = xLowerYOffset - yRange + 40;
-        //var cnvsCtx = washer(xOffset - xRange / 2, yOffset, wDiskColor, plotElevenId);
-        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotElevenId, cnvsElevenId);
-        panelX = panelOrigin[0];
-        panelY = panelOrigin[1];
-        cnvsElevenCtx.fillStyle = wDiskColor;
-        cnvsElevenCtx.fillRect(0, 0, panelWidth, panelHeight);
-        // Add title annotation:
-
-        titleX = panelX + titleOffsetX;
-        titleY = panelY + titleOffsetY;
-
-        txtPrint("<span style='font-size:normal; color:blue' title='Assumes liquid salt-free water at one Earth atmosphere pressure needed for life'><a href='https://en.wikipedia.org/wiki/Circumstellar_habitable_zone' target='_blank'>Life zone for habitable planets</a></span><br />\n\
-     <span style='font-size:small'>(Logarithmic radius)</span>",
-                titleOffsetX, titleOffsetY, lineColor, plotElevenId);
-        var legendY = titleOffsetY;
-        var legendX = titleOffsetX + 320;
-        txtPrint("<span style='font-size:small'>"
-                + " <span style='color:#FF0000'>Steam line</span> " + steamLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> "
-                + " <span style='color:#00FF88'><strong>Life zone</strong></span><br /> "
-                + " <span style='color:#0000FF'>Ice line</span> " + iceLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> " 
-                + " <span style='color:#000000'>Reference line: 1 <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'>AU</a></span>",
-                legendX, legendY, lineColor, plotElevenId);
-//
-        txtPrint("<span style='font-size:small'>" + solvent + " boiling temp = " + steamTempRound + " K</span>", 
-          (legendX-75), (legendY+300), lineColor, plotElevenId);
-        //Get the Vega-calibrated colors from the intensity spectrum of each theta annulus:    
-        // moved earlier var intcolors = iColors(lambdaScale, intens, numDeps, numThetas, numLams, tauRos, temp);
-
-        //  Loop over radial zones - largest to smallest
-        for (var i = 0; i < radii.length; i++) {
-
-            var radiusStr = numToPxStrng(radii[i]);
-            // Adjust position to center star:
-            // Radius is really the *diameter* of the symbol
-
-// Adjust position to center star:
-// Radius is really the *diameter* of the symbol
-            var yCenterCnvs = panelHeight / 2; 
-            var xCenterCnvs = panelWidth / 2; 
-
-            cnvsElevenCtx.beginPath();
-            //cnvsSevenCtx.strokeStyle = RGBHex;
-            //var grd=cnvsElevenCtx.createRadialGradient(xOffsetICnvs, xLowerYOffsetICnvs, radiusPxICnvs,
-            //          xOffsetICnvs, xLowerYOffsetICnvs, radiusPxICnvsNext);
-            //grd.addColorStop(0, RGBHex);
-            //grd.addColorStop(1, RGBHexNext);
-            cnvsElevenCtx.fillStyle=colors[i];
-//            cnvsElevenCtx.fillStyle = grd;
-            cnvsElevenCtx.arc(xCenterCnvs, yCenterCnvs, radii[i], 0, 2*Math.PI);
-            //cnvsSevenCtx.stroke();
-            cnvsElevenCtx.fill();
-            //
-        }  //i loop (thetas)
-
-    }
-
+				
     //
     //
     //  *****   PLOT NINE / PLOT 9
@@ -6718,19 +7860,22 @@ Spectral line \n\
      <em>L</em><sub>Sun</sub></a></span> ";
         //
         var fineness = "fine";
-        var panelOrigin = washer(plotRow, plotCol, wDiskColor, plotNineId, cnvsNineId);
+				//JB
+       var panelOrigin = washer(plotRow, plotCol, wDiskColor, newPlotNineId, SVGNine);
+
+				//JB
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsNineCtx.fillStyle = wDiskColor;
-        cnvsNineCtx.fillRect(0, 0, panelWidth, panelHeight);
+
+				//JB
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotNineId, cnvsNineCtx);
+                newPlotNineId, SVGNine);
 
         var yAxisParams = YAxis(panelX, panelY,
-                minYData, maxYData, yAxisName,
-                plotNineId, cnvsNineCtx);
-
+                minYData, maxYData, yAxisName, fineness,
+                newPlotNineId, SVGNine);
+				//JB
         //
 //        xOffset = xAxisParams[0];
 //        yOffset = yAxisParams[4];
@@ -6748,8 +7893,10 @@ Spectral line \n\
         //
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+				//JB
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://www.ap.smu.ca/~ishort/hrdtest3.html' target='_blank'>H-R Diagram</a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotNineId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotNineId);
+				//JB
         // *********  Input stellar data
 
         //Sun
@@ -6896,6 +8043,89 @@ Spectral line \n\
   
   } // end i loop
 
+
+                              //JB
+                              //
+//create text box that displays the coordinates (in units of the x and y axes) and set the coordinates equal to the text content
+      var textP9 = document.createElementNS(xmlW3,'text');
+//    textP9.setAttribute('id',"textP9");
+      textP9.setAttribute('x',180);
+        textP9.setAttribute('y',325);
+        textP9.setAttribute('font-size',"10");
+      textP9.textContent="(?,?)";
+      textP9.setAttribute('id',"subtext");
+      textP9.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGNine.appendChild(textP9);
+
+//function that sets the text content to the x and y positions (in the graph's units)
+      function convertTextP9(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+
+      textP9.textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      //console.log(text.textContent)
+      SVGNine.appendChild(textP9);
+      //console.log(text.textContent);
+      }else{
+
+        textP9.textContent="(?,?)";
+        SVGNine.appendChild(textP9);
+      
+      }
+              }
+
+      function check(x,y){
+      console.log(x+","+y);
+              }
+                              //
+                              //
+                              //JB
+//function to set dials. Is called upon click.
+      function set (XV,YV){
+//convert the x value into units of Kelvin and set
+              var HRDX = Math.pow(10,XV);
+              var XStr = String(HRDX);
+              settingsId[0].value=HRDX;
+              $("#Teff").roundSlider("setValue",HRDX);
+              
+              var logSunG = 4.44;
+              var teffSun = 5777;
+              var massIn = document.getElementsByName("starMass")[0];
+              var radiusCal = (.5)*logTen((Math.pow(10,YV))*(Math.pow(teffSun/HRDX,4)));
+//use y value and mass to determine log(g) and set the surface gravity dial
+              var logMassIn = logTen(massIn.value);
+              var HRDY = logMassIn-radiusCal+logSunG;
+                var YStr = String(HRDY);
+                settingsId[1].value=HRDY;
+                $("#logg").roundSlider("setValue",HRDY);
+      //console.log(logMassIn);
+}
+
+
+
+//Varibles needed specifically for this plot.
+var minX = minXData;
+var maxX = maxXData;
+var minY = minYData;
+var maxY = maxYData;
+var scaleXPx = (minX-maxX)/xAxisLength ;
+//var offsetX = (event.offsetX)+xAxisXCnvs;
+var scaleYPx = (maxY-minY)/ (yAxisLength) ;
+//var offsetYP9 = (-event.offsetY+yAxisYCnvs+yAxisLength);
+
+
+/*create event listeners that change the text box's tect content when the 
+ * mouse is moved over
+*/
+      SVGNine.addEventListener("mousemove",function(){convertTextP9(minX-scaleXPx*(event.offsetX-xAxisLength-xAxisXCnvs)-1.5, minY+scaleYPx*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+//document.addEventListener("mousemove",function(){console.log(event.offsetY)});
+      SVGNine.addEventListener("mouseout",function(){convertTextP9(0, 0);});
+SVGNine.appendChild;
+                              //JB
+
+
+
 //Lines of constant radius first
 //
      var RGBHex = colHex(100, 100, 100);
@@ -6940,20 +8170,23 @@ Spectral line \n\
           var yTickPosCnvs = yAxisLength * (log10L - minYData) / rangeYData;
           // vertical position in pixels - data values increase upward:
           var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+				//JB
+	  var line = document.createElementNS(xmlW3,'polyline');
+//set the points that the line will follow
+	  line.setAttribute('points',(lastXShiftCnvs+","+ lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" "));
+	  line.setAttribute('stroke',"black");
 
-          cnvsNineCtx.fillStyle = RGBHex;
-          cnvsNineCtx.strokeStyle = RGBHex;
-          cnvsNineCtx.beginPath();
-          cnvsNineCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-          cnvsNineCtx.lineTo(xShiftCnvs, yShiftCnvs);
-          cnvsNineCtx.stroke();
 
+	  line.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	  SVGNine.appendChild(line);
+				//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
   } //i loop over Teff
-
-          txtPrint("<span style='font-size:xx-small'>" + HRradii[r] + " R<sub>Sun</sub></span>", 
-                    xShiftCnvs+5, yShiftCnvs-5, RGBHex, plotNineId);
+				//JB
+          txtPrint("<span style='font-size:xx-small'>" + HRradii[r] + " R<sub>Sun</sub></span>",
+                    xShiftCnvs+5, yShiftCnvs-5, RGBHex, newPlotNineId);
+				//JB
  } //r loop over radii
  
 
@@ -6983,13 +8216,44 @@ Spectral line \n\
         //console.log("logTen(msTeffs[i] " + logTen(msTeffs[i]) + " msLogLum[i] " + msLogLum[i]);
             // vertical position in pixels - data values increase upward:
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+				//JB
+//plot MS stars
+	    var dot = document.createElementNS(xmlW3,'circle');
+	    dot.setAttribute('cx',xShiftCnvs);
+            dot.setAttribute('cy',yShiftCnvs);
+            dot.setAttribute('r',dSizeCnvs);
+            dot.setAttribute('stroke',RGBHex);
+            dot.setAttribute('fill',wDefaultColor);
+            dot.setAttribute('id',"dot"+i);
+	    dot.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGNine.appendChild(dot);
+				//JB
 
-            cnvsNineCtx.fillStyle = RGBHex;
-            cnvsNineCtx.strokeStyle = RGBHex;
-            cnvsNineCtx.beginPath();
-            cnvsNineCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsNineCtx.stroke();
-        }
+var dotId = document.getElementById("dot"+i);//+","+;
+/*Function needed to be able to have values update for each 
+ * iteration of the loop. This is done because any value that is passed on 
+ * to the event listener doesn't get updated until the end of the loop
+ * (scope issue).
+ * Otherwise it attaches an event to all elements using only final 
+ * values used during LAST iteration of the loop.
+ *
+*/
+!function I(ii){
+ 
+        var   x = logTen(msTeffs[ii]);
+        var   y = msLogLum[ii];  
+      
+/*Get a specific MS star element and add event listeners that return the 
+ * center position of the circle (setting text content). Also, an event
+ * listener created that sets the dials on click.
+ */ 
+ dotId.addEventListener("mouseover",function(){convertTextP9(x,y);},false);
+ dotId.addEventListener("mouseout",function(){convertTextP9(0, 0);},false);
+ dotId.addEventListener("click",function(){set(x,y);},false);     
+//check(x,y);
+}(i);
+//  SVGNine.appendChild(dot);
+}
 
 
 //RGB stars
@@ -7014,12 +8278,44 @@ Spectral line \n\
             // vertical position in pixels - data values increase upward:
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
 
-            cnvsNineCtx.fillStyle = RGBHex;
-            cnvsNineCtx.strokeStyle = RGBHex;
-            cnvsNineCtx.beginPath();
-            cnvsNineCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsNineCtx.stroke();
-        }
+				//JB
+            var dot2 = document.createElementNS(xmlW3,'circle');
+            dot2.setAttribute('cx',xShiftCnvs);
+            dot2.setAttribute('cy',yShiftCnvs);
+            dot2.setAttribute('r',dSizeCnvs);
+            dot2.setAttribute('stroke',RGBHex);
+            dot2.setAttribute('fill',wDefaultColor);
+            dot2.setAttribute('id',"dotTwo"+i);
+            dot2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGNine.appendChild(dot2);
+                                //JB
+
+var dotId2 = document.getElementById("dotTwo"+i);//+","+;
+/*Function needed to be able to have values update for each 
+ *  iteration of the loop. This is done because any value that is passed on 
+ *  to the event listener doesn't get updated until the end of the loop 
+ *  (scope issue).
+ *  Otherwise it attaches an event to all elements using only final 
+ *  values used during LAST iteration of the loop.
+ *  
+ */ 
+        !function I2(ii){
+            var x2 = logTen(rgbTeffs[i]);
+            var y2 = rgbLogLum[i];
+
+
+/*Get a specific RGB star element and add event listeners that return the 
+ *  center position of the circle (setting text content). Also, an event
+ *  listener created that sets the dials on click.
+ *  */
+ dotId2.addEventListener("mouseover",function(){convertTextP9(x2,y2);},false);
+ dotId2.addEventListener("mouseout",function(){convertTextP9(0, 0);},false);
+ dotId2.addEventListener("click",function(){set(x2,y2);console.log(1);},false);
+//check(x2,y2);
+}(i);
+
+
+ }
 
 
 // //SGB stars
@@ -7042,13 +8338,48 @@ Spectral line \n\
   var yTickPosCnvs = yAxisLength * (sgbLogLum[i] - minYData) / rangeYData;
  // vertical position in pixels - data values increase upward:
   var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
- 
-            cnvsNineCtx.fillStyle = RGBHex;
-            cnvsNineCtx.strokeStyle = RGBHex;
-            cnvsNineCtx.beginPath();
-            cnvsNineCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsNineCtx.stroke();
- 
+				
+				//JB
+            var dot3 = document.createElementNS(xmlW3,'circle');
+            dot3.setAttribute('cx',xShiftCnvs);
+            dot3.setAttribute('cy',yShiftCnvs);
+            dot3.setAttribute('r',dSizeCnvs);
+            dot3.setAttribute('stroke',RGBHex);
+            dot3.setAttribute('fill',wDefaultColor);
+            dot3.setAttribute('id',"dotThree"+i);
+            dot3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGNine.appendChild(dot3);
+
+				//JB
+
+  /*Function needed to be able to have values update for each 
+ * iteration of the loop. This is done because any value that is passed on 
+ * to the event listener doesn't get updated until the end of the loop 
+ * (scope issue).
+ * Otherwise it attaches an event to all elements using only final 
+ * values used during LAST iteration of the loop.
+ *
+*/
+
+var dotId3 = document.getElementById("dotThree"+i);//+","+;
+!function I3(){
+            var x3 = logTen(sgbTeffs[i]);
+            var y3 = sgbLogLum[i];
+
+/*Get a specific SGB star element and add event listeners that return the 
+ * center position of the circle (setting text content). Also, an event
+ * listener created that sets the dials on click.
+ */
+//check(x3,y3);
+
+ dotId3.addEventListener("mouseover",function(){convertTextP9(x3,y3);},false);
+ dotId3.addEventListener("mouseout",function(){convertTextP9(0, 0);},false);
+ dotId3.addEventListener("click",function(){set(x3,y3);console.log(1);},false);
+             SVGNine.appendChild(dot3);
+//check(x3,y3);
+}(i);
+
+
   }
 
 
@@ -7068,40 +8399,74 @@ Spectral line \n\
         var rrI = saveRGB[0];
         var ggI = saveRGB[1];
         var bbI = saveRGB[2];
+        var RGBHex = colHex(rrI, ggI, bbI);
+
 //
-            cnvsNineCtx.beginPath();
-            cnvsNineCtx.strokeStyle="#000000";
-            cnvsNineCtx.arc(xShiftCnvs, yShiftCnvs, 1.1 * radiusPxThis, 0, 2*Math.PI);
-            cnvsNineCtx.stroke();
-            cnvsNineCtx.fill();
-        //plotPnt(xShift, yShift, rrI, ggI, bbI, opac, radiusPxThis, plotNineId);
-            var RGBHex = colHex(rrI, ggI, bbI);
-            cnvsNineCtx.beginPath();
-            cnvsNineCtx.strokeStyle=RGBHex;
-            cnvsNineCtx.fillStyle=RGBHex;
-            cnvsNineCtx.arc(xShiftCnvs, yShiftCnvs, 1.05 * radiusPxThis, 0, 2*Math.PI);
-            cnvsNineCtx.stroke();
-            cnvsNineCtx.fill();
+			//JB
+            var x4 = logTen(teff);
+            var y4 = logTen(bolLum);
+//create a circle representing our star
+	    var dot4 = document.createElementNS(xmlW3,'circle');
+	    dot4.setAttribute('cx',xShiftCnvs);
+            dot4.setAttribute('cy',yShiftCnvs);
+            dot4.setAttribute('r',1.1 * radiusPxThis);
+            dot4.setAttribute('stroke',"white");
+            dot4.setAttribute('fill',wDefaultColor);
+
+//event listeners added directly onto the one circle
+            dot4.addEventListener("mouseover",function(){convertTextP9(x4, y4);});
+ dot4.addEventListener("click",function(){set(x4,y4);console.log(1);},false);
+            dot4.addEventListener("mouseout",function(){convertTextP9(0, 0);});
+
+	    dot4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+//create another circle behind our star to make it more visable
+
+	    var dot5 = document.createElementNS(xmlW3,'circle');
+            dot5.setAttribute('cx',xShiftCnvs);
+            dot5.setAttribute('cy',yShiftCnvs);
+            dot5.setAttribute('r',1.05 * radiusPxThis);
+	    dot5.setAttribute('stroke',RGBHex);
+            dot5.setAttribute('fill',RGBHex);
+//event listeners added directly onto the one circle
+            dot5.addEventListener("mouseover",function(){convertTextP9(x4, y4);});
+            dot5.addEventListener("mouseout",function(){convertTextP9(0, 0);});
+ dot5.addEventListener("click",function(){set(x4,y4);console.log(1);},false);
+	    dot5.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+		SVGNine.appendChild(dot4);
+	    
+	                SVGNine.appendChild(dot5);
+
+			//JB
+
         //Now overplot Luminosity class markers:
 
             //I
         var xShift = xAxisXCnvs + xAxisLength * (logTen(sgbTeffs[sgbNum-1]) - minXData) / rangeXData; // pixels 
         var yShift = (yAxisYCnvs + yAxisLength) - (yAxisLength * (sgbLogLum[sgbNum - 1] - minYData) / rangeYData);
+				//JB
         txtPrint("<span style='font-size:normal'><a href='http://en.wikipedia.org/wiki/Stellar_classification' target='_blank'>\n\
-         I</a></span>", xShift, yShift, lineColor, plotNineId);
+I</a></span>", xShift, yShift, lineColor, newPlotNineId);
+				//JB
         //III
         xShift = xAxisXCnvs + xAxisLength * (logTen(rgbTeffs[rgbNum-1]) - minXData) / rangeXData; // pixels 
         yShift = (yAxisYCnvs + yAxisLength) - (yAxisLength * (rgbLogLum[rgbNum - 8] - minYData) / rangeYData);
+				//JB
         txtPrint("<span style='font-size:normal'><a href='http://en.wikipedia.org/wiki/Stellar_classification' title='Giants' target='_blank'>\n\
-     III</a></span>", xShift, yShift, lineColor, plotNineId);
+     III</a></span>", xShift, yShift, lineColor, newPlotNineId);
+				//JB
         //V
         xShift = xAxisXCnvs + xAxisLength * (logTen(msTeffs[msNum-1]) - minXData) / rangeXData; // pixels 
         yShift = (yAxisYCnvs + yAxisLength) - (yAxisLength * (msLogLum[msNum - 8] - minYData) / rangeYData);
+				//JB
         txtPrint("<span style='font-size:normal'><a href='http://en.wikipedia.org/wiki/Stellar_classification' title='Main Sequence, Dwarfs' target='_blank'>\n\
-     V</a></span>", xShift, yShift, lineColor, plotNineId);
+     V</a></span>", xShift, yShift, lineColor, newPlotNineId);
     }
 
-
+				//JB
+					
+					
 
 // ****************************************
     //
@@ -7231,216 +8596,6 @@ Spectral line \n\
                 xShift, yShift, lineColor, plotOneId);
     }
 */
-//
-//
-//  *****   PLOT TWO / PLOT 2
-//
-//
-
-// Plot two: log(Tau) vs Temp
-// 
-    if ((ifLineOnly === false) && (ifShowAtmos === true)) {
-
-        var plotRow = 2;
-        var plotCol = 2;
-        var minXData = logE * tauRos[1][0];
-        var maxXData = logE * tauRos[1][numDeps - 1];
-        var xAxisName = "<span title='Rosseland mean optical depth'><a href='http://en.wikipedia.org/wiki/Optical_depth_%28astrophysics%29' target='_blank'>Log<sub>10</sub> <em>&#964</em><sub>Ros</sub></a></span>";
-        var minYData = temp[0][0];
-        var maxYData = temp[0][numDeps - 1];
-        var yAxisName = "<em>T</em><sub>Kin</sub> (K)";
-        var fineness = "normal";
-
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotTwoId, cnvsTwoId);
-        panelX = panelOrigin[0];
-        panelY = panelOrigin[1];
-        cnvsTwoCtx.fillStyle = wDefaultColor;
-        cnvsTwoCtx.fillRect(0, 0, panelWidth, panelHeight);
-        var xAxisParams = XAxis(panelX, panelY,
-                minXData, maxXData, xAxisName, fineness,
-                plotTwoId, cnvsTwoCtx);
-        //no! var cnvsCtx = xAxisParams[8];
-        var yAxisParams = YAxis(panelX, panelY,
-                minYData, maxYData, yAxisName,
-                plotTwoId, cnvsTwoCtx);
-        //
-        //xOffset = xAxisParams[0];
-        //yOffset = xAxisParams[4];
-        var rangeXData = xAxisParams[1];
-        var deltaXData = xAxisParams[2];
-        var deltaXPxl = xAxisParams[3];
-        var rangeYData = yAxisParams[1];
-        var deltaYData = yAxisParams[2];
-        var deltaYPxl = yAxisParams[3];
-        //var xLowerYOffset = xAxisParams[5];
-        minXData = xAxisParams[6]; //updated value
-        minYData = yAxisParams[6]; //updated value
-        maxXData = xAxisParams[7]; //updated value
-        maxYData = yAxisParams[7]; //updated value    
-        yFinesse = 0;       
-        xFinesse = 0;       
-        //
-        // Tau=1 cross-hair
-
-        var barWidth = 1.0;
-        var barColor = "#777777";
-        var tTau1 = tauPoint(numDeps, tauRos, 1.0);
-        xShift = YBar(logE * tauRos[1][tTau1], minXData, maxXData, barWidth, yAxisLength,
-                yFinesse, barColor, plotTwoId, cnvsTwoCtx);
-
-        yShift = XBar(temp[0][tTau1], minYData, maxYData, xAxisLength, barHeight,
-                xFinesse, barColor, plotTwoId, cnvsTwoCtx);
-        barHeight = 1.0;
-        // Add label
-        txtPrint("<span style='font-size:small; color:#444444'><em>&#964</em><sub>Ros</sub>=1</span>",
-                xShift, yShift, lineColor, plotTwoId);
-        // Tau_lambda(lambda_0) = 1 cross-hair
-
-        // Get depth index where monochromatic line center Tau_l ~ 1:
-        var indxLam0 = keyLambds[0]; // line center
-        var tauLam0 = [];
-        tauLam0.length = 2;
-        tauLam0[0] = [];
-        tauLam0[1] = [];
-        tauLam0[0].length = numDeps;
-        tauLam0[1].length = numDeps;
-        for (var i = 0; i < numDeps - 1; i++) {
-            tauLam0[0][i] = Math.exp(logTauL[indxLam0][i]);
-            tauLam0[1][i] = logTauL[indxLam0][i];
-        }
-        var tTauL1 = tauPoint(numDeps, tauLam0, 1.0);
-        var barWidth = 1.0;
-        var barColor = "#00FF77";
-        //console.log("logE * tauRos[1][tTauL1] " + logE * tauRos[1][tTauL1]);
-
-        xShift = YBar(logE * tauRos[1][tTauL1], minXData, maxXData, barWidth, yAxisLength,
-                yFinesse, barColor, plotTwoId, cnvsTwoCtx);
-        //console.log("Bar: xShift = " + xShift);
-
-        barHeight = 1.0;
-        yShift = XBar(temp[0][tTauL1], minYData, maxYData, xAxisLength, barHeight,
-                xFinesse, barColor, plotTwoId, cnvsTwoCtx);
-        // Add label
-        RGBHex = colHex(0, 255, 100);
-        txtPrint("<span style='font-size:small'><em>&#964</em><sub><em>&#955</em>_0</sub>=1</span>",
-                xShift+15, yShift, RGBHex, plotTwoId);
-        titleX = panelX + titleOffsetX;
-        titleY = panelY + titleOffsetY;
-        //        titleXPos, titleYPos - 40, zeroInt, zeroInt, zeroInt, masterId);
-        txtPrint("<span style='font-size:normal; color:blue'>Gas temperature </span>",
-                titleOffsetX, titleOffsetY, lineColor, plotTwoId);
-        //Data loop - plot the result!
-
-        //var dSize = 5.0; //plot point size
-        var dSizeCnvs = 1.0; //plot point size
-        var opac = 1.0; //opacity
-        // RGB color
-        var r255 = 0;
-        var g255 = 0;
-        var b255 = 255; //blue
-
-        var ii;
-        var xTickPosCnvs = xAxisLength * (logE * tauRos[1][0] - minXData) / rangeXData; // pixels   
-
-        // horizontal position in pixels - data values increase rightward:
-        var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-
-        var yTickPosCnvs = yAxisLength * (temp[0][0] - minYData) / rangeYData;
-        // vertical position in pixels - data values increase upward:
-        var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-
-        for (var i = 0; i < numDeps; i++) {
-
-            ii = 1.0 * i;
-            var xTickPosCnvs = xAxisLength * (logE * tauRos[1][i] - minXData) / rangeXData; // pixels   
-
-            // horizontal position in pixels - data values increase rightward:
-            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-
-            var yTickPosCnvs = yAxisLength * (temp[0][i] - minYData) / rangeYData;
-            // vertical position in pixels - data values increase upward:
-            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-
-//Plot points
-            cnvsTwoCtx.strokeStyle=lineColor; 
-            cnvsTwoCtx.beginPath();
-            cnvsTwoCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsTwoCtx.stroke();
-//Line plot
-            cnvsTwoCtx.beginPath();
-            cnvsTwoCtx.strokeStyle=lineColor; 
-            cnvsTwoCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsTwoCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsTwoCtx.stroke();  
-            lastXShiftCnvs = xShiftCnvs;
-            lastYShiftCnvs = yShiftCnvs;
-        }
-
-//  Loop over limb darkening sub-disks - largest to smallest, and add color-coded Tau(theta) = 1 markers
-
-        //dSize = 8.0;
-        dSizeCnvs = 4.0;
-
-        // Disk centre:
-        //This approach does not allow for calibration easily:
-        //now done earlier var bvr = bandIntens[2][0] + bandIntens[3][0] + bandIntens[4][0];
-        var brightScale = 255.0 / Math.max(bandIntens[2][0] / bvr, bandIntens[3][0] / bvr, bandIntens[4][0] / bvr);
-        // *Raw* Vega: r g b 183 160 255
-        //now down above: var rgbVega = [183.0 / 255.0, 160.0 / 255.0, 255.0 / 255.0];
-        for (var i = numThetas - 1; i >= 0; i--) {
-
-            ii = 1.0 * i;
-            //     iCosThetaI = limbTheta1 - ii * limbDelta;
-            //     iIntMaxI = interpol(iCosTheta, iIntMax, iCosThetaI);
-
-            //numPrint(i, 50, 100 + i * 20, zeroInt, zeroInt, zeroInt, masterId);
-            // LTE Eddington-Barbier limb darkening: I(Tau=0, cos(theta)=t) = B(T(Tau=t))
-            var cosFctr = cosTheta[1][i];
-            //  var cosFctr = iCosThetaI;
-            //numPrint(cosFctr, 100, 100+i*20, zeroInt, zeroInt, zeroInt, masterId);
-            var dpthIndx = tauPoint(numDeps, tauRos, cosFctr);
-            //numPrint(dpthIndx, 100, 100+i*20, zeroInt, zeroInt, zeroInt, masterId);
-
-            r255 = Math.ceil(brightScale * (bandIntens[4][i] / bvr) / rgbVega[0]); // / vegaBVR[2]);
-            g255 = Math.ceil(brightScale * (bandIntens[3][i] / bvr) / rgbVega[1]); // / vegaBVR[1]);
-            b255 = Math.ceil(brightScale * (bandIntens[2][i] / bvr) / rgbVega[2]); // / vegaBVR[0]);
-
-            var xTickPosCnvs = xAxisLength * (logE * tauRos[1][dpthIndx] - minXData) / rangeXData; // pixels   
-
-            // horizontal position in pixels - data values increase rightward:
-            //var xShift = xOffset + xTickPos;
-            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;// + 200;
-            ////stringify and add unit:
-            //        var xShiftStr = numToPxStrng(xShift);
-
-            //var yTickPos = yRange * (temp[0][dpthIndx] - minYData) / rangeYData;
-            var yTickPosCnvs = yAxisLength * (temp[0][dpthIndx] - minYData) / rangeYData;
-            // vertical position in pixels - data values increase upward:
-            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-
-            var RGBHex = colHex(r255, g255, b255);
-            cnvsTwoCtx.beginPath();
-            cnvsTwoCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsTwoCtx.strokeStyle = RGBHex;
-            cnvsTwoCtx.fillStyle = RGBHex;
-            //cnvsCtx.strokeStyle = "rgba(r255, g255, b255, 1.0)";
-            //cnvsCtx.strokeStyle = "#FF0000"; //test
-            cnvsTwoCtx.stroke();
-            cnvsTwoCtx.fill();
-        }
-
-// legend using dot of last color in loop directly above:
-        //plotPnt(titleX, titleY + 10, r255, g255, b255, opac, dSize, plotTwoId);
-            cnvsTwoCtx.beginPath();
-            cnvsTwoCtx.strokeStyle = RGBHex;
-            cnvsTwoCtx.fillStyle = RGBHex;
-            cnvsTwoCtx.arc(titleOffsetX + 365, titleOffsetY+10, dSizeCnvs, 0, 2*Math.PI);
-            cnvsTwoCtx.stroke();
-            cnvsTwoCtx.fill();
-        txtPrint("<span title='Limb darkening depths of &#964_Ros(&#952) = 1'><em>&#964</em><sub>Ros</sub>(0 < <em>&#952</em> < 90<sup>o</sup>) = 1</span>",
-                titleOffsetX + 200, titleOffsetY, lineColor, plotTwoId);
-
-    }
 
     //
     //
@@ -7477,17 +8632,19 @@ Spectral line \n\
 
         var fineness = "normal";
         //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotThreeId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotThreeId, cnvsThreeId);
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotThreeId, SVGThree);
+				//JB
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsThreeCtx.fillStyle = wDefaultColor;
-        cnvsThreeCtx.fillRect(0, 0, panelWidth, panelHeight);
+	SVGThree.setAttribute('fill',wDefaultColor);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotThreeId, cnvsThreeCtx);
+                newPlotThreeId, SVGThree);
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotThreeId, cnvsThreeCtx);
+                fineness,newPlotThreeId, SVGThree);
+
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
         var rangeXData = xAxisParams[1];
@@ -7506,12 +8663,14 @@ Spectral line \n\
         //
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("log Pressure: <span style='color:blue' title='Total pressure'><strong><em>P</em><sub>Tot</sub></strong></span> "
                 + " <a href='http://en.wikipedia.org/wiki/Gas_laws' target='_blank'><span style='color:#00FF88' title='Gas pressure'><em>P</em><sub>Gas</sub></span></a> "
                 + " <a href='http://en.wikipedia.org/wiki/Radiation_pressure' target='_blank'><span style='color:red' title='Radiation pressure'><em>P</em><sub>Rad</sub></span></a> " +
                   " <span style='color:black' title='Partial electron pressure'><em>P</em><sub>e</sub></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotThreeId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotThreeId);
 
+					//JB
         //Data loop - plot the result!
 
         var dSizeCnvs = 2.0; //plot point size
@@ -7543,9 +8702,134 @@ Spectral line \n\
          var lastYTickPosBCnvs = yAxisLength * (logE * newPe[1][0] - minYData) / rangeYData;
          // vertical position in pixels - data values increase upward:
          var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
-         var lastYShiftGCnvs = (yAxisYCnvs + yAxisLength) - yTickPosGCnvs;
+         var lastYShiftGCnvs =(yAxisYCnvs + yAxisLength) - yTickPosGCnvs;
          var lastYShiftRCnvs = (yAxisYCnvs + yAxisLength) - yTickPosRCnvs;
          var lastYShiftBCnvs = (yAxisYCnvs + yAxisLength) - yTickPosBCnvs;
+
+        
+
+
+
+                                      //JB
+/*text box that will have text content equal to the 
+ * x and y coordinates on the SVG
+*/
+      var textP3 = document.createElementNS(xmlW3,'text');
+      textP3.setAttribute('x',325);
+        textP3.setAttribute('y',325);
+        textP3.setAttribute('font-size',"10");
+      textP3.setAttribute('id',"subtextP3");
+      textP3.setAttribute('name',"subtextP3");
+      textP3.textContent = "(?,?)";
+      textP3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+      SVGThree.appendChild(textP3);
+
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP3 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP3(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP3 = document.getElementsByName("subtextP3").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP3==1){
+      document.getElementsByName("subtextP3")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGThree.appendChild(textP3);
+      
+      }else if(nTextsP3>1){
+      for(var i = 0; i < nTextsP3; i++){
+      var extraText = document.getElementsByName("subtextP3")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGThree.appendChild(textP3);
+      }//end for loop
+
+      document.getElementsByName("subtextP3")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGThree.appendChild(textP3);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP3")[0].textContent="(?,?)";
+        SVGThree.appendChild(textP3);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+
+/*function that sets that sets the text content 
+ * to the x and y coordinates on the SVG
+*/
+/*      function convertTextP3(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+
+      textP3.textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      //console.log(text.textContent)
+      SVGThree.appendChild(textP3);
+      }else{
+
+        textP3.textContent="(?,?)";
+        SVGThree.appendChild(textP3);
+      
+      }
+              }
+*/
+//variables needed specifiaclly for this plot
+var minXP3 = minXData;
+var maxXP3 = maxXData;
+var minYP3 = minYData;
+var maxYP3 = maxYData;
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP3 = Math.abs((maxXP3-minXP3)/xAxisLength) ;
+//var offsetXP3 = ($("#SVG3").offset().left)+xAxisXCnvs;
+var scaleYPxP3 = (maxYP3-minYP3)/yAxisLength ;
+//var offsetYP3 = ($("#SVG3").offset().top+yAxisYCnvs);
+
+
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+
+
+      SVGThree.addEventListener("mousemove",function(){convertTextP3(minXP3+scaleXPxP3*(event.offsetX-xAxisXCnvs), minYP3+scaleYPxP3*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      
+      SVGThree.addEventListener("mouseout",function(){convertTextP3(0, 0);});
+
+                                      //JB
+
+
+
+      // Avoid upper boundary at i=0
+
+
         // Avoid upper boundary at i=0
         for (var i = 1; i < numDeps; i++) {
 
@@ -7556,7 +8840,7 @@ Spectral line \n\
             var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
 
             var yTickPosCnvs = yAxisLength * (logE * logPTot[i] - minYData) / rangeYData;
-            var yTickPosGCnvs = yAxisLength * (logE * pGas[1][i] - minYData) / rangeYData;
+	    var yTickPosGCnvs = yAxisLength * (logE * pGas[1][i] - minYData) / rangeYData;
             var yTickPosRCnvs = yAxisLength * (logE * pRad[1][i] - minYData) / rangeYData;
             var yTickPosBCnvs = yAxisLength * (logE * newPe[1][i] - minYData) / rangeYData;
             // vertical position in pixels - data values increase upward:
@@ -7565,48 +8849,78 @@ Spectral line \n\
             var yShiftRCnvs = (yAxisYCnvs + yAxisLength) - yTickPosRCnvs;
             var yShiftBCnvs = (yAxisYCnvs + yAxisLength) - yTickPosBCnvs;
 
-//Plot points
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            cnvsThreeCtx.strokeStyle = "#0000FF";
-            cnvsThreeCtx.stroke();
-//Line plots
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.strokeStyle="#0000FF"; 
-            cnvsThreeCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsThreeCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsThreeCtx.stroke();  
-//
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.arc(xShiftCnvs, yShiftGCnvs, dSizeGCnvs, 0, 2*Math.PI);
-            cnvsThreeCtx.strokeStyle = "#00FF00";
-            cnvsThreeCtx.stroke();
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.strokeStyle="#00FF00"; 
-            cnvsThreeCtx.moveTo(lastXShiftCnvs, lastYShiftGCnvs);
-            cnvsThreeCtx.lineTo(xShiftCnvs, yShiftGCnvs);
-            cnvsThreeCtx.stroke();  
-//
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.arc(xShiftCnvs, yShiftRCnvs, dSizeGCnvs, 0, 2*Math.PI);
-            cnvsThreeCtx.strokeStyle = "#FF0000";
-            cnvsThreeCtx.stroke();
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.strokeStyle="#FF0000"; 
-            cnvsThreeCtx.moveTo(lastXShiftCnvs, lastYShiftRCnvs);
-            cnvsThreeCtx.lineTo(xShiftCnvs, yShiftRCnvs);
-            cnvsThreeCtx.stroke();  
-//
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.arc(xShiftCnvs, yShiftBCnvs, dSizeGCnvs, 0, 2*Math.PI);
-            cnvsThreeCtx.strokeStyle = "#000000";
-            cnvsThreeCtx.stroke();
-            cnvsThreeCtx.beginPath();
-            cnvsThreeCtx.strokeStyle="#000000"; 
-            cnvsThreeCtx.moveTo(lastXShiftCnvs, lastYShiftBCnvs);
-            cnvsThreeCtx.lineTo(xShiftCnvs, yShiftBCnvs);
-            cnvsThreeCtx.stroke();  
-//
+				//JB
+				
+//plot points
+	    var dot = document.createElementNS(xmlW3, 'circle');	    
+	    dot.setAttribute('cx',xShiftCnvs);
+            dot.setAttribute('cy',yShiftCnvs);
+            dot.setAttribute('r',dSizeCnvs);
+            dot.setAttribute('fill',"none");
+            dot.setAttribute('stroke',"#0000FF");
+	    dot.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGThree.appendChild(dot);
+//plot line points
+	    var pline = document.createElementNS(xmlW3, 'polyline'); 
+	    pline.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" "));
+            pline.setAttribute('stroke',"#0000FF");
+            pline.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGThree.appendChild(pline);
+
+            var dot2 = document.createElementNS(xmlW3, 'circle');
+            dot2.setAttribute('cx',xShiftCnvs);
+            dot2.setAttribute('cy',yShiftGCnvs);
+            dot2.setAttribute('r',dSizeGCnvs);
+	    dot2.setAttribute('fill',"none");
+            dot2.setAttribute('stroke',"#00FF00");
+            dot2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            var dot3 = document.createElementNS(xmlW3, 'circle');
+            dot3.setAttribute('cx',xShiftCnvs);
+            dot3.setAttribute('cy',yShiftRCnvs);
+            dot3.setAttribute('r',dSizeGCnvs);
+	    dot3.setAttribute('fill',"red");
+            dot3.setAttribute('stroke',"#FF0000");
+            dot3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            var dot4 = document.createElementNS(xmlW3, 'circle');
+            dot4.setAttribute('cx',xShiftCnvs);
+            dot4.setAttribute('cy',yShiftBCnvs);
+            dot4.setAttribute('r',dSizeGCnvs);
+            dot4.setAttribute('stroke',"#000000");
+            dot4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+ SVGThree.appendChild(dot2);
+ SVGThree.appendChild(dot3);
+ SVGThree.appendChild(dot4);
+
+//for all but the first iteration of the loop
+
+//creates colored dots and lines for each function on the graph
+
+
+if(i!==1){
+            var pline2 = document.createElementNS(xmlW3, 'polyline');
+	    pline2.setAttribute('points',(lastXShiftCnvs+","+lastYShiftGCnvs+" "+xShiftCnvs+","+yShiftGCnvs+" "));
+	    pline2.setAttribute('stroke',"#00FF00");
+            pline2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            SVGThree.appendChild(pline2);
+	    
+            var pline3 = document.createElementNS(xmlW3, 'polyline');
+            pline3.setAttribute('points',(lastXShiftCnvs+","+lastYShiftRCnvs+" "+xShiftCnvs+","+yShiftRCnvs+" "));
+            pline3.setAttribute('stroke',"#FF0000");
+            pline3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            SVGThree.appendChild(pline3);
+                       var pline4 = document.createElementNS(xmlW3, 'polyline');
+            pline4.setAttribute('points',(lastXShiftCnvs+","+lastYShiftBCnvs+" "+xShiftCnvs+","+yShiftBCnvs+" "));
+            pline4.setAttribute('stroke',"#000000");
+            pline4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            SVGThree.appendChild(pline4);
+           }
+
+				//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
             lastYShiftGCnvs = yShiftGCnvs;
@@ -7620,16 +8934,16 @@ Spectral line \n\
         var barWidth = 1.0;
         var barColor = "#777777";
         yFinesse = 0.0;
+				//JB
         xShift = YBar(logE * tauRos[1][tTau1], minXData, maxXData, barWidth, yAxisLength,
-                yFinesse, barColor, plotThreeId, cnvsThreeCtx);
-        //console.log("Bar: xShift = " + xShift);
-
-        //console.log("PLOT THREE: logE*logPTot[tTau1] " + logE * logPTot[tTau1]);
+                yFinesse, barColor, newPlotThreeId, SVGThree);
         barHeight = 1.0;
         yShift = XBar(logE * logPTot[tTau1], minYData, maxYData, xAxisLength, barHeight,
-                xFinesse, barColor, plotThreeId, cnvsThreeCtx);
+                xFinesse, barColor, newPlotThreeId, SVGThree);
         txtPrint("<span style='font-size:small; color:#444444'><em>&#964</em><sub>Ros</sub>=1</span>",
-                xShift, yShift, lineColor, plotThreeId);
+                xShift, yShift, lineColor, newPlotThreeId);
+
+				//JB
     }
 
     //
@@ -7657,17 +8971,20 @@ Spectral line \n\
 
         var fineness = "normal";
 //
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFourId, cnvsFourId);
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotFourId, SVGFour);
+				//JB
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFourCtx.fillStyle = wDefaultColor;
-        cnvsFourCtx.fillRect(0, 0, panelWidth, panelHeight);
-        var xAxisParams = XAxis(panelX, panelY,
+				//JB
+	SVGFour.setAttribute('fill',wDefaultColor);
+ var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotFourId, cnvsFourCtx);
+                newPlotFourId, SVGFour);
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotFourId, cnvsFourCtx);
+                fineness,newPlotFourId, SVGFour);
+				//JB
         var rangeXData = xAxisParams[1];
         var deltaXData = xAxisParams[2];
         var deltaXPxl = xAxisParams[3];
@@ -7691,13 +9008,13 @@ Spectral line \n\
         var diskLamStr = diskLamLbl.toString(10);
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("<span style='font-size:small'><span style='color:#000000'><em>&#955</em><sub>Filter</sub> = " + diskLamStr + "nm</span><br /> ",
-                xAxisXCnvs+10, titleOffsetY+20, lineColor, plotFourId);
+                xAxisXCnvs+10, titleOffsetY+20, lineColor, newPlotFourId);
         // Add title annotation:
-
-
-        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>Limb darkening </a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotFourId);
+                 txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Limb_darkening' target='_blank'>Limb darkening </a></span>",
+        titleOffsetX, titleOffsetY, lineColor, newPlotFourId);
+					//JB
         //Data loop - plot the result!
 
         var dSizeCnvs = 2.0; //plot point size
@@ -7717,7 +9034,6 @@ Spectral line \n\
         var g255N = 0;
         var b255N = 0; //red
 
-
         var xTickPosCnvs = xAxisLength * (180.0 * Math.acos(cosTheta[1][0]) / Math.PI - minXData) / rangeXData; // pixels   
         // horizontal position in pixels - data values increase rightward:
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
@@ -7725,8 +9041,32 @@ Spectral line \n\
 
         // vertical position in pixels - data values increase upward:
         var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+
+//
+
+
+//variables required to create an array of colors based on the gaussian filter
+var ilLam0 = lamPoint(numMaster,masterLams,1.0e-7 * diskLambda);
+var lambdanm = masterLams[ilLam0]*1.0e7;
+var minZData = 0.0;
+var maxZData = tuneBandIntens[0]/norm;
+var rangeZData = maxZData - minZData;
+//console.log(diskLambda);
+                              
+                              //JB
+
+
 //
         for (var i = 1; i < numThetas; i++) {
+
+/*other variables required to create an array of colors based
+ * on the gaussian filter
+*/
+var zLevel = ((tuneBandIntens[i]/norm)-minZData)/rangeZData;
+
+var RGBHex = lambdaToRGB(lambdanm,zLevel);
+//console.log (RGBHex);
+
 
             xTickPosCnvs = xAxisLength * (180.0 * Math.acos(cosTheta[1][i]) / Math.PI - minXData) / rangeXData; // pixels   
             // horizontal position in pixels - data values increase rightward:
@@ -7738,22 +9078,142 @@ Spectral line \n\
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
 
 //Plot points
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            RGBHex = colHex(0, 0, 0);
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.stroke();
+			//JB
+            //RGBHex = colHex(0, 0, 0);
+	    var circle = document.createElementNS(xmlW3,'circle');
+	    circle.setAttribute('cx',xShiftCnvs);
+            circle.setAttribute('cy',yShiftCnvs);
+            circle.setAttribute('r',dSizeCnvs);
+            circle.setAttribute('stroke',RGBHex);
+            circle.setAttribute('fill',RGBHex);
+            circle.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFour.appendChild(circle);
+			//JB
 //line plot
-            cnvsFourCtx.beginPath();
-            cnvsFourCtx.strokeStyle = RGBHex;
-            cnvsFourCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsFourCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsFourCtx.stroke();  
-            //
-
+			//JB
+	    var line = document.createElementNS(xmlW3,'polyline');
+            line.setAttribute('stroke',"black");
+	    line.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" "));
+	    line.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGFour.appendChild(line);
+			//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
         }
+                              //JB
+// text element that holds the x and y coordinates of the cursor on the SVG
+      var textP4 = document.createElementNS(xmlW3,'text');
+      textP4.setAttribute('x',325);
+        textP4.setAttribute('y',325);
+        textP4.setAttribute('font-size',"10");
+      textP4.setAttribute('id',"subtextP4");
+      textP4.setAttribute('name',"subtextP4");
+      textP4.textContent="(?,?)";
+      textP4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGFour.appendChild(textP4);
+
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP4 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP4(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP4 = document.getElementsByName("subtextP4").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP4==1){
+      document.getElementsByName("subtextP4")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFour.appendChild(textP4);
+      
+      }else if(nTextsP4>1){
+      for(var i = 0; i < nTextsP4; i++){
+      var extraText = document.getElementsByName("subtextP4")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGFour.appendChild(textP4);
+      }//end for loop
+
+      document.getElementsByName("subtextP4")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFour.appendChild(textP4);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP4")[0].textContent="(?,?)";
+        SVGFour.appendChild(textP4);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+/* a function that sets the text content to the x and y cursor
+ * positons on the SVG (in units of he x and y axis)
+*/
+/*    
+      function convertTextP4(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+
+      textP4.textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      //console.log(text.textContent)
+      SVGFour.appendChild(textP4);
+      //console.log(text.textContent);
+      }else{
+
+        textP4.textContent="(?,?)";
+        SVGFour.appendChild(textP4);
+      
+      }
+              }
+*/
+//console.log(minXData);
+//console.log(maxXData);
+//
+//
+//variables specifically for this plot
+var minXP4 = minXData;
+var maxXP4 = maxXData;
+var minYP4 = minYData;
+var maxYP4 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP4 = Math.abs((maxXP4-minXP4)/xAxisLength) ;
+//var offsetXP4 = ($("#SVG4").offset().left)+xAxisXCnvs;
+var scaleYPxP4 = (maxYP4-minYP4)/yAxisLength ;
+//var offsetYP4 = ($("#SVG4").offset().top+yAxisYCnvs);
+
+
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+
+
+      SVGFour.addEventListener("mousemove",function(){convertTextP4(minXP4+scaleXPxP4*(event.offsetX-xAxisXCnvs), minYP4+scaleYPxP4*(-event.offsetY+yAxisYCnvs+yAxisLength));});      
+      SVGFour.addEventListener("mouseout",function(){convertTextP4(0, 0);});
+
     }
 //ifShowRad = true; //For movie 
 
@@ -7796,20 +9256,32 @@ Spectral line \n\
         //var yAxisName = "<span title='Monochromatic surface flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'>Log<sub>10</sub> <em>F</em><sub>&#955</sub> <br /> ergs s<sup>-1</sup> cm<sup>-3</sup></a></span>";
         //(xRange, xOffset, yRange, yOffset, wDefaultColor, plotFiveId);
 
-        var fineness = "coarse";
+        //var fineness = "coarse";
         //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsFiveId);
+
+					//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotFiveId, SVGFive);
+					//JB
+
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFiveCtx.fillStyle = wDefaultColor;
-        cnvsFiveCtx.fillRect(0, 0, panelWidth, panelHeight);
-        var xAxisParams = XAxis(panelX, panelY,
-                minXData, maxXData, xAxisName, fineness,
-                plotFiveId, cnvsFiveCtx);
 
-        var yAxisParams = YAxis(panelX, panelY,
-                minYData, maxYData, yAxisName,
-                plotFiveId, cnvsFiveCtx);
+				//JB
+	SVGFive.setAttribute("fill",wDefaultColor);
+				//JB
+
+				//JB
+		//console.log(SVGFive); is good, created fine
+		//console.log("Before: minXData, maxXData " + minXData + ", " + maxXData);
+                //console.log("XAxis called from PLOT 5:");
+	        var xAxisParams = XAxis(panelX, panelY,
+                minXData, maxXData, xAxisName, fineness,
+                newPlotFiveId, SVGFive);
+				//JB
+
+                                //JB
+        var yAxisParams = YAxis(panelX, panelY,minYData, maxYData, yAxisName, fineness, newPlotFiveId, SVGFive);                                                                       //JB
+
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
         var rangeXData = xAxisParams[1];
@@ -7822,6 +9294,7 @@ Spectral line \n\
         minYData = yAxisParams[6]; //updated value
         maxXData = xAxisParams[7]; //updated value
         maxYData = yAxisParams[7]; //updated value        
+		//console.log("After : minXData, maxXData " + minXData + ", " + maxXData + " rangeXData " + rangeXData);
         //
         // Add legend annotation:
 
@@ -7834,15 +9307,16 @@ Spectral line \n\
 //
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Spectral_energy_distribution' target='_blank'>\n\
      Spectral energy distribution (SED)</a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotFiveId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotFiveId);
         txtPrint("<span style='font-size:small'>"
                 + "<span><em>F</em><sub>&#955</sub> (<em>&#955</em><sub>Max</sub> = " + lamMaxStr + " nm)</span>, "
                 + " <span><em>I</em><sub>&#955</sub>,</span> <span style='color:#444444'> <em>&#952</em> = " + thet0Str + "<sup>o</sup></span>,  "
                 + " <span style='color:#444444'><em>&#952</em> = " + thetNStr + "<sup>o</sup></span></span>",
-                titleOffsetX, titleOffsetY+35, lineColor, plotFiveId);
-//
+                titleOffsetX, titleOffsetY+35, lineColor, newPlotFiveId);
+					//JB
         // Photometric bands centers
 
         var opac = 0.5;
@@ -7864,10 +9338,13 @@ Spectral line \n\
 //            var xTickPos = xRange * (band0 - minXData) / rangeXData; // pixels    
  //           var xShift = xOffset + xTickPos;
  //  
-        xShift = YBar(band0, minXData, maxXData, vBarWidth, yAxisLength,
-                yFinesse, RGBHex, plotFiveId, cnvsFiveCtx);
-        }; //end function UBVRIbands
 
+					//JB
+        xShift = YBar(band0, minXData, maxXData, vBarWidth, yAxisLength,
+                yFinesse, RGBHex, newPlotFiveId, SVGFive);
+        }; //end function UBVRIbands
+					
+					//JB
 
 //
         //
@@ -7876,6 +9353,130 @@ Spectral line \n\
         var numBands = filters.length;
         var lamUBVRI = [];
         lamUBVRI.length = numBands;
+
+        
+                                      //JB
+//a text box that holds the x and y positons on the SVG
+      var textP5 = document.createElementNS(xmlW3,'text');
+      textP5.setAttribute('x',325);
+      textP5.setAttribute('y',325);
+      textP5.setAttribute('font-size',"10");
+      textP5.setAttribute('id',"subtextP5");
+      textP5.setAttribute('name',"subtextP5");
+      //textP5.textContent="(?,?)";
+      textP5.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+//console.log(window.devicePixelRatio);
+      SVGFive.appendChild(textP5);
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP5 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP5(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP5 = document.getElementsByName("subtextP5").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP5==1){
+      document.getElementsByName("subtextP5")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFive.appendChild(textP5);
+      
+      }else if(nTextsP5>1){
+      for(var i = 0; i < nTextsP5; i++){
+      var extraText = document.getElementsByName("subtextP5")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGFive.appendChild(textP5);
+      }//end for loop
+
+      document.getElementsByName("subtextP5")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFive.appendChild(textP5);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP5")[0].textContent="(?,?)";
+        SVGFive.appendChild(textP5);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+/* a function that sets the text content to the x and y 
+ * cursor positons on the SVG (in units of he x and y axis)
+*/ 
+
+/*   
+      function convertTextP5(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+
+      textP5.textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      //console.log(text.textContent)
+      SVGFive.appendChild(textP5);
+      //console.log(text.textContent);
+      }else{
+
+        textP5.textContent="(?,?)";
+        SVGFive.appendChild(textP5);
+      
+      }
+              }
+*/
+//console.log(minXData);
+//console.log(maxXData);
+
+
+//variables specifically for this plot
+var minXP5 = minXData;
+var maxXP5 = maxXData;
+var minYP5 = minYData;
+var maxYP5 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP5 = Math.abs((maxXP5-minXP5)/xAxisLength) ;
+//var offsetXP5 = ($("#SVG5").offset().left)+xAxisXCnvs;
+var scaleYPxP5 = (maxYP5-minYP5)/yAxisLength ;
+//var offsetYP5 = ($("#SVG5").offset().top+yAxisYCnvs);
+
+
+/*event listeners that change the text content on the text element
+ *  on mouse over
+*/
+
+      SVGFive.addEventListener("mousemove",function(){convertTextP5(minXP5+scaleXPxP5*(event.offsetX-xAxisXCnvs), minYP5+scaleYPxP5*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      SVGFive.addEventListener("mouseout",function(){convertTextP5(0, 0);});
+
+
+
+
+                                      //JB
+
+
+
+
         for (var ib = 0; ib < numBands; ib++) {
             lamUBVRI[ib] = 1.0e7 * filters[ib][0][lam0_ptr]; //linear lambda
             //lamUBVRI[ib] = 7.0 + logTen(filters[ib][0][lam0_ptr]);  //logarithmic lambda
@@ -7906,6 +9507,21 @@ Spectral line \n\
         var g255 = 40;
         var b255 = 40; // dark red / brown ??
         UBVRIBands(r255, g255, b255, lamUBVRI[5]);
+	//J: (lburns)
+	var r255 = 178;
+	var g255 = 34;
+	var b255 = 34; // firebrick 
+	UBVRIBands(r255, g255, b255, lamUBVRI[6]);
+	//H: (lburns)
+	var r255 = 128;
+	var g255 = 0;
+	var b255 = 0; // maroon
+	UBVRIBands(r255, g255, b255, lamUBVRI[7]);
+	//K: (lburns)
+	var r255 = 160;
+	var g255 = 82;
+	var b255 = 45; // sienna
+	UBVRIBands(r255, g255, b255, lamUBVRI[8]);
         //Data loop - plot the result!
 
 //Continuum spectrum - For testing: 
@@ -7946,6 +9562,14 @@ Spectral line \n\
         var lastYShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
         var lastYShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
         var xShift, yShift;
+
+				//JB
+//initalized points for all the lines to be plotted
+			var points = "";
+			var points2 = "";
+			var points3 = "";
+				//JB
+
         for (var i = 1; i < numMaster; i++) {
 
             lambdanm = masterLams[i] * 1.0e7; //cm to nm //linear
@@ -7967,65 +9591,75 @@ Spectral line \n\
             yShift0Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos0Cnvs;
             yShiftNCnvs = (yAxisYCnvs + yAxisLength) - yTickPosNCnvs;
 
-//plot points
-            //cnvsFiveCtx.beginPath();
-            //cnvsFiveCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            //RGBHex = colHex(r255, g255, b255);
-            //cnvsFiveCtx.strokeStyle = RGBHex;
-            //cnvsFiveCtx.stroke();
-//line plot
-            cnvsFiveCtx.beginPath();
-            RGBHex = colHex(r255, g255, b255);
-            cnvsFiveCtx.strokeStyle=RGBHex; 
-            cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsFiveCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsFiveCtx.stroke();  
-//Contintuum spectrum - for testing
-            //cnvsFiveCtx.beginPath();
-            //RGBHex = colHex(255, 0, 0);
-            //cnvsFiveCtx.strokeStyle=RGBHex; 
-            //cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShiftCCnvs);
-            //cnvsFiveCtx.lineTo(xShiftCnvs, yShiftCCnvs);
-            //cnvsFiveCtx.stroke();  
-            //cnvsFiveCtx.beginPath();
-            //cnvsFiveCtx.arc(xShiftCnvs, yShift0Cnvs, dSize0Cnvs, 0, 2*Math.PI);
-            //RGBHex = colHex(r2550, g2550, b2550);
-            //cnvsFiveCtx.strokeStyle = RGBHex;
-            //cnvsFiveCtx.stroke();
-            cnvsFiveCtx.beginPath();
-            RGBHex = colHex(r2550, g2550, b2550);
-            cnvsFiveCtx.strokeStyle=RGBHex; 
-            cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShift0Cnvs);
-            cnvsFiveCtx.lineTo(xShiftCnvs, yShift0Cnvs);
-            cnvsFiveCtx.stroke();  
-            //cnvsFiveCtx.beginPath();
-            //cnvsFiveCtx.arc(xShiftCnvs, yShiftNCnvs, dSize0Cnvs, 0, 2*Math.PI);
-            //RGBHex = colHex(r255N, g255N, b255N);
-            //cnvsFiveCtx.strokeStyle = RGBHex;
-            //cnvsFiveCtx.stroke();
-            cnvsFiveCtx.beginPath();
-            RGBHex = colHex(r255N, g255N, b255N);
-            cnvsFiveCtx.strokeStyle=RGBHex; 
-            cnvsFiveCtx.moveTo(lastXShiftCnvs, lastYShiftNCnvs);
-            cnvsFiveCtx.lineTo(xShiftCnvs, yShiftNCnvs);
-            cnvsFiveCtx.stroke();  
-
-            lastXShiftCnvs = xShiftCnvs;
-            lastYShiftCnvs = yShiftCnvs;
+          //  lastXShiftCnvs = xShiftCnvs;
+          //  lastYShiftCnvs = yShiftCnvs;
             //lastYShiftCCnvs = yShiftCCnvs;
-            lastYShift0Cnvs = yShift0Cnvs;
+          //  lastYShift0Cnvs = yShift0Cnvs;
+          //  lastYShiftNCnvs = yShiftNCnvs;
+
+//JB create points
+           
+//points+=(lastXShiftCnvs+","+lastYShiftCnvs+" ");
+//points2+=(lastXShiftCnvs+","+lastYShift0Cnvs+" ");
+//points3+=(lastXShiftCnvs+","+lastYShiftNCnvs+" ");
+
+points += xShiftCnvs+","+(yShiftCnvs)+" ";
+points2 += xShiftCnvs+","+(yShift0Cnvs)+" ";
+points3 += xShiftCnvs+","+(yShiftNCnvs)+" ";
+		
+    lastXShiftCnvs = xShiftCnvs;
+      lastYShiftCnvs = yShiftCnvs;
+        //lastYShiftCCnvs = yShiftCCnvs;
+          lastYShift0Cnvs = yShift0Cnvs;
             lastYShiftNCnvs = yShiftNCnvs;
         }
+
+//JB create lines to be plotted
+
+var pline = document.createElementNS(xmlW3,'polyline');
+var pline2 = document.createElementNS(xmlW3,'polyline');
+var pline3 = document.createElementNS(xmlW3,'polyline');
+
+pline.setAttribute('stroke',"black");
+pline2.setAttribute('stroke',"blue");
+pline3.setAttribute('stroke',"green");
+
+pline.setAttribute('fill',"none");
+pline2.setAttribute('fill',"none");
+pline3.setAttribute('fill',"none");
+
+pline.setAttribute('points',points);
+pline2.setAttribute('points',points2);
+pline3.setAttribute('points',points3);
+
+//event listener only needed on the SVG and not the lines (useless code)
+
+            pline.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            pline2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            pline3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+            SVGFive.appendChild(pline);
+            SVGFive.appendChild(pline2);
+            SVGFive.appendChild(pline3);
+
+//	console.log(points);
+//	console.log(points2);
+//	console.log(points3);
+
            //monochromatic disk lambda
                 yFinesse = 0.0;
                 barHeight = 200;
                 barWidth = 2;
                 RGBHex = "#000000";
-                var xShiftDum = YBar(diskLambda, minXData, maxXData, barWidth, barHeight,
-                        yFinesse, RGBHex, plotFiveId, cnvsFiveCtx);
+					//JB
+
+                var xShiftDum = YBar(diskLambda, minXData, maxXData, barWidth, barHeight,yFinesse, RGBHex, newPlotFiveId, SVGFive);
+
         txtPrint("<span style='font-size:xx-small'>Filter</span>",
-                xShiftDum, titleOffsetY+60, lineColor, plotFiveId);
-    //} 
+                xShiftDum, titleOffsetY+60, lineColor, newPlotFiveId);
+
+					//JB    
+//} 
 
 //
 //
@@ -8034,10 +9668,6 @@ Spectral line \n\
 //
 // Plot six: Line profile
 
-    if (ifShowLine === true) {
-
-        var plotRow = 2;
-        var plotCol = 0;
         //w.r.t. line center lambda:
         //Find where line profile climbs up to 95% of continuum in red half iof line:
 
@@ -8067,6 +9697,45 @@ Spectral line \n\
             iStop++;
         }
 
+                              //JB
+
+//variables needed to create an array of colors
+var counter = 0;
+var arrayLambda = [];
+
+var halfPoints = Math.floor(numPoints/2);
+arrayLambda.length=halfPoints;
+
+//colors initalized on/for the fringes of the spectral line
+var RGBHex = "";
+var greenG = 175;
+var blueB = 125;
+var redR = 0;
+
+//a function to convert RGB values to hexidecimals
+      function hexConvert(v){
+      var hex = v.toString(16);
+      return(hex.length == 1) ? "0" + hex : hex;
+      }
+
+//create an array of colors for all possible points on the spectral line
+      for(var k = 0; k < halfPoints; k++){
+//colors become more blue, and less green toward the center (toward end of loop)
+      var greenN = greenG - (k)*(greenG/halfPoints);
+      var blueN = blueB + (k)*(greenG/(halfPoints));
+      var redN = redR;        
+      var blue = hexConvert(parseInt(Math.abs(blueN)));
+      var green = hexConvert(parseInt(Math.abs(greenN)));
+      var red = hexConvert(parseInt(Math.abs(redN)));
+      
+      arrayLambda[k]=("#"+ red + green + blue);
+              
+      
+      }       
+              //JB
+
+
+
 ////over-ride x-axis scaling while debugging:
 // var iStart = 0;
 // var iStop = numPoints-1;
@@ -8075,6 +9744,12 @@ Spectral line \n\
 //        var maxXData = 1.0e7 * (lineLambdas[iStop] - lam0);
 //        var minXData = 1.0e7 * (lineLambdas[iStart] - lam0);
 //console.log("lam0 " + lam0 + " lineLambdas[iStart] " + lineLambdas[iStart] + " lineLambdas[iStop] " + lineLambdas[iStop]);
+
+    if (ifShowLine === true) {
+
+        var plotRow = 2;
+        var plotCol = 0;
+
         var maxXData = 1.0e7 * linePoints[0][iStop];
         var minXData = 1.0e7 * linePoints[0][iStart];
         ////Special setting for movie:
@@ -8094,17 +9769,22 @@ Spectral line \n\
         var yAxisName = "<span title='Continuum normalized flux'><a href='http://en.wikipedia.org/wiki/Spectral_flux_density' target='_blank'><em>F</em><sub>&#955</sub>/<br /><em>F</em><sup>C</sup><sub>&#955 0</sub></a></span>";
 
         var fineness = "fine";
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSixId, cnvsSixId);
-        panelX = panelOrigin[0];
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotSixId, SVGSix);
+
+				//JB
+	 panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSixCtx.fillStyle = wDefaultColor;
-        cnvsSixCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+	SVGSix.setAttribute("fill",wDefaultColor);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotSixId, cnvsSixCtx);
+                newPlotSixId, SVGSix);
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotSixId, cnvsSixCtx);
+                fineness,newPlotSixId, SVGSix);
+
+				//JB
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
         var rangeXData = xAxisParams[1];
@@ -8131,10 +9811,11 @@ Spectral line \n\
         var thetNStr = thetNlbl.toString();
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+				//JB
         txtPrint("<span style='font-size:small'><span><em>F</em><sub>&#955</sub>, <em>&#955</em><sub>0</sub> = " + lam0Str + " nm</span><br /> ",
-                // + " <span><em>I</em><sub>&#955</sub>,</span> <span style='color:green'> &#955 = " + thet0Str + "<sup>o</sup></span>,  "
-                // + " <span style='color:red'>&#952 = " + thetNStr + "<sup>o</sup></span></span>",
-                titleOffsetX, titleOffsetY + 35, lineColor, plotSixId);
+                titleOffsetX, titleOffsetY + 35, lineColor, newPlotSixId);
+
+				//JB
 //
         var dSizeCnvs = 2.0; //plot point size
         var dSizeSymCnvs = 2.0;
@@ -8166,14 +9847,16 @@ Spectral line \n\
 
         var one = 1.0;
         barHeight = 1.0;
+				//JB
         yShift = XBar(one, minYData, maxYData, barWidth, barHeight,
-                xFinesse, RGBHexc, plotSixId, cnvsSixCtx);
-        //   
+                xFinesse, RGBHexc, newPlotSixId, SVGSix);
 
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Spectral_line' target='_blank'>Spectral line profile </a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotSixId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotSixId);
+				//JB
 // Equivalent width:
     roundNum = Wlambda.toFixed(2);
+					//JB
     txtPrint("<span style='font-size:small' title='Equivalent width: A measure of spectral line strength'>\n\
 <a href='http://en.wikipedia.org/wiki/Equivalent_width' target='_blank'>W<sub><em>&#955</em></sub></a>: \n\
 </span>"
@@ -8181,7 +9864,8 @@ Spectral line \n\
             + " <span style='font-size:small' title='picometers'>\n\
 <a href='http://en.wikipedia.org/wiki/Picometre' target='_blank'>pm</a>\n\
 </span>",
-            titleOffsetX+150, titleOffsetY, lineColor, plotSixId);
+            titleOffsetX+150, titleOffsetY, lineColor, newPlotSixId);
+					//JB
         // Data loop below in here instead
 // Spectrum not normalized - try this instead (redefines input parameter fluxCont):
         //lineFLux2 now continuum rectified: var fluxCont = (lineFlux[0][0] + lineFlux[0][numPoints - 1]) / 2.0;
@@ -8198,7 +9882,14 @@ Spectral line \n\
         //lnIntN.length = numPoints;
         lnLam.length = numPoints;
         var ii;
+
+                      //JB
+
+
+
         for (var i = 0; i < numPoints; i++) {
+
+
             lnFlx[i] = lineFlux2[0][i]; // / fluxCont  lineFLux2 now continuum rectified 
             // lnInt0[i] = lineIntens[i][5] / lineIntens[numPoints - 1][5];
             // lnIntN[i] = lineIntens[i][numThetas - 2] / lineIntens[numPoints - 1][numThetas - 2];
@@ -8222,6 +9913,15 @@ Spectral line \n\
         //var lastYShift0 = xLowerYOffset - yTickPos0;
         //var lastYShiftN = xLowerYOffset - yTickPosN;
 
+//console.log(arrayLambda);
+
+/*counters for the iterations of the following loop and the number
+ * of times the if statement is entered (to know how far
+ * along the second half of the spectral line we are)
+*/
+var iterCounter = 0;
+var ifCounter =0;
+
         for (var i = iStart; i < iStop; i++) {
 
             xTickPosCnvs = xAxisLength * (lnLam[i] - minXData) / rangeXData; // pixels  
@@ -8233,25 +9933,156 @@ Spectral line \n\
             yTickPosCnvs = yAxisLength * (lnFlx[i] - minYData) / rangeYData;
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
 
-//// plot point
-//            cnvsSixCtx.beginPath();
-//            cnvsFiveCtx.strokeStyle=lineColor; 
-//            cnvsSixCtx.arc(xShiftCnvs, yShiftCnvs, dSizeSymCnvs, 0, 2*Math.PI);
-//            cnvsSixCtx.stroke();
-//line plot
-            cnvsSixCtx.beginPath();
-            cnvsSixCtx.strokeStyle=lineColor; 
-            cnvsSixCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsSixCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsSixCtx.stroke();  
+				//JB
+	    var pline = document.createElementNS(xmlW3,'polyline');
+	    pline.setAttribute('stroke',lineColor);
+	    pline.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" ");
+	    pline.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGSix.appendChild(pline);
 
+      
+//plots dots along the polyline
+          var dot = document.createElementNS(xmlW3,'circle');
+          dot.setAttribute('cx',xShiftCnvs);
+            dot.setAttribute('cy',yShiftCnvs);
+            dot.setAttribute('r',"4");
+            dot.setAttribute('fill',"none");
+          dot.setAttribute('stroke-width',"3");
+//console.log(iStart);
+//console.log(iStop);
+
+
+
+//set the color of the circle to be getting darker toward the center (works)
+           dot.setAttribute('stroke',arrayLambda[iterCounter]);
+
+/*if there is an odd number of points on the line, add one to lineCenter
+ * after the integer division. this determines how many times the loop
+ * iterates.
+*/
+var mid = (iStop-iStart)/2;
+
+//check if iStop is odd
+      if((iStop-iStart) % 2 != 0){
+              mid = Math.floor((iStop-iStart)/2)+1;
+      }
+
+//console.log(mid);
+//console.log(iterCounter);
+
+//after the center circle, loop through the array holding the colors backwards
+      if(iterCounter>=mid){
+//            console.log(ifCounter);
+                  dot.setAttribute('stroke',arrayLambda[mid-ifCounter]);
+              ifCounter++;
+      }
+
+          dot.setAttribute('id',"dotP6 "+i);
+            dot.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+
+          SVGSix.appendChild(dot);
+
+iterCounter += 1;
+//counter ++;
+
+				//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
             //lastYShift0 = yShift0;
             //lastYShiftN = yShiftN;
         }
-    }
 
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP6 = 0;//document.getElementsByName("subtextP6").length;
+
+// text element that holds the x and y coordinates of the cursor on the SVG
+
+      var textP6 = document.createElementNS(xmlW3,'text');
+      textP6.setAttribute('x',325);
+        textP6.setAttribute('y',325);
+        textP6.setAttribute('font-size',"10");
+      textP6.setAttribute('id',"subtextP6");
+      textP6.setAttribute('name',"subtextP6");
+      textP6.textContent=("(?,?)");
+      textP6.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGSix.appendChild(textP6);
+//function to convert x and y values from the loop into text
+      function convertTextP6(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP6 = document.getElementsByName("subtextP6").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP6==1){
+      document.getElementsByName("subtextP6")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSix.appendChild(textP6);
+      
+      }else if(nTextsP6>1){
+      for(var i = 0; i < nTextsP6; i++){
+      var extraText = document.getElementsByName("subtextP6")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGSix.appendChild(textP6);
+      }//end for loop
+
+      document.getElementsByName("subtextP6")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSix.appendChild(textP6);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP6")[0].textContent="(?,?)";
+        SVGSix.appendChild(textP6);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+//console.log(minXData);
+//console.log(maxXData);
+
+//variables created specifcally for this plot
+var minXP6 = minXData;
+var maxXP6 = maxXData;
+var minYP6 = minYData;
+var maxYP6 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP6 = Math.abs((maxXP6-minXP6)/xAxisLength) ;
+//var offsetXP6 = ($("#SVG6").offset().left)+xAxisXCnvs;
+var scaleYPxP6 = (maxYP6-minYP6)/yAxisLength ;
+//var offsetYP6 = ($("#SVG6").offset().top+yAxisYCnvs);
+
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+
+      SVGSix.addEventListener("mousemove",function(){convertTextP6(minXP6+scaleXPxP6*(event.offsetX-xAxisXCnvs), minYP6+scaleYPxP6*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      SVGSix.addEventListener("mouseout",function(){convertTextP6(0,0);});
+                                      //JB
+
+
+
+}
 
 
 //
@@ -8314,17 +10145,20 @@ Spectral line \n\
 
         var fineness = "coarse";
         //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotEightId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotEightId, cnvsEightId);
+					//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotEightId, SVGEight);
+					//JB
         panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsEightCtx.fillStyle = wDefaultColor;
-        cnvsEightCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+	SVGEight.setAttribute('fill',wDefaultColor);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotEightId, cnvsEightCtx);
+                newPlotEightId, SVGEight);
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotEightId, cnvsEightCtx);
+                fineness,newPlotEightId, SVGEight);
+				//JB
         //
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
@@ -8344,8 +10178,11 @@ Spectral line \n\
 
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Grotrian_diagram' target='_blank'>Grotrian diagram</a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotEightId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotEightId);
+
+					//JB
     
         //
         // Second special "y-ticks" for lower and upper E-levels of b-b transition, and ground-state
@@ -8390,9 +10227,10 @@ Spectral line \n\
 
         //barHeight = 1.0;
         //barWidth = xRange;
+					//JB
             yShift = XBar(yData[i], minYData, maxYData, xAxisLength, tickLength,
-                xFinesse, lineColor, plotEightId, cnvsEightCtx);
-            
+                xFinesse, lineColor, newPlotEightId, SVGEight);
+					//JB
             // Now over-plot with the width of the "y-tickmark" scaled by the 
             // log number density in each E-level:
             //var xRangePops = Math.floor(xRange * (logE*logNums[lPoint[i]][tTau1] / maxXData));
@@ -8400,9 +10238,10 @@ Spectral line \n\
             var tickWidthPops = 6;
 
  // Energy level logarithmic population horizontal bars:
+					//JB
            yShift = XBar(yData[i], minYData, maxYData, xRangePops, tickWidthPops,
-                    xFinesse, RGBHex, plotEightId, cnvsEightCtx);
-
+                    xFinesse, RGBHex, newPlotEightId, SVGEight);
+					//JB
 // yShift values for b-b transtion marker: 
            if (i === 2){
               yShiftL = yShift;  //lower transition level
@@ -8411,9 +10250,10 @@ Spectral line \n\
               yShiftU = yShift;  //lower transition level
                       }
             //Make the y-tick label:
-
-           txtPrint(yRightTickValStr[i], yRightLabelXOffset[i], 
-                yShift, lineColor, plotEightId);
+				//JB
+           txtPrint(yRightTickValStr[i], yRightLabelXOffset[i],
+                yShift, lineColor, newPlotEightId);
+				//JB
          //cnvsEightCtx.font="normal normal normal 8pt arial";
          //cnvsEightCtx.fillText(yRightTickValStr[i], yRightLabelXOffset, yShift);
         }  // end y-tickmark loop, i
@@ -8437,11 +10277,593 @@ Spectral line \n\
         var vBarHeightCnvs = Math.floor(yShiftU - yShiftL);
         var xTickPosCnvs = (maxXData - minXData) / 3; // pixels
         var vBarWidth = 4; //pixels 
-        var yFinesse = Math.floor(yShiftL - yAxisYCnvs); 
+        var yFinesse = Math.floor(yShiftL - yAxisYCnvs);
+					//JB
+
         xShiftDum = YBar(xTickPosCnvs, minXData, maxXData, vBarWidth, vBarHeightCnvs,
-                         yFinesse, RGBHex, plotEightId, cnvsEightCtx); 
+                         yFinesse, RGBHex, newPlotEightId, SVGEight);
+
+					//JB
     }
 
+
+//
+//
+//  *****   PLOT TWO / PLOT 2
+//
+//
+
+// Plot two: log(Tau) vs Temp
+// 
+    if ((ifLineOnly === false) && (ifShowAtmos === true)) {
+
+        var plotRow = 2;
+        var plotCol = 2;
+        var minXData = logE * tauRos[1][0];
+        var maxXData = logE * tauRos[1][numDeps - 1];
+        var xAxisName = "<span title='Rosseland mean optical depth'><a href='http://en.wikipedia.org/wiki/Optical_depth_%28astrophysics%29' target='_blank'>Log<sub>10</sub> <em>&#964</em><sub>Ros</sub></a></span>";
+        var minYData = temp[0][0];
+        var maxYData = temp[0][numDeps - 1];
+        var yAxisName = "<em>T</em><sub>Kin</sub> (K)";
+        var fineness = "normal";
+					//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotTwoId, SVGTwo);
+					//JB
+        panelX = panelOrigin[0];
+        panelY = panelOrigin[1];
+					//JB
+	SVGTwo.setAttribute('fill',wDefaultColor);
+        var xAxisParams = XAxis(panelX, panelY,
+                minXData, maxXData, xAxisName, fineness,
+                newPlotTwoId, SVGTwo);
+            var cnvsCtx = xAxisParams[8];
+            var yAxisParams = YAxis(panelX, panelY, minYData, maxYData, yAxisName,fineness,newPlotTwoId, SVGTwo);
+                                                
+					//JB
+
+        //
+        //xOffset = xAxisParams[0];
+        //yOffset = xAxisParams[4];
+        var rangeXData = xAxisParams[1];
+        var deltaXData = xAxisParams[2];
+        var deltaXPxl = xAxisParams[3];
+        var rangeYData = yAxisParams[1];
+        var deltaYData = yAxisParams[2];
+        var deltaYPxl = yAxisParams[3];
+        //var xLowerYOffset = xAxisParams[5];
+        minXData = xAxisParams[6]; //updated value
+        minYData = yAxisParams[6]; //updated value
+        maxXData = xAxisParams[7]; //updated value
+        maxYData = yAxisParams[7]; //updated value    
+        yFinesse = 0;       
+        xFinesse = 0;       
+        //
+        // Tau=1 cross-hair
+
+        var barWidth = 1.0;
+        var barColor = "#777777";
+        var tTau1 = tauPoint(numDeps, tauRos, 1.0);
+					//JB
+        xShift = YBar(logE * tauRos[1][tTau1], minXData, maxXData, barWidth, yAxisLength,
+                yFinesse, barColor, newPlotTwoId, SVGTwo);
+
+        yShift = XBar(temp[0][tTau1], minYData, maxYData, xAxisLength, barHeight,
+                xFinesse, barColor, newPlotTwoId, SVGTwo);
+        barHeight = 1.0;
+        // Add label
+                 txtPrint("<span style='font-size:small; color:#444444'><em>&#964</em><sub>Ros</sub>=1</span>", xShift, yShift, lineColor, newPlotTwoId);
+					//JB
+
+        // Tau_lambda(lambda_0) = 1 cross-hair
+
+        // Get depth index where monochromatic line center Tau_l ~ 1:
+        var indxLam0 = keyLambds[0]; // line center
+        var tauLam0 = [];
+        tauLam0.length = 2;
+        tauLam0[0] = [];
+        tauLam0[1] = [];
+        tauLam0[0].length = numDeps;
+        tauLam0[1].length = numDeps;
+        for (var i = 0; i < numDeps - 1; i++) {
+            tauLam0[0][i] = Math.exp(logTauL[indxLam0][i]);
+            tauLam0[1][i] = logTauL[indxLam0][i];
+        }
+        var tTauL1 = tauPoint(numDeps, tauLam0, 1.0);
+        var barWidth = 1.0;
+        var barColor = "#00FF77";
+        //console.log("logE * tauRos[1][tTauL1] " + logE * tauRos[1][tTauL1]);
+
+
+					//JB
+        titleX = panelX + titleOffsetX;
+        titleY = panelY + titleOffsetY;
+        txtPrint("<span style='font-size:normal; color:blue'>Gas temperature </span>",
+                titleOffsetX, titleOffsetY, lineColor, newPlotTwoId);
+					//JB
+        //var dSize = 5.0; //plot point size
+        var dSizeCnvs = 1.0; //plot point size
+        var opac = 1.0; //opacity
+        // RGB color
+        var r255 = 0;
+        var g255 = 0;
+        var b255 = 255; //blue
+
+        var ii;
+        var xTickPosCnvs = xAxisLength * (logE * tauRos[1][0] - minXData) / rangeXData; // pixels   
+
+        // horizontal position in pixels - data values increase rightward:
+        var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
+
+        var yTickPosCnvs = yAxisLength * (temp[0][0] - minYData) / rangeYData;
+        // vertical position in pixels - data values increase upward:
+        var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+
+
+                              //JB
+// text element that holds the x and y coordinates of the cursor on the SVG
+      var textP2 = document.createElementNS(xmlW3,'text');
+      textP2.setAttribute('x',325);
+      textP2.setAttribute('y',325);
+      textP2.setAttribute('font-size',"10");
+      textP2.setAttribute('id',"subtextP2");
+      textP2.setAttribute('name',"subtextP2");
+      textP2.textContent=("(?,?)");
+      textP2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGTwo.appendChild(textP2);
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP2 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP2(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP2 = document.getElementsByName("subtextP2").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP2==1){
+      document.getElementsByName("subtextP2")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGTwo.appendChild(textP2);
+      
+      }else if(nTextsP2>1){
+      for(var i = 0; i < nTextsP2; i++){
+      var extraText = document.getElementsByName("subtextP2")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGTwo.appendChild(textP2);
+      }//end for loop
+
+      document.getElementsByName("subtextP2")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGTwo.appendChild(textP2);
+      }//end else if
+      
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP2")[0].textContent="(?,?)";
+        SVGTwo.appendChild(textP2);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+
+//console.log(minXData);
+//console.log(maxXData);
+
+//variables needed for this specific plot
+var minXP2 = minXData;
+var maxXP2 = maxXData;
+var minYP2 = minYData;
+var maxYP2 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP2 = Math.abs((maxXP2-minXP2)/xAxisLength) ;
+//var offsetXP2 = ($("#SVG2").offset().left)+xAxisXCnvs;
+var scaleYPxP2 = (maxYP2-minYP2)/yAxisLength ;
+//var offsetYP2 = (-event.offsetY+yAxisYCnvs+yAxisLength);
+
+/*create evernts that change the text content of the text element
+ * on mouse movement
+*/
+
+      SVGTwo.addEventListener("mousemove",function(){convertTextP2(minXP2+scaleXPxP2*(event.offsetX-xAxisXCnvs), minYP2+scaleYPxP2*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      SVGTwo.addEventListener("mouseout",function(){convertTextP2(0, 0);});
+                                      //JB
+
+//JB
+//array to hold the indacies that make logTau[i][] closest to 0
+var indacies = [];
+//JB
+       for (var i = 0; i < numDeps; i++) {
+              
+
+            ii = 1.0 * i;
+            var xTickPosCnvs = xAxisLength * (logE * tauRos[1][i] - minXData) / rangeXData; // pixels   
+
+            // horizontal position in pixels - data values increase rightward:
+            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
+
+            var yTickPosCnvs = yAxisLength * (temp[0][i] - minYData) / rangeYData;
+            // vertical position in pixels - data values increase upward:
+            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+
+        //create circles (not colored)
+	    var points = document.createElementNS(xmlW3,'circle');
+	    points.setAttribute('cx',xShiftCnvs);
+            points.setAttribute('cy',yShiftCnvs);
+            points.setAttribute('r',dSizeCnvs);
+            points.setAttribute('fill',lineColor);
+	    points.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGTwo.appendChild(points);
+//line plot
+
+//create polyline for the graph
+	    var pline = document.createElementNS(xmlW3,'polyline');
+	    pline.setAttribute('stroke',lineColor);
+//set the points that the line will follow
+            pline.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" "));
+            pline.setAttribute('fill',"none");
+	    pline.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGTwo.appendChild(pline);
+
+            lastXShiftCnvs = xShiftCnvs;
+            lastYShiftCnvs = yShiftCnvs;
+
+        }
+
+
+/*create array of indacies that have a log(tau) values close to 0
+ *  for every numPoint.
+*/
+      for(var j = 0; j < numPoints; j ++){
+      //console.log(logTauL[i][j]);
+      indacies.push(tauPointP2(numDeps, logTauL, j, 0));
+      }
+
+//console.log(numPoints);
+
+//if($("#linePlot").is(':checked')){
+
+    if (ifShowLine === true) {
+/*find the middle iteration of the value j in the loop 
+ *(the middle of iStart and iStop)
+*/
+var mid2  = iStart+(iStop-iStart)/2;
+if((iStop-iStart)%2!=0){
+mid2 = Math.floor(((iStop-iStart)/2))+1+iStart;
+}     
+var counter2 = 0;
+var lastX = 0;
+var lastY = 0;
+        for(var j = iStart; j <= mid2; j ++){ 
+
+
+            jj = 1.0 * j;
+           // var cosFctr = cosTheta[1][i];
+            var dpthIndx = indacies[j];
+            var xTickPosCnvs = xAxisLength * (logE * tauRos[1][dpthIndx] - minXData) / rangeXData; // pixels   
+
+            // horizontal position in pixels - data values increase rightward:
+            //var xShift = xOffset + xTickPos;
+            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;// + 200;
+            ////stringify and add unit:
+            var yTickPosCnvs = yAxisLength * (temp[0][dpthIndx] - minYData) / rangeYData;
+            // vertical position in pixels - data values increase upward:
+            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+
+
+
+/*for each index in indacies (or at least the ones use to create the 
+ *spectral line in Plot 2), create an open circle on the plot with the
+ *same color as that in Plot 2 for corresponding indacies.
+*/
+      if(lastY!=yShiftCnvs){
+          var pointsC = document.createElementNS(xmlW3,'circle');
+          pointsC.setAttribute('cx',xShiftCnvs);
+            pointsC.setAttribute('cy',yShiftCnvs);
+            pointsC.setAttribute('r','5');
+          //pointsC.setAttribute('stroke',arrayLambda[j-iStart]);
+          pointsC.setAttribute('stroke-width',"2.2");
+          pointsC.setAttribute('fill',"none");
+          //console.log(counter2);
+/*set color of the stroke equal to the kth color in arrayLambda,
+ * starting from k=0.
+*/
+            pointsC.setAttribute('stroke',arrayLambda[counter2]);
+          pointsC.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+          SVGTwo.appendChild(pointsC);
+      }
+
+lastX = xShiftCnvs;
+lastY = yShiftCnvs;
+counter2 +=1;
+
+      }
+
+}
+
+//console.log(indacies);
+
+
+
+//  Loop over limb darkening sub-disks - largest to smallest, and add color-coded Tau(theta) = 1 markers
+
+        //dSize = 8.0;
+        dSizeCnvs = 4.0;
+
+        // Disk centre:
+        //This approach does not allow for calibration easily:
+        //now done earlier var bvr = bandIntens[2][0] + bandIntens[3][0] + bandIntens[4][0];
+        var brightScale = 255.0 / Math.max(bandIntens[2][0] / bvr, bandIntens[3][0] / bvr, bandIntens[4][0] / bvr);
+        // *Raw* Vega: r g b 183 160 255
+        //now down above: var rgbVega = [183.0 / 255.0, 160.0 / 255.0, 255.0 / 255.0];
+        for (var i = numThetas - 1; i >= 0; i--) {
+
+            ii = 1.0 * i;
+            //     iCosThetaI = limbTheta1 - ii * limbDelta;
+            //     iIntMaxI = interpol(iCosTheta, iIntMax, iCosThetaI);
+
+            //numPrint(i, 50, 100 + i * 20, zeroInt, zeroInt, zeroInt, masterId);
+            // LTE Eddington-Barbier limb darkening: I(Tau=0, cos(theta)=t) = B(T(Tau=t))
+            var cosFctr = cosTheta[1][i];
+            //  var cosFctr = iCosThetaI;
+            //numPrint(cosFctr, 100, 100+i*20, zeroInt, zeroInt, zeroInt, masterId);
+            var dpthIndx = tauPoint(numDeps, tauRos, cosFctr);
+            //numPrint(dpthIndx, 100, 100+i*20, zeroInt, zeroInt, zeroInt, masterId);
+
+            r255 = Math.ceil(brightScale * (bandIntens[4][i] / bvr) / rgbVega[0]); // / vegaBVR[2]);
+            g255 = Math.ceil(brightScale * (bandIntens[3][i] / bvr) / rgbVega[1]); // / vegaBVR[1]);
+            b255 = Math.ceil(brightScale * (bandIntens[2][i] / bvr) / rgbVega[2]); // / vegaBVR[0]);
+
+            var xTickPosCnvs = xAxisLength * (logE * tauRos[1][dpthIndx] - minXData) / rangeXData; // pixels   
+
+            // horizontal position in pixels - data values increase rightward:
+            //var xShift = xOffset + xTickPos;
+            var xShiftCnvs = xAxisXCnvs + xTickPosCnvs;// + 200;
+            ////stringify and add unit:
+            //        var xShiftStr = numToPxStrng(xShift);
+
+            //var yTickPos = yRange * (temp[0][dpthIndx] - minYData) / rangeYData;
+            var yTickPosCnvs = yAxisLength * (temp[0][dpthIndx] - minYData) / rangeYData;
+            // vertical position in pixels - data values increase upward:
+            var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
+
+            var RGBHex = colHex(r255, g255, b255);
+
+                                //JB
+        //create colored dots
+	    var cDot = document.createElementNS(xmlW3,'circle');
+	    cDot.setAttribute('cx',xShiftCnvs);
+            cDot.setAttribute('cy',yShiftCnvs);
+            cDot.setAttribute('r',dSizeCnvs);
+            cDot.setAttribute('fill',RGBHex);
+	    cDot.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGTwo.appendChild(cDot);
+        }
+
+// legend using dot of last color in loop directly above:
+                              
+                              //JB
+//create a single dot for the legend  (based on Plot 7)
+            var dotL = document.createElementNS(xmlW3,'circle');
+            dotL.setAttribute('cx',titleOffsetX + 365);
+            dotL.setAttribute('cy',titleOffsetY+10);
+            dotL.setAttribute('r',dSizeCnvs);
+            dotL.setAttribute('fill',RGBHex);
+            dotL.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGTwo.appendChild(dotL);
+
+//create a single dot for the legend  (based on Plot 6)
+            var dotL2 = document.createElementNS(xmlW3,'circle');
+            dotL2.setAttribute('cx',titleOffsetX + 365);
+            dotL2.setAttribute('cy',titleOffsetY+35);
+            dotL2.setAttribute('r',dSizeCnvs);
+            dotL2.setAttribute('fill',arrayLambda[0]);
+            dotL2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGTwo.appendChild(dotL2);
+                              //JB
+                              
+
+
+					//JB
+        txtPrint("<span title='Limb darkening depths of &#964_Ros(&#952) = 1'><em>&#964</em><sub>Ros</sub>(0 < <em>&#952</em> < 90<sup>o</sup>) = 1</span>",
+                titleOffsetX + 200, titleOffsetY, lineColor, newPlotTwoId);
+//legend for the colored dots corresponding with the spectral line (Plot 6)
+        txtPrint("<span title='Limb darkening depths of &#964_Ros(&#952) = 1'>Specral Line <em>&#964</em><sub>&#955</sub>= 1</span>",
+                titleOffsetX + 200, titleOffsetY+25, lineColor, newPlotTwoId);
+
+
+
+
+					//JB
+    }
+
+					
+//
+//
+//  *****   PLOT ELEVEN / PLOT 11
+//
+//
+// Plot Eleven: Life Zone
+
+    if (ifLineOnly === false) {
+
+        var plotRow = 0;
+        var plotCol = 2;
+
+//background color needs to be finessed so that white-ish stars will stand out:
+       if (teff > 6000.0){
+  //hotter white or blue-white star - darken the background (default background in #F0F0F0
+           wDiskColor = "#808080";  
+       } else {
+           wDiskColor = wDefaultColor;
+       }
+
+        // Calculation of steam line and ice line:
+
+        //Assuming liquid salt-free water at one atmospheric pGasressure is necessary:
+        //var atmosPres = 101.0;  // test - kPa
+//        var steamTemp = waterPhase(atmosPress);
+       var steamTemp = solventPhase(atmosPress, phaseA, phaseB, phaseC);
+        //console.log("steamTemp " + steamTemp); // + " steamTemp2 " + steamTemp2);
+        //var steamTemp = 373.0; // K = 100 C
+        //var iceTemp = 273.0; //K = 0 C
+        var iceTemp = tripleTemp; 
+
+        steamTemp = steamTemp - greenHouse;
+        iceTemp = iceTemp - greenHouse;
+        var logSteamLine, logIceLine;
+        var au = 1.4960e13; // 1 AU in cm
+        var rSun = 6.955e10; // solar radii to cm
+        var log1AULine = logAu - logRSun; // 1 AU in solar radii
+        //Steam line:
+        //Set steamTemp equal to planetary surface temp and find distance that balances stellar irradiance 
+        //absorbed by planetary cross-section with planet's bolometric thermal emission:
+        //Everything in solar units -> distance, d, in solar radii
+        logSteamLine = 2.0 * (Math.log(teff) - Math.log(steamTemp)) + logRadius + 0.5 * Math.log(1.0 - albedo);
+        //now the same for the ice line:
+        logIceLine = 2.0 * (Math.log(teff) - Math.log(iceTemp)) + logRadius + 0.5 * Math.log(1.0 - albedo);
+        var iceLineAU = Math.exp(logIceLine) * rSun / au;
+        var steamLineAU = Math.exp(logSteamLine) * rSun / au;
+        iceLineAU = iceLineAU.toPrecision(3);
+        steamLineAU = steamLineAU.toPrecision(3);
+        var steamTempRound = steamTemp.toPrecision(3);
+
+        // Convert solar radii to pixels:
+
+        var radiusScale = 20; //solar_radii-to-pixels!
+        var logScale = 20; //amplification factor for log pixels
+
+        // 
+        // Star radius in pixels:
+
+        //    var radiusPx = (radiusScale * radius);  //linear radius
+        var radiusPx = logScale * logTen(radiusScale * radius); //logarithmic radius
+
+        radiusPx = Math.ceil(radiusPx);
+        var radiusPxSteam = logScale * logTen(radiusScale * radius * Math.exp(logSteamLine));
+        radiusPxSteam = Math.ceil(radiusPxSteam);
+        var radiusPxIce = logScale * logTen(radiusScale * radius * Math.exp(logIceLine));
+        radiusPxIce = Math.ceil(radiusPxIce);
+        var radiusPx1AU = logScale * logTen(radiusScale * radius * Math.exp(log1AULine));
+        radiusPx1AU = Math.ceil(radiusPx1AU);
+        // Key radii in order of *DECREASING* size (important!):
+        var numZone = 7;
+        var radii = [];
+        radii.length = numZone;
+        rrI = saveRGB[0];
+        ggI = saveRGB[1];
+        bbI = saveRGB[2];
+        var starRGBHex = "rgb(" + rrI + "," + ggI + "," + bbI + ")";
+        var colors = [];
+        colors.length = numZone;
+        if (radiusPx1AU > (radiusPxIce + 3)){
+           radii = [radiusPx1AU+1, radiusPx1AU, radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#000000", wDiskColor, "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPxIce) && (radiusPx1AU < (radiusPxIce + 3)) ){
+           radii = [radiusPxIce + 3, radiusPx1AU, radiusPx1AU-1, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#000000", "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPxSteam) && (radiusPx1AU < radiusPxIce) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPx1AU+1, radiusPx1AU, radiusPxSteam, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#00FF88", "#000000", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= (radiusPxSteam - 3)) && (radiusPx1AU < radiusPxSteam) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPx1AU+1, radiusPx1AU, radiusPxSteam - 3, radiusPx];
+           colors = ["#0000FF", "#00FF88", "#FF0000", "#000000", "#FF0000", wDiskColor, starRGBHex];
+        }
+        if ( (radiusPx1AU >= radiusPx) && (radiusPx1AU < (radiusPxSteam - 3)) ){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx1AU, radiusPx1AU-1,  radiusPx];
+           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, "#000000", wDiskColor, starRGBHex];
+        }
+        if (radiusPx1AU <= radiusPx){
+           radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx, radiusPx1AU, radiusPx1AU-1];
+           colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex, "#000000", starRGBHex];
+        }
+        //
+        //var titleYPos = xLowerYOffset - yRange + 40;
+					//JB
+      var panelOrigin = washer(plotRow, plotCol, wDiskColor, newPlotElevenId, SVGEleven);
+					//JB
+	panelX = panelOrigin[0];
+        panelY = panelOrigin[1];
+	SVGEleven.setAttribute('fill',wDiskColor);
+        // Add title annotation:
+
+        titleX = panelX + titleOffsetX;
+        titleY = panelY + titleOffsetY;
+			//JB
+      
+        txtPrint("<span style='font-size:normal; color:blue' title='Assumes liquid salt-free water at one Earth atmosphere pressure needed for life'><a href='https://en.wikipedia.org/wiki/Circumstellar_habitable_zone' target='_blank'>Life zone for habitable planets</a></span><br />\n\
+     <span style='font-size:small'>(Logarithmic radius)</span>",
+                titleOffsetX, titleOffsetY, lineColor, newPlotElevenId);
+        var legendY = titleOffsetY;
+        var legendX = titleOffsetX + 320;
+        txtPrint("<span style='font-size:small'>"
+                + " <span style='color:#FF0000'>Steam line</span> " + steamLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> "
+                + " <span style='color:#00FF88'><strong>Life zone</strong></span><br /> "
+                + " <span style='color:#0000FF'>Ice line</span> " + iceLineAU + " <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'> AU</a><br /> " 
+                + " <span style='color:#000000'>Reference line: 1 <a href='https://en.wikipedia.org/wiki/Astronomical_unit' title='1 AU = Earths average distance from center of Sun'>AU</a></span>",
+                legendX, legendY, lineColor, newPlotElevenId);
+//
+        txtPrint("<span style='font-size:small'>" + solvent + " boiling temp = " + steamTempRound + " K</span>", 
+          (legendX-75), (legendY+300), lineColor, newPlotElevenId);
+        //Get the Vega-calibrated colors from the intensity spectrum of each theta annulus:    
+        // moved earlier var intcolors = iColors(lambdaScale, intens, numDeps, numThetas, numLams, tauRos, temp);
+			//JB
+
+        //  Loop over radial zones - largest to smallest
+        for (var i = 0; i < radii.length; i++) {
+   // for (var i = parseFloat(radii.length); i > 2; i--) {
+            var radiusStr = numToPxStrng(radii[i]);
+            // Adjust position to center star:
+            // Radius is really the *diameter* of the symbol
+
+// Adjust position to center star:
+// Radius is really the *diameter* of the symbol
+            var yCenterCnvs = panelHeight / 2; 
+            var xCenterCnvs = panelWidth / 2; 
+				
+				//JB
+		
+		var circ = document.createElementNS(xmlW3,'circle');
+		//cric.setAttribute('id',"circ"+i);
+		circ.setAttribute('cx',xCenterCnvs);
+                circ.setAttribute('cy',yCenterCnvs);
+		circ.setAttribute('r',radii[i]-33);
+		circ.setAttribute('fill',colors[i]);
+		circ.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+		SVGEleven.appendChild(circ);
+				
+//console.log(radii[i]-33);
+				//JB
+				
+        }  //i loop (thetas)
+
+    }
+					
 
 // ****************************************
     //
@@ -8469,14 +10891,18 @@ Spectral line \n\
         var yAxisName = "Log<sub>10</sub> <em>&#954<sub>&#955</sub></em> <br />(cm<sup>2</sup> g<sup>-1</sup>)";
 
         var fineness = "normal";
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFourteenId, cnvsFourteenId);
-        panelX = panelOrigin[0];
+				//JB
+	        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotFourteenId, SVGFourteen);
+
+				//JB        
+panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFourteenCtx.fillStyle = wDefaultColor;
-        cnvsFourteenCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+        SVGFourteen.setAttribute('fill',wDefaultColor); 
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotFourteenId, cnvsFourteenCtx);
+                newPlotFourteenId, SVGFourteen);
+				//JB
         //xOffset = xAxisParams[0];
         var rangeXData = xAxisParams[1];
         var deltaXData = xAxisParams[2];
@@ -8485,10 +10911,11 @@ Spectral line \n\
         var xLowerYOffset = xAxisParams[5];
         minXData = xAxisParams[6]; //updated value
         maxXData = xAxisParams[7]; //updated value
-        //no! var cnvsCtx = xAxisParams[8];
-        var yAxisParams = YAxis(panelX, panelY,
+			//JB
+	        var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotFourteenId, cnvsFourteenCtx);
+                fineness,newPlotFourteenId, SVGFourteen);
+			//JB
         var rangeYData = yAxisParams[1];
         var deltaYData = yAxisParams[2];
         var deltaYPxl = yAxisParams[3];
@@ -8499,16 +10926,17 @@ Spectral line \n\
         xFinesse = 0;       
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+				//JB
         txtPrint("log<sub>10</sub> <a href='https://en.wikipedia.org/wiki/Absorption_(electromagnetic_radiation)' title='mass extinction coefficient' target='_blank'>Extinction</a>",
-                titleOffsetX, titleOffsetY, lineColor, plotFourteenId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotFourteenId);
         txtPrint("<span style='font-size:small'>"
                 + "<span><em>&#954</em><sub>Ros</sub></span>,  "
                 + " <span style='color:#0000FF'><em>&#954<sub>&#955</sub></em> 360 nm</span>,  "
                 + " <span style='color:#00FF00'><em>&#954<sub>&#955</sub></em> 500 nm</span>,  "
                // + " <span style='color:#FF0000'><em>&#954<sub>&#955</sub></em> 1640 nm</span> ",
                 + " <span style='color:#FF0000'><em>&#954<sub>&#955</sub></em> 1000 nm</span> ",
-                titleOffsetX, titleOffsetY+35, lineColor, plotFourteenId);
-
+                   titleOffsetX, titleOffsetY+35, lineColor, newPlotFourteenId);
+               			//JB
         //Data loop - plot the result!
 
         //var dSizeG = 2.0;
@@ -8551,6 +10979,9 @@ Spectral line \n\
             var lastYShiftCnvs1000 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs1000;
 
 
+
+
+
         for (var i = 1; i < numDeps; i++) {
 
             ii = 1.0 * i;
@@ -8574,57 +11005,38 @@ Spectral line \n\
  //console.log("i " + i + " lastXShiftCnvs " + lastXShiftCnvs);
 
 //log kappa_Ros
-//Plot points
-//            cnvsFourteenCtx.beginPath();
-//            cnvsFourteenCtx.strokeStyle=lineColor; 
-//            cnvsFourteenCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-//            cnvsFourteenCtx.stroke();
-//Line plot 
-            cnvsFourteenCtx.beginPath();
-            cnvsFourteenCtx.strokeStyle=lineColor; 
-            cnvsFourteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsFourteenCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsFourteenCtx.stroke();  
-
+//line plot
+				//JB
+	    var line = document.createElementNS(xmlW3,'polyline');
+	    line.setAttribute('stroke',lineColor);
+            line.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" "));
+            line.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGFourteen.appendChild(line);
+				//JB
 //log kappa_lambda = 360 nm
-//Plot points
-//            cnvsFourteenCtx.beginPath();
-//            cnvsFourteenCtx.strokeStyle=lineColor; 
-//            cnvsFourteenCtx.arc(xShiftCnvs, yShiftCnvs360, dSizeCnvs, 0, 2*Math.PI);
-//            cnvsFourteenCtx.stroke();
-//Line plot 
-            cnvsFourteenCtx.beginPath();
-            cnvsFourteenCtx.strokeStyle="#0000FF"; 
-            cnvsFourteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs360);
-            cnvsFourteenCtx.lineTo(xShiftCnvs, yShiftCnvs360);
-            cnvsFourteenCtx.stroke(); 
- 
+				//JB
+            var line2 = document.createElementNS(xmlW3,'polyline');
+            line2.setAttribute('stroke',"blue");
+            line2.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs360+" "+xShiftCnvs+","+yShiftCnvs360+" "));
+            line2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFourteen.appendChild(line2);
+				//JB
 //log kappa_lambda = 500 nm
-//Plot points
-//            cnvsFourteenCtx.beginPath();
-//            cnvsFourteenCtx.strokeStyle=lineColor; 
-//            cnvsFourteenCtx.arc(xShiftCnvs, yShiftCnvs500, dSizeCnvs, 0, 2*Math.PI);
-//            cnvsFourteenCtx.stroke();
-//Line plot 
-            cnvsFourteenCtx.beginPath();
-            cnvsFourteenCtx.strokeStyle="#00FF00"; 
-            cnvsFourteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs500);
-            cnvsFourteenCtx.lineTo(xShiftCnvs, yShiftCnvs500);
-            cnvsFourteenCtx.stroke(); 
- 
+				//JB
+            var line3 = document.createElementNS(xmlW3,'polyline');
+            line3.setAttribute('stroke',"#00FF00");
+            line3.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs500+" "+xShiftCnvs+","+yShiftCnvs500+" "));
+            line3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFourteen.appendChild(line3);
+				//JB
 //log kappa_lambda = 1600 nm
-//Plot points
-//            cnvsFourteenCtx.beginPath();
-//            cnvsFourteenCtx.strokeStyle=lineColor; 
-//            cnvsFourteenCtx.arc(xShiftCnvs, yShiftCnvs500, dSizeCnvs, 0, 2*Math.PI);
-//            cnvsFourteenCtx.stroke();
-//Line plot 
-            cnvsFourteenCtx.beginPath();
-            cnvsFourteenCtx.strokeStyle="#FF0000"; 
-            cnvsFourteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs1000);
-            cnvsFourteenCtx.lineTo(xShiftCnvs, yShiftCnvs1000);
-            cnvsFourteenCtx.stroke(); 
- 
+				//JB
+            var line4 = document.createElementNS(xmlW3,'polyline');
+            line4.setAttribute('stroke',"red");
+            line4.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs1000+" "+xShiftCnvs+","+yShiftCnvs1000+" "));
+            line4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFourteen.appendChild(line4);
+				//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
             lastYShiftCnvs360 = yShiftCnvs360;
@@ -8637,16 +11049,132 @@ Spectral line \n\
 
         var barWidth = 1.0;
         var barColor = "#777777";
+					//JB
         var xShift = YBar(logE * tauRos[1][tTau1], minXData, maxXData, barWidth, yAxisLength,
-                yFinesse, barColor, plotFourteenId, cnvsFourteenCtx);
+                yFinesse, barColor, newPlotFourteenId, SVGFourteen);
 
         var barHeight = 1.0;
         var yShift = XBar(logE * kappaRos[1][tTau1], minYData, maxYData, xAxisLength, barHeight,
-                xFinesse, barColor, plotFourteenId, cnvsFourteenCtx);
+                xFinesse, barColor, newPlotFourteenId, SVGFourteen);
         txtPrint("<span style='font-size:small; color:#444444'><em>&#964</em><sub>Ros</sub>=1</span>",
-                xShift, yShift, lineColor, plotFourteenId);
-    }
+                xShift, yShift, lineColor, newPlotFourteen);
+					//JB
 
+// text element that holds the x and y coordinates of the cursor on the SVG
+      var textP14 = document.createElementNS(xmlW3,'text');
+      textP14.setAttribute('x',325);
+        textP14.setAttribute('y',325);
+        textP14.setAttribute('font-size',"10");
+      textP14.setAttribute('id',"subtextP14");
+      textP14.setAttribute('name',"subtextP14");
+      textP14.textContent=("(?,?)");
+      textP14.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGFourteen.appendChild(textP14);
+
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP14 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP14(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP14 = document.getElementsByName("subtextP14").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP14==1){
+      document.getElementsByName("subtextP14")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFourteen.appendChild(textP14);
+      
+      }else if(nTextsP14>1){
+      for(var i = 0; i < nTextsP14; i++){
+      var extraText = document.getElementsByName("subtextP14")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGFourteen.appendChild(textP14);
+      }//end for loop
+
+      document.getElementsByName("subtextP14")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFourteen.appendChild(textP14);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP14")[0].textContent="(?,?)";
+        SVGFourteen.appendChild(textP14);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+        SVGFourteen.appendChild(textP14);
+
+/* a function that sets the text content to the x and y cursor
+ * positons on the SVG (in units of he x and y axis)
+*/
+/*
+      function convertTextP14(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+
+      textP14.textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      //console.log(text.textContent)
+      SVGFourteen.appendChild(textP14);
+      //console.log(text.textContent);
+      }else{
+
+        textP14.textContent="(?,?)";
+        SVGFourteen.appendChild(textP14);
+      
+      }
+              }
+*/
+//console.log(minXData);
+//console.log(maxXData);
+
+//variables created specifically for this plot
+var minXP14 = minXData;
+var maxXP14 = maxXData;
+var minYP14 = minYData;
+var maxYP14 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP14 = Math.abs((maxXP14-minXP14)/xAxisLength) ;
+//var offsetXP14 = ($("#SVG14").offset().left)+xAxisXCnvs;
+var scaleYPxP14 = (maxYP14-minYP14)/yAxisLength ;
+//var offsetYP14 = ($("#SVG14").offset().top+yAxisYCnvs);
+
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+
+
+      SVGFourteen.addEventListener("mousemove",function(){convertTextP14(minXP14+scaleXPxP14*(event.offsetX-xAxisXCnvs), minYP14+scaleYPxP14*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      SVGFourteen.addEventListener("mouseout",function(){convertTextP14(0, 0);});
+                                      //JB
+
+}
 
 //
 //
@@ -8682,18 +11210,22 @@ Spectral line \n\
 
         var fineness = "coarse";
         //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotFiveId, cnvsId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotFifteenId, cnvsFifteenId);
-        panelX = panelOrigin[0];
+					//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotFifteenId, SVGFifteen);
+					//JB
+	panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsFifteenCtx.fillStyle = wDefaultColor;
-        cnvsFifteenCtx.fillRect(0, 0, panelWidth, panelHeight);
+					//JB
+	SVGFifteen.setAttribute('fill',wDefaultColor);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotFifteenId, cnvsFifteenCtx);
+                newPlotFifteenId, SVGFifteen);
 
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotFifteenId, cnvsFifteenCtx);
+                fineness,newPlotFifteenId, SVGFifteen);
+
+					//JB
         //xOffset = xAxisParams[0];
         //yOffset = xAxisParams[4];
         var rangeXData = xAxisParams[1];
@@ -8712,13 +11244,15 @@ Spectral line \n\
 //
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+					//JB
         txtPrint("log<sub>10</sub> <a href='https://en.wikipedia.org/wiki/Absorption_(electromagnetic_radiation)' title='mass extinction coefficient' target='_blank'>Extinction</a>",
-                titleOffsetX, titleOffsetY, lineColor, plotFifteenId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotFifteenId);
         txtPrint("<span style='font-size:small'>"
                 + " <span style='color:#0000FF'><em>&#954<sub>&#955</sub> &#964 =</em> 1.0 </span>,  "
                 + " <span style='color:#00FF00'><em>&#954<sub>&#955</sub> &#964 =</em> 0.01</span>, "
                 + "<span><em>&#954</em><sub>Ros</sub></span>  ",
-                titleOffsetX, titleOffsetY+35, lineColor, plotFifteenId);
+                titleOffsetX, titleOffsetY+35, lineColor, newPlotFifteenId);
+					//JB
 //
         // Photometric bands centers
 
@@ -8753,6 +11287,110 @@ Spectral line \n\
         //var lastYShiftCnvsRM2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsRM2;
         //var lastYShiftCnvsR1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsR1;
         var xShift, yShift;
+
+
+                              //JB
+// text element that holds the x and y coordinates of the cursor on the SVG
+      var textP15 = document.createElementNS(xmlW3,'text');
+      textP15.setAttribute('x',325);
+      textP15.setAttribute('y',325);
+      textP15.setAttribute('font-size',"10");
+      textP15.setAttribute('id',"subtextP15");
+      textP15.setAttribute('name',"subtextP15");
+      textP15.textContent="(?,?)";
+      textP15.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGFifteen.appendChild(textP15);
+
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP15 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP15(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP15 = document.getElementsByName("subtextP15").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP15==1){
+      document.getElementsByName("subtextP15")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFifteen.appendChild(textP15);
+      
+      }else if(nTextsP15>1){
+      for(var i = 0; i < nTextsP15; i++){
+      var extraText = document.getElementsByName("subtextP15")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGFifteen.appendChild(textP15);
+      }//end for loop
+
+      document.getElementsByName("subtextP15")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGFifteen.appendChild(textP15);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP15")[0].textContent="(?,?)";
+        SVGFifteen.appendChild(textP15);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+
+
+
+//variables created specifically for this plot
+var minXP15 = minXData;
+var maxXP15 = maxXData;
+var minYP15 = minYData;
+var maxYP15 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP15 = Math.abs((maxXP15-minXP15)/xAxisLength) ;
+//var offsetXP15 = ($("#SVG15").offset().left)+xAxisXCnvs;
+var scaleYPxP15 = (maxYP15-minYP15)/yAxisLength ;
+//var offsetYP15 = ($("#SVG15").offset().top+yAxisYCnvs);
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+
+
+
+
+      SVGFifteen.addEventListener("mousemove",function(){convertTextP15(minXP15+scaleXPxP15*(event.offsetX-xAxisXCnvs), minYP15+scaleYPxP15*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      SVGFifteen.addEventListener("mouseout",function(){convertTextP15(0, 0);});
+
+
+//console.log(minXData);
+//console.log(maxXData);
+                                      //JB
+
+
+
+
+
         for (var i = 1; i < numLams; i++) {
 
             lambdanm = lambdaScale[i] * 1.0e7; //cm to nm //linear
@@ -8771,31 +11409,27 @@ Spectral line \n\
             //var yShiftCnvsRM2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsRM2;
             //var yShiftCnvsR1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsR1;
 
-//plot points
-            //cnvsFiveCtx.beginPath();
-            //cnvsFiveCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-            //RGBHex = colHex(r255, g255, b255);
-            //cnvsFiveCtx.strokeStyle = RGBHex;
-            //cnvsFiveCtx.stroke();
-//line plot
-            cnvsFifteenCtx.beginPath();
             RGBHex = colHex(0, 0, 255);
-            cnvsFifteenCtx.strokeStyle=RGBHex; 
-            cnvsFifteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs1);
-            cnvsFifteenCtx.lineTo(xShiftCnvs, yShiftCnvs1);
-            cnvsFifteenCtx.stroke();  
-            //cnvsFiveCtx.beginPath();
-            //cnvsFiveCtx.arc(xShiftCnvs, yShift0Cnvs, dSize0Cnvs, 0, 2*Math.PI);
-            //RGBHex = colHex(r2550, g2550, b2550);
-            //cnvsFiveCtx.strokeStyle = RGBHex;
-            //cnvsFiveCtx.stroke();
-            cnvsFifteenCtx.beginPath();
-            RGBHex = colHex(0, 255, 0);
-            cnvsFifteenCtx.strokeStyle=RGBHex; 
-            cnvsFifteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvsM2);
-            cnvsFifteenCtx.lineTo(xShiftCnvs, yShiftCnvsM2);
-            cnvsFifteenCtx.stroke();  
 
+				//JB
+	    var line = document.createElementNS(xmlW3,'polyline');
+	    line.setAttribute('stroke',RGBHex);
+            line.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvs1+" "+xShiftCnvs+","+yShiftCnvs1+" "));
+            line.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGFifteen.appendChild(line);
+
+				//JB
+  
+            RGBHex = colHex(0, 255, 0);
+
+			//JB
+            var line2 = document.createElementNS(xmlW3,'polyline');
+            line2.setAttribute('stroke',RGBHex);
+            line2.setAttribute('points',(lastXShiftCnvs+","+lastYShiftCnvsM2+" "+xShiftCnvs+","+yShiftCnvsM2+" "));
+            line2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFifteen.appendChild(line2);
+
+			//JB
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvsM2 = yShiftCnvsM2;
             lastYShiftCnvs1 = yShiftCnvs1;
@@ -8808,41 +11442,50 @@ Spectral line \n\
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
         var yTickPosCnvsR1 = yAxisLength * ((logE*kappaRos[1][tTau1]) - minYData) / rangeYData;
+				//JB
         var yShiftCnvsR1 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsR1;
-        cnvsFifteenCtx.beginPath();
         RGBHex = colHex(0, 0, 0);
-        cnvsFifteenCtx.strokeStyle=RGBHex; 
-        cnvsFifteenCtx.moveTo(lastXShiftCnvs, yShiftCnvsR1);
         lambdanm = lambdaScale[numLams-1] * 1.0e7; //cm to nm //linear
-        xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels   //linear
+    xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels   //linear
         xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        cnvsFifteenCtx.lineTo(xShiftCnvs, yShiftCnvsR1);
-        cnvsFifteenCtx.stroke();  
+
+            var line3 = document.createElementNS(xmlW3,'polyline');
+            line3.setAttribute('stroke',RGBHex);
+            line3.setAttribute('points',(lastXShiftCnvs+","+yShiftCnvsR1+" "+xShiftCnvs+","+yShiftCnvsR1+" "));
+            line3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFifteen.appendChild(line3);
+
+
  //Tau = 0.01 line::
         var lambdanm = 1.0e7 * lambdaScale[0];
         var xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels
         var lastXShiftCnvs = xAxisXCnvs + xTickPosCnvs;
         var yTickPosCnvsRM2 = yAxisLength * ((logE*kappaRos[1][tTauM2]) - minYData) / rangeYData;
+ 				//JB
         var yShiftCnvsRM2 = (yAxisYCnvs + yAxisLength) - yTickPosCnvsRM2;
-        cnvsFifteenCtx.beginPath();
         RGBHex = colHex(0, 0, 0);
-        cnvsFifteenCtx.strokeStyle=RGBHex; 
-        cnvsFifteenCtx.moveTo(lastXShiftCnvs, yShiftCnvsRM2);
-        lambdanm = lambdaScale[numLams-1] * 1.0e7; //cm to nm //linear
+ lambdanm = lambdaScale[numLams-1] * 1.0e7; //cm to nm //linear
         xTickPosCnvs = xAxisLength * (lambdanm - minXData) / rangeXData; // pixels   //linear
         xShiftCnvs = xAxisXCnvs + xTickPosCnvs;
-        cnvsFifteenCtx.lineTo(xShiftCnvs, yShiftCnvsRM2);
-        cnvsFifteenCtx.stroke();  
-           
+            var line4 = document.createElementNS(xmlW3,'polyline');
+            line4.setAttribute('stroke',RGBHex);
+            line4.setAttribute('points',(lastXShiftCnvs+","+yShiftCnvsRM2+" "+xShiftCnvs+","+yShiftCnvsRM2+" "));
+            line4.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGFifteen.appendChild(line4);
+
+ 				//JB
            //monochromatic disk lambda
                 yFinesse = 0.0;
                 barHeight = 200;
                 barWidth = 2;
                 RGBHex = "#000000";
+					//JB
                 var xShiftDum = YBar(diskLambda, minXData, maxXData, barWidth, barHeight,
-                        yFinesse, RGBHex, plotFifteenId, cnvsFifteenCtx);
+                        yFinesse, RGBHex, newPlotFifteenId, SVGFifteen);
         txtPrint("<span style='font-size:xx-small'>Filter</span>",
-                xShiftDum, titleOffsetY+60, lineColor, plotFifteenId);
+                xShiftDum, titleOffsetY+60, lineColor, newPlotFifteenId);
+
+					//JB
     }
 
 // ****************************************
@@ -8855,6 +11498,7 @@ Spectral line \n\
     // 
     if ( (ifLineOnly === false) && ((ifShowAtmos === true) && (ionEqElement != "None")) ) {
 //
+  console.log("PLOT 16 reached");
         var ifMolPlot = false; //initial default value
 
         var plotRow = 4;
@@ -8924,14 +11568,17 @@ Spectral line \n\
         var fineness = "normal";
         //var cnvsCtx = washer(xOffset, yOffset, wDefaultColor, plotOneId, cnvsId);
         //var cnvsCtx = washer(plotRow, plotCol, wDefaultColor, plotOneId, cnvsOneId);
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSixteenId, cnvsSixteenId);
-        panelX = panelOrigin[0];
+					//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotSixteenId, SVGSixteen);
+					//JB
+	panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSixteenCtx.fillStyle = wDefaultColor;
-        cnvsSixteenCtx.fillRect(0, 0, panelWidth, panelHeight);
-        var xAxisParams = XAxis(panelX, panelY,
+				//JB
+	SVGSixteen.setAttribute('fill',wDefaultColor);
+	        var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotSixteenId, cnvsSixteenCtx);
+                newPlotSixteenId, SVGSixteen);
+				//JB
         //xOffset = xAxisParams[0];
         var rangeXData = xAxisParams[1];
         var deltaXData = xAxisParams[2];
@@ -8943,7 +11590,8 @@ Spectral line \n\
         //no! var cnvsCtx = xAxisParams[8];
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotSixteenId, cnvsSixteenCtx);
+                fineness,newPlotSixteenId, SVGSixteen);
+
         var rangeYData = yAxisParams[1];
         var deltaYData = yAxisParams[2];
         var deltaYPxl = yAxisParams[3];
@@ -8954,14 +11602,16 @@ Spectral line \n\
         xFinesse = 0;       
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
-
+					//JB
         txtPrint("<a href='https://en.wikipedia.org/wiki/Saha_ionization_equation' target='_blank'>Ionization equilibrium</a> of " + ionEqElement,
-                titleOffsetX, titleOffsetY, lineColor, plotSixteenId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotSixteenId);
         txtPrint("<span style='font-size:small'>"
                 + "<span><em>N</em><sub>I</sub></span>,  "
                 + " <span style='color:#0000FF'><em>N</em><sub>II</sub></span>,  "
                 + " <span style='color:#00FF00'><em>N</em><sub>III</sub></span> ",
-                titleOffsetX, titleOffsetY+35, lineColor, plotSixteenId);
+                titleOffsetX, titleOffsetY+35, lineColor, newPlotSixteenId);
+
+					//JB
         //Data loop - plot the result!
 
         //var dSizeG = 2.0;
@@ -8987,6 +11637,98 @@ Spectral line \n\
 
 
        var yTickPosCnvs0, lastYShiftCnvs0, yTickPosCnvs1, lastYShiftCnvs1, yTickPosCnvs2, lastYShiftCnvs2, yShiftCnvs2;
+
+
+
+                      //JB
+
+// a text box created to hold the x and y positions of the mouse on the SVG
+      var textP16 = document.createElementNS(xmlW3,'text');
+      textP16.setAttribute('id',"textP16");
+      textP16.setAttribute('x',275);
+      textP16.setAttribute('y',325);
+      textP16.setAttribute('font-size',"10");
+      textP16.setAttribute('id',"subtextP16");
+      textP16.setAttribute('name',"subtextP16");
+      textP16.textContent="(?,?)";
+      textP16.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGSixteen.appendChild(textP16);
+
+
+/*to account for the fact that UPON MOVEMENT IN THE SVG,
+ * A NEW TEXT ELEMENT IS CREATED UP TO N TIMES WHERE N
+ *  IS THE NUMBER TIMES THE MODEL BUTTON HAS BEEN PRESSED SINCE
+ *  THE CACHE WAS CLEARED, these variables were created to keep
+ *  track of the single text element that is wanted to display
+ *  the coordinates.
+*/
+
+
+      var nTextsP16 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP16(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP16 = document.getElementsByName("subtextP16").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP16==1){
+      document.getElementsByName("subtextP16")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSixteen.appendChild(textP16);
+      
+      }else if(nTextsP16>1){
+      for(var i = 0; i < nTextsP16; i++){
+      var extraText = document.getElementsByName("subtextP16")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGSixteen.appendChild(textP16);
+      }//end for loop
+
+      document.getElementsByName("subtextP16")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSixteen.appendChild(textP16);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP16")[0].textContent="(?,?)";
+        SVGSixteen.appendChild(textP16);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+
+//variables created specifically for this plot
+var xMinP16 = minXData;
+var xMaxP16 = maxXData;
+var yMinP16 = minYData;
+var yMaxP16 = maxYData;
+//scale required to convert x values to pixels
+var scaleP16 = (xMaxP16-xMinP16)/xAxisLength; 
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+ SVGSixteen.addEventListener("mousemove",function(){convertTextP16(xMinP16+scaleP16*(event.offsetX-xAxisXCnvs), yMinP16+scaleP16*(event.offsetY-yAxisYCnvs-yAxisLength));},false);
+ SVGSixteen.addEventListener("mouseout",function(){convertTextP16(0,0);},false);
+                      //JB
+
+
+
+
+
        if (ifMolPlot == true){
           yTickPosCnvs0 = yAxisLength * (plotLogNumsAB[0] - minYData) / rangeYData;
           lastYShiftCnvs0 = (yAxisYCnvs + yAxisLength) - yTickPosCnvs0;
@@ -9029,35 +11771,43 @@ Spectral line \n\
    //console.log(" i " + i + " xShiftCnvs " + xShiftCnvs + " yShiftCnvs0 " + yShiftCnvs0);
 
 //Stage I
-////Plot points
-//            cnvsOneCtx.beginPath();
-//            cnvsOneCtx.strokeStyle=lineColor; 
-//            cnvsOneCtx.arc(xShiftCnvs, yShiftCnvs0, dSizeCnvs, 0, 2*Math.PI);
-//            cnvsOneCtx.stroke();
-//Line plot 
-            cnvsSixteenCtx.beginPath();
-            cnvsSixteenCtx.strokeStyle=lineColor; 
-            cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs0);
-            cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs0);
-            cnvsSixteenCtx.stroke();
+	    //var line = document.createElementNS(xmlW3,'polyline');
+	    //line.setAttribute('stroke',lineColor);
+            //line.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs0+" "+xShiftCnvs+","+yShiftCnvs0+" ");
+            //line.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    //SVGSixteen.appendChild(line);
+//Line plot
+                      //JB
+          var line1P16 = document.createElementNS(xmlW3,'polyline');
+          line1P16.setAttribute('stroke',lineColor);
+            line1P16.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs0+" "+xShiftCnvs+","+yShiftCnvs0+" ");
+            line1P16.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+          SVGSixteen.appendChild(line1P16);
+                      //JB
+
+
             lastYShiftCnvs0 = yShiftCnvs0;
 
     if (ifMolPlot == false){
 //Stage II
-            cnvsSixteenCtx.beginPath();
-            cnvsSixteenCtx.strokeStyle="#0000FF"; 
-            cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs1);
-            cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs1);
-            cnvsSixteenCtx.stroke();
+			//JB
+	    var line2 = document.createElementNS(xmlW3,'polyline');
+	    line2.setAttribute('stroke',"#0000FF");
+            line2.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs1+" "+xShiftCnvs+","+yShiftCnvs1+" ");
+            line2.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGSixteen.appendChild(line2);
             lastYShiftCnvs1 = yShiftCnvs1;
+			//JB
  
 //Stage III 
             if (ionEqElement != "H"){
-               cnvsSixteenCtx.beginPath();
-               cnvsSixteenCtx.strokeStyle="#00FF00";
-               cnvsSixteenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs2);
-               cnvsSixteenCtx.lineTo(xShiftCnvs, yShiftCnvs2);
-               cnvsSixteenCtx.stroke();
+				//JB
+	    var line3 = document.createElementNS(xmlW3,'polyline');
+            line3.setAttribute('stroke',"#00FF00");
+            line3.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs2+" "+xShiftCnvs+","+yShiftCnvs2+" ");
+            line3.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+            SVGSixteen.appendChild(line3);
+				//JB
                lastYShiftCnvs2 = yShiftCnvs2;
             }
 
@@ -9096,17 +11846,20 @@ Spectral line \n\
 
         var fineness = "normal";
 //
-        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, plotSeventeenId, cnvsSeventeenId);
-        panelX = panelOrigin[0];
+				//JB
+        var panelOrigin = washer(plotRow, plotCol, wDefaultColor, newPlotSeventeenId, SVGSeventeen);
+				//JB
+	panelX = panelOrigin[0];
         panelY = panelOrigin[1];
-        cnvsSeventeenCtx.fillStyle = wDefaultColor;
-        cnvsSeventeenCtx.fillRect(0, 0, panelWidth, panelHeight);
+				//JB
+	SVGSeventeen.setAttribute('fill',wDefaultColor);
         var xAxisParams = XAxis(panelX, panelY,
                 minXData, maxXData, xAxisName, fineness,
-                plotSeventeenId, cnvsSeventeenCtx);
+                newPlotSeventeenId, SVGSeventeen);
         var yAxisParams = YAxis(panelX, panelY,
                 minYData, maxYData, yAxisName,
-                plotSeventeenId, cnvsSeventeenCtx);
+                fineness,newPlotSeventeenId, SVGSeventeen);
+				//JB
         var rangeXData = xAxisParams[1];
         var deltaXData = xAxisParams[2];
         var deltaXPxl = xAxisParams[3];
@@ -9131,13 +11884,17 @@ Spectral line \n\
         var diskLamStr = diskLamLbl.toString(10);
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
+				//JB
+				
         txtPrint("<span style='font-size:small'><span style='color:#000000'><em>&#955</em><sub>Filter</sub> = " + diskLamStr + "nm</span><br /> ",
-                xAxisXCnvs+10, titleOffsetY+20, lineColor, plotSeventeenId);
-        // Add title annotation:
+                xAxisXCnvs+10, titleOffsetY+20, lineColor, newPlotSeventeenId);
+         //Add title annotation:
 
 
         txtPrint("<span style='font-size:normal; color:blue'><a href='https://en.wikipedia.org/wiki/Discrete_Fourier_transform' target='_blank'> Fourier transform of <em>I</em><sub>&#955</sub>(<em>&#952</em>)/ <em>I</em><sub>&#955</sub>(0)</a> </a></span>",
-                titleOffsetX, titleOffsetY, lineColor, plotSeventeenId);
+                titleOffsetX, titleOffsetY, lineColor, newPlotSeventeenId);
+				//JB
+
         //Data loop - plot the result!
 
         var dSizeCnvs = 2.0; //plot point size
@@ -9169,6 +11926,94 @@ Spectral line \n\
         var lastYShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
         //var lastYShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
 //
+
+//
+
+                              //JB
+// text element that holds the x and y coordinates of the cursor on the SVG
+      var textP17 = document.createElementNS(xmlW3,'text');
+      textP17.setAttribute('x',325);
+      textP17.setAttribute('y',325);
+      textP17.setAttribute('font-size',"10");
+      textP17.setAttribute('id',"subtextP17");
+      textP17.setAttribute('name',"subtextP17");
+      textP17.textContent="(?,?)";
+      textP17.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+      SVGSeventeen.appendChild(textP17);
+
+
+      var nTextsP17 = 0;//document.getElementsByName("subtextP6").length;
+
+//function to convert x and y values from the loop into text
+      function convertTextP17(X,Y){
+      //var X = x;
+      //var Y = y;
+      if(X!=0){
+      nTextsP17 = document.getElementsByName("subtextP6").length;
+
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      //console.log(nTexts);
+      //console.log(document.getElementsByName("subtextP6"));
+      if(nTextsP17==1){
+      document.getElementsByName("subtextP17")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSeventeen.appendChild(textP17);
+      
+      }else if(nTextsP17>1){
+      for(var i = 0; i < nTextsP17; i++){
+      var extraText = document.getElementsByName("subtextP17")[i];
+//For some reason, deleteing the textbox does not work...
+      //$("#SVGSix").remove("#"+extraText.id.toString());
+//but setting the text to nothing does...     
+      extraText.textContent="";
+      //nTexts = document.getElementsByName("subtextP6").length;      
+      SVGSeventeen.appendChild(textP17);
+      }//end for loop
+
+      document.getElementsByName("subtextP17")[0].textContent="("+X.toFixed(3).toString()+","+Y.toFixed(3).toString()+")";
+      
+      SVGSeventeen.appendChild(textP17);
+      }//end else if
+      
+      
+      }else{
+        
+      //var wantedText = document.getElementsByName("subtextP6")[0];
+      document.getElementsByName("subtextP17")[0].textContent="(?,?)";
+        SVGSeventeen.appendChild(textP17);
+//    newPlotSixId.appendChild(SVGSix);
+//    document.body.appendChild(newPlotSixId);
+      }//end else
+      }//end function
+
+
+
+//console.log(minXData);
+//console.log(maxXData);
+
+//variables created specifically for this plot
+var minXP17 = minXData;
+var maxXP17 = maxXData;
+var minYP17 = minYData;
+var maxYP17 = maxYData;
+
+//these scales determine the number of units per pixel in x and y
+var scaleXPxP17 = Math.abs((maxXP17-minXP17)/xAxisLength) ;
+//var offsetXP17 = ($("#SVG17").offset().left)+xAxisXCnvs;
+var scaleYPxP17 = (maxYP17-minYP17)/yAxisLength ;
+//var offsetYP17 = ($("#SVG17").offset().top+yAxisYCnvs);
+
+
+/*event listeners created to change the text content to the x and y position of 
+ * the mouse (in units on the plot) of the text element.
+*/
+      SVGSeventeen.addEventListener("mousemove",function(){convertTextP17(minXP17+scaleXPxP17*(event.offsetX-xAxisXCnvs), minYP17+scaleYPxP17*(-event.offsetY+yAxisYCnvs+yAxisLength));});
+      
+      SVGSeventeen.addEventListener("mouseout",function(){convertTextP17(0, 0);});
+                                      //JB
+
+
+
         for (var i = 1; i < numK; i++) {
 
   //console.log("i " + i + " ft[0] " + ft[0][i] + " ft[1] " + ft[1][i]);
@@ -9184,32 +12029,15 @@ Spectral line \n\
             var yShiftCnvs = (yAxisYCnvs + yAxisLength) - yTickPosCnvs;
            // var yShift2Cnvs = (yAxisYCnvs + yAxisLength) - yTickPos2Cnvs;
 
-////Plot points
-//            cnvsSeventeenCtx.beginPath();
-//            cnvsSeventeenCtx.arc(xShiftCnvs, yShiftCnvs, dSizeCnvs, 0, 2*Math.PI);
-//            RGBHex = colHex(0, 0, 0);
-//            cnvsSeventeenCtx.strokeStyle = RGBHex;
-//            cnvsSeventeenCtx.stroke();
-//line plot
-            cnvsSeventeenCtx.beginPath();
-            cnvsSeventeenCtx.strokeStyle = RGBHex;
+			//JB
             RGBHex = colHex(0, 0, 0);
-            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShiftCnvs);
-            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShiftCnvs);
-            cnvsSeventeenCtx.stroke();  
-            //
-////Plot points
-//            cnvsSeventeenCtx.beginPath();
-//            cnvsSeventeenCtx.arc(xShiftCnvs, yShift2Cnvs, dSizeCnvs, 0, 2*Math.PI);
-//            RGBHex = colHex(250, 0, 0);
-//            cnvsSeventeenCtx.strokeStyle = RGBHex;
-//            cnvsSeventeenCtx.stroke();
-////line plot
-//            cnvsSeventeenCtx.beginPath();
-//            cnvsSeventeenCtx.strokeStyle = RGBHex;
-//            cnvsSeventeenCtx.moveTo(lastXShiftCnvs, lastYShift2Cnvs);
-//            cnvsSeventeenCtx.lineTo(xShiftCnvs, yShift2Cnvs);
-//            cnvsSeventeenCtx.stroke();  
+	    var pline = document.createElementNS(xmlW3,'polyline');
+	    pline.setAttribute('stroke',RGBHex);
+            pline.setAttribute('points',lastXShiftCnvs+","+lastYShiftCnvs+" "+xShiftCnvs+","+yShiftCnvs+" ");
+            pline.setAttributeNS(xmlns,xmlnsLink,xmlnsLink2);
+	    SVGSeventeen.appendChild(pline);
+			//JB    
+	//
 
             lastXShiftCnvs = xShiftCnvs;
             lastYShiftCnvs = yShiftCnvs;
@@ -9217,6 +12045,7 @@ Spectral line \n\
         }
     }
 //ifShowRad = true; //For movie 
+
 
 
 // Detailed model output section:
@@ -9284,7 +12113,7 @@ Spectral line \n\
         var xTab = 190;
         txtPrint("i", 10, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>&#964</em><sub>Rosseland</sub>", 10 + xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
-        txtPrint("depth (km)", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
+        txtPrint("log<sub>10</sub> depth (cm)", 10 + 2 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>T</em><sub>Kin</sub> (K)", 10 + 3 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>P</em><sub>Gas</sub> (dynes cm<sup>-2</sup>)", 10 + 4 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
         txtPrint("log<sub>10</sub> <em>P</em><sub>Rad</sub> (dynes cm<sup>-2</sup>)", 10 + 5 * xTab, yOffsetT + 2*lineHeight, txtColor, printModelId);
@@ -9302,7 +12131,7 @@ Spectral line \n\
             //value = tauRos[0][i];
             value = value.toPrecision(5);
             numPrint(value, 10 + xTab, yTab, txtColor, printModelId);
-            value = 1.0e-5 * depths[i];
+            value = logE * Math.log(depths[i]);
             //value = (depths[i]);
             value = value.toPrecision(5);
             numPrint(value, 10 + 2 * xTab, yTab, txtColor, printModelId);
@@ -9547,4 +12376,3 @@ Spectral line \n\
 //
     return;
 }; //end function main()
-
