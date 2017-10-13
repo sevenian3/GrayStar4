@@ -27,14 +27,15 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     // Stellar parameters of Castelli, F.; Kurucz, R. L., 1994, A&A, 281, 817
     // Teff = 9550 K, log(g) = 3.95, ([Fe/H] = -0.5 - not directly relevent):
 
-    //var vegaColors = [0.0, 0.0, 0.0, 0.0, 0.0]; //For re-calibrating with raw Vega colours
+    var vegaColors = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]; //For re-calibrating with raw Vega colours
     // Aug 2015 - with 14-line linelist:
     //var vegaColors = [0.289244, -0.400324, 0.222397, -0.288568, -0.510965];
     //var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
     //With Balmer line linear Stark broadening wings:
     //var vegaColors = [0.321691, -0.248000, 0.061419, -0.463083, -0.524502];
     //var vegaColors = [0.09, 0.00, 0.08, -0.43, -0.51];
-    var vegaColors = [0.17, -0.09, 0.10, -0.44, -0.54, -3.11, -1.54];//lburns, June 2017
+    //var vegaColors = [0.17, -0.09, 0.10, -0.44, -0.54, -3.11, -1.54];//lburns, June 2017
+    var vegaColors = [0.49, -0.58, 0.11, -0.51, -0.62, -3.17, -1.54];
 
     var deltaLam, newY, product;
 
@@ -566,6 +567,8 @@ var filterSet = function() {
     filterCurves[5][0][24] = 920.0;
     filterCurves[5][1][24] = 0.000;
     //
+//HJK from Johnson, H.L, 1965, ApJ 141, 923
+////http://ulisse.pd.astro.it/Astro/ADPS/Systems/Sys_033/index_033.html
 //H lburns /06
     filterCurves[6][0][0] = 1460;
     filterCurves[6][1][0] = 0.000;

@@ -1824,13 +1824,13 @@ for (var i = 0; i < log10Gw1V.length; i++) {
         //$("#Albedo").val(0.0);
         $("#Albedo").roundSlider("setValue", 0.0);
     }
-    if (albedo > 1.0) {
+    if (albedo > 0.95) {
         flagArr[5] = true;
-        albedo = 1.0;
-        var albedoStr = "1.0";
-        settingsId[5].value = 1.0;
-        //$("#Albedo").val(1.0);
-        $("#Albedo").roundSlider("setValue", 1.0);
+        albedo = 0.95;
+        var albedoStr = "0.95";
+        settingsId[5].value = 0.95;
+        //$("#Albedo").val(0.95);
+        $("#Albedo").roundSlider("setValue", 0.95);
     }
 
 
@@ -9851,7 +9851,7 @@ var redR = 0;
         yShift = XBar(one, minYData, maxYData, barWidth, barHeight,
                 xFinesse, RGBHexc, newPlotSixId, SVGSix);
 
-        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Spectral_line' target='_blank'>Spectral line profile </a></span>",
+        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Spectral_line' target='_blank'>2-level atom: Spectral line profile </a></span>",
                 titleOffsetX, titleOffsetY, lineColor, newPlotSixId);
 				//JB
 // Equivalent width:
@@ -9864,7 +9864,7 @@ var redR = 0;
             + " <span style='font-size:small' title='picometers'>\n\
 <a href='http://en.wikipedia.org/wiki/Picometre' target='_blank'>pm</a>\n\
 </span>",
-            titleOffsetX+150, titleOffsetY, lineColor, newPlotSixId);
+            titleOffsetX+250, titleOffsetY, lineColor, newPlotSixId);
 					//JB
         // Data loop below in here instead
 // Spectrum not normalized - try this instead (redefines input parameter fluxCont):
@@ -10090,7 +10090,7 @@ var scaleYPxP6 = (maxYP6-minYP6)/yAxisLength ;
 //  *****   PLOT EIGHT / PLOT 8
 //
 //
-// Plot eight - Grotrian diagram for ionization stage and excitation level selected
+// Plot eight - 2-level atom E-level diagram for ionization stage and excitation level selected
 //
 //
 
@@ -10179,7 +10179,7 @@ var scaleYPxP6 = (maxYP6-minYP6)/yAxisLength ;
         titleX = panelX + titleOffsetX;
         titleY = panelY + titleOffsetY;
 					//JB
-        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Grotrian_diagram' target='_blank'>Grotrian diagram</a></span>",
+        txtPrint("<span style='font-size:normal; color:blue'><a href='http://en.wikipedia.org/wiki/Grotrian_diagram' target='_blank'>2-level atom: E-level diagram</a></span>",
                 titleOffsetX, titleOffsetY, lineColor, newPlotEightId);
 
 					//JB
@@ -11191,7 +11191,7 @@ var scaleYPxP14 = (maxYP14-minYP14)/yAxisLength ;
 //
         var minXData = 1.0e7 * lambdaScale[0];
         var maxXData = 1.0e7 * lambdaScale[numLams - 1];
-        var xAxisName = "<em>&#955</em> (nm)";
+        var xAxisName = "log<sub>10</sub><em>&#955</em> (nm)";
         //    ////Logarithmic x:
         //var minXData = 7.0 + logTen(masterLams[0]);
         //var maxXData = 7.0 + logTen(masterLams[numMaster - 1]);
@@ -12248,7 +12248,7 @@ var scaleYPxP17 = (maxYP17-minYP17)/yAxisLength ;
 
         var atomOffset = 750;
         var xTab = 200;
-//From PLOT EIGHT (Grotrian diagram):
+//From PLOT EIGHT (2-level atom: E-level diagram):
 
         var yData = [0.0, chiI1, chiL, chiU, chiI2];
         //console.log("yDatda[0] " + yData[0] + " yDatda[1] " + yData[1] + " yDatda[2] " + yData[2] + " yDatda[3] " + yData[3]);

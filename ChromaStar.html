@@ -132,8 +132,8 @@
                     sliderType: "min-range",
                     value: "0.3",
                     min: "0.0",
-                    max: "1.0",
-                    step: "0.05",
+                    max: "0.95",
+                    step: "0.01",
                     showTooltip: "true",
                     editableTooltip: "true"
                 });
@@ -358,7 +358,7 @@
                             <td>
                                 <span title="Surface reflectivity from bright regions such as ice sheets and deserts">
                                     <a href="https://en.wikipedia.org/wiki/Albedo" target="_blank">Albedo</a> 
-                                    (0.0 - 1.0) <br />
+                                    (0.0 - 0.95) <br />
                                     <!-- <input id="Albedo" type="number" name="Albedo" value=0.3 size="3"/> -->
                                     <!-- <input id="Albedo" type="range" name="Albedo" value=0.3 min="0.0" max="1.0" step="0.05" onchange="displayAlb()"/> -->
                                     <div id="Albedo"></div>
@@ -404,14 +404,14 @@
             <div id="flipLines"><h4>Show/Hide spectral line</h4></div>
             <div id="lineIn" style="display:none">
 
-                <!-- <h4><a href="http://en.wikipedia.org/wiki/Spectral_line" target=_blank">Spectral line</a> parameters</h4> -->
+                <!-- <h4><a href="http://en.wikipedia.org/wiki/Spectral_line" target=_blank">2-level atom: Spectral line</a> parameters</h4> -->
                 <fieldset>
                     <legend>
-                        <a href="http://en.wikipedia.org/wiki/Spectral_line" target=_blank">Spectral line</a> parameters
+                        <a href="http://en.wikipedia.org/wiki/Spectral_line" target=_blank">2-level atom: Spectral line</a> parameters
                     </legend>
                     <table> 
                         <tr>
-                            <td><span title="Affects line strength and width"> Line center 
+                            <td><span title="2-level atom: Affects line strength and width"> Line center 
                                     <a href="http://en.wikipedia.org/wiki/Wavelength" target="_blank">wavelength, <em>&#955</em><sub>0</sub></a> 
                                     (350 - 1000 <a href="http://en.wikipedia.org/wiki/Nanometre" target="_blank">nm</a>) <br />
                                     <input id="lambda_0" type="number" name="lambda_0" value=500 size="4" min="350" max="1000" step="1"/>
@@ -922,7 +922,7 @@
                     <input id="showRad" type="checkbox" name="showRad" />Radiation field
                 </span>       
                 <span title="Turn high resolution spectral line plots on/off">
-                    <input id="showLine" type="checkbox" name="showLine" />High resolution spectral line
+                    <input id="showLine" type="checkbox" name="showLine" />2-level atom: spectral line
                 </span>   
                 </span>
             </fieldset>
