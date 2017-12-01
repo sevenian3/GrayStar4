@@ -2653,13 +2653,13 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
       var jolaQuantumS = 1.0; //default for a multiplicative factor
 
       if (system == "TiO_C3Delta_X3Delta"){
-         jolaQuantumS = 3.0e-11;
+         jolaQuantumS = 2.0e-14;
       }
       if (system == "TiO_c1Phi_a1Delta"){
-         jolaQuantumS = 3.0e-12;
+         jolaQuantumS = 2.0e-14;
       }
       if (system == "TiO_A3Phi_X3Delta"){
-         jolaQuantumS = 3.0e-12;
+         jolaQuantumS = 2.0e-14;
       }
 
       return jolaQuantumS;

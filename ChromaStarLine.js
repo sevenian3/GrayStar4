@@ -1005,7 +1005,9 @@ var lineSource = function(numDeps, tau, temp, lambda) {
 };
 
 var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
-        numDeps, zScale, tauRos, temp, rho) {
+        numDeps, zScale, tauRos, temp, rho, logFudgeTune) {
+
+    var logE10 = Math.log(10.0); //natural log of 10
 
     var c = 2.9979249E+10; // light speed in vaccuum in cm/s
     var k = 1.3806488E-16; // Boltzmann constant in ergs/K
@@ -1105,11 +1107,11 @@ var lineKap = function(lam0In, logNums, logFluIn, linePoints, lineProf,
 //// **********************
 ////  Opacity problem #2
 ////
-////Line opacity needs to be multipied by fudge factor ~e^4.0 = 55 for Fraunhofer lines in Sun to have even
-////approximately the right strength - actually W_lambda is *still* to small!
-////  - related to Opacity problem #1 (logFudgeTune in GrayStarServer3.java) - ??
+//  #//Line opacity needs to be enhanced by same factor as the conitnuum opacity
+//  #//  - related to Opacity problem #1 (logFudgeTune in GrayStarServer3.java) - ??
+//  #//
+            logKappaL[il][id] = logKappaL[il][id] + logE10*logFudgeTune;
 ////
-            logKappaL[il][id] = logKappaL[il][id] + Math.log(4.0);
             //var refRhoIndx = 16;
           //  if (id == 12) {
            //     console.log("LINEKAPPA: id, il " + id + " " + il + " logKappaL " + logE * logKappaL[il][id]
@@ -1541,7 +1543,9 @@ var masterKappa = function(numDeps, numLams, numMaster, numNow, masterLams, mast
 // temp structure 
 // rho structure
 
-    var levelPops = function(lam0In, logNStage, chiL, log10UwStage, 
+    //var levelPops = function(lam0In, logNStage, chiL, log10UwStage, 
+    //                gwL, numDeps, temp) {
+    var levelPops = function(lam0In, logNStage, chiL, logUw, 
                     gwL, numDeps, temp) {
 
 
@@ -1581,12 +1585,12 @@ var logEv = Math.log(eV);
 // Convert to natural logs:
         var thisLogUw, Ttheta;
         thisLogUw = 0.0; //default initialization
-        var logUw = [];  
-        logUw.length = 5;
+        //var logUw = [];  
+        //logUw.length = 5;
         var logE10 = Math.log(10.0);
-        for (var k = 0; k < logUw.length; k++){
-            logUw[k] = logE10*log10UwStage[k]; // lburns new loop
-        }
+        //for (var k = 0; k < logUw.length; k++){
+        //    logUw[k] = logE10*log10UwStage[k]; // lburns new loop
+        //}
         var logGwL = Math.log(gwL);
 
         //System.out.println("chiL before: " + chiL);
@@ -1701,8 +1705,11 @@ var logEv = Math.log(eV);
 // Atomic element "A" is the one whose ionization fractions are being computed
 //  Element "B" refers to array of other species with which A forms molecules "AB" 
 
-    var stagePops2 = function(logNum, Ne, chiIArr, log10UwAArr,  //species A data - ionization equilibrium of A
-                 numMols, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+    //var stagePops2 = function(logNum, Ne, chiIArr, log10UwAArr,  //species A data - ionization equilibrium of A
+    //             numMols, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+    //             numDeps, temp) {
+    var stagePops2 = function(logNum, Ne, chiIArr, logUw,  //species A data - ionization equilibrium of A
+                 numMols, logNumB, dissEArr, logUwB, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
                  numDeps, temp) {
 
 
@@ -1753,23 +1760,23 @@ var logEv = Math.log(eV);
         }
 
         var logE10 = Math.log(10.0);
-        var logUw = [];
+        //var logUw = [];
 //We need one more stage in size of saha factor than number of stages we're actualy populating
-        logUw.length = numStages+1;
-        for (var i  = 0; i < numStages+1; i++){
-           logUw[i] = [];
-           logUw[i].length = 5;
-        } 
-        for (var i  = 0; i < numStages; i++){
-           for (var k = 0; k < 5; k++){
-                logUw[i][k] = logE10*log10UwAArr[i][k];
-           } // lburns- what variable can we use instead of 5?
-        } 
+        //logUw.length = numStages+1;
+        //for (var i  = 0; i < numStages+1; i++){
+        //   logUw[i] = [];
+        //   logUw[i].length = 5;
+        //} 
+        //for (var i  = 0; i < numStages; i++){
+        //   for (var k = 0; k < 5; k++){
+        //        logUw[i][k] = logE10*log10UwAArr[i][k];
+        //   } // lburns- what variable can we use instead of 5?
+        //} 
         //Assume ground state statistical weight (or partition fn) of highest stage is 1.0;
         //var logGw5 = 0.0;
-        for (var k = 0; k < 5; k++){
-            logUw[numStages][k] = 0.0;
-        } // lburns
+        //for (var k = 0; k < 5; k++){
+        //    logUw[numStages][k] = 0.0;
+        //} // lburns
 
         //System.out.println("chiL before: " + chiL);
         // If we need to subtract chiI from chiL, do so *before* converting to tiny numbers in ergs!
@@ -1849,18 +1856,18 @@ var logEv = Math.log(eV);
         } // lburns
       }
 // Array of elements B for all molecular species AB:
-       var logUwB = [];
+      // var logUwB = [];
       //if (numMols > 0){
-       logUwB.length = numMols;
-       for (var iMol = 0; iMol < numMols; iMol++){
-          logUwB[iMol] = [];
-          logUwB[iMol].length = 5;
-       } 
-        for (var iMol  = 0; iMol < numMols; iMol++){
-           for (var k = 0; k < 5; k++){
-                logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
-           } // lburns
-        }
+      // logUwB.length = numMols;
+      // for (var iMol = 0; iMol < numMols; iMol++){
+      //    logUwB[iMol] = [];
+      //    logUwB[iMol].length = 5;
+      // } 
+      //  for (var iMol  = 0; iMol < numMols; iMol++){
+      //     for (var k = 0; k < 5; k++){
+      //          logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
+      //     } // lburns
+      //  }
       //}
 //// Molecular partition functions:
 //       var logQwAB = [];
@@ -2082,7 +2089,9 @@ var logEv = Math.log(eV);
 
     //public static double[] sahaRHS(double chiI, double[] log10UwUArr, double[] log10UwLArr,
     //             int numDeps, double[][] temp) {
-    var sahaRHS = function(chiI, log10UwUArr, log10UwLArr,
+  //  var sahaRHS = function(chiI, log10UwUArr, log10UwLArr,
+  //                temp) {
+    var sahaRHS = function(chiI, logUwU, logUwL,
                   temp) {
 
 
@@ -2105,14 +2114,14 @@ var logEv = Math.log(eV);
 
         var logE10 = Math.log(10.0);
 //We need one more stage in size of saha factor than number of stages we're actualy populating
-        var logUwU = [];
-        logUwU.length = 5;
-        var logUwL = [];
-        logUwL.length = 5;
+       // var logUwU = [];
+       // logUwU.length = 5;
+       // var logUwL = [];
+       // logUwL.length = 5;
         // For logUwL AND logUwU: new lburns
            for (var k = 0; k < logUwL.length; k++){
-                logUwU[k] = logE10*log10UwUArr[k];
-                logUwL[k] = logE10*log10UwLArr[k];
+                logUwU[k] = logUwL[k];
+                //logUwL[k] = logE10*log10UwLArr[k];
            }
 
 
@@ -2209,8 +2218,11 @@ var logEv = Math.log(eV);
 //   in the denominator of the master fraction
 //  Element "B" refers to array of other species with which A forms molecules "AB" 
 
-    var molPops = function(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
-                 numMolsB, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+    //var molPops = function(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
+    //             numMolsB, logNumB, dissEArr, log10UwBArr, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
+    //             logGroundRatio, numDeps, temp) {
+    var molPops = function(nmrtrLogNumB, nmrtrDissE, logUwA, nmrtrLogUwB, nmrtrLogQwAB, nmrtrLogMuAB,  //species A data - ionization equilibrium of A
+                 numMolsB, logNumB, dissEArr, logUwB, logQwABArr, logMuABArr,  //data for set of species "B" - molecular equlibrium for set {AB}
                  logGroundRatio, numDeps, temp) {
         //           molPops(nmrtrLogNumB, nmrtrDissE, log10UwA, nmrtrLog10UwB, nmrtrLogQwAB, nmrtrLogMuAB, 
          //    thisNumMols, logNumBArr, dissEArr, log10UwBArr, logQwABArr, logMuABArr,
@@ -2274,28 +2286,28 @@ var logEv = Math.log(eV);
 
 //For clarity: neutral stage of atom whose ionization equilibrium is being computed is element A
 // for molecule formation:
-        var logUwA = [];
-        logUwA.length = 5;
-        var nmrtrLogUwB = [];
-        nmrtrLogUwB.length = 5;
-        for (var k = 0; k < logUwA.length; k++){
-            logUwA[k] = logE10*log10UwA[k];
-            nmrtrLogUwB[k] = logE10*nmrtrLog10UwB[k];
-        } // lburns new loop
+      //  var logUwA = [];
+      //  logUwA.length = 5;
+      //  var nmrtrLogUwB = [];
+      //  nmrtrLogUwB.length = 5;
+      //  for (var k = 0; k < logUwA.length; k++){
+      //      logUwA[k] = logE10*log10UwA[k];
+      //      nmrtrLogUwB[k] = logE10*nmrtrLog10UwB[k];
+      //  } // lburns new loop
 
 // Array of elements B for all molecular species AB:
-       var logUwB = [];
-      //if (numMolsB > 0){
-       logUwB.length = numMolsB;
-       for (var iMol = 0; iMol < numMolsB; iMol++){
-          logUwB[iMol] = [];
-          logUwB[iMol].length = 5;
-       } 
-        for (var iMol  = 0; iMol < numMolsB; iMol++){
-           for (var k = 0; k < 5; k++){
-                logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
-           } // lburns new loop
-        }
+     //  var logUwB = [];
+     // //if (numMolsB > 0){
+     //  logUwB.length = numMolsB;
+     //  for (var iMol = 0; iMol < numMolsB; iMol++){
+     //     logUwB[iMol] = [];
+     //     logUwB[iMol].length = 5;
+     //  } 
+     //   for (var iMol  = 0; iMol < numMolsB; iMol++){
+     //      for (var k = 0; k < 5; k++){
+     //           logUwB[iMol][k] = logE10*log10UwBArr[iMol][k];
+     //      } // lburns new loop
+     //   }
       //}
 //// Molecular partition functions:
 //       var nmrtrLogQwAB = logE10*nmrtrLog10QwAB;

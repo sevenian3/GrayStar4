@@ -1253,7 +1253,7 @@ function main() {
   var logATot = Math.log(ATot); //natural log
 
     //The following is a 5-element vector of temperature-dependent partition fns, U,
-    // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
+    // that are base e10 log_10 U, a la Allen's Astrophysical Quantities
        var log10Gw1V = [];
        log10Gw1V.length = 5;
        var log10Gw2V = [];
@@ -1546,7 +1546,7 @@ for (var i = 0; i < log10Gw1V.length; i++) {
          settingsId[10].value = chiI1;
          $("#chi_I1").val(chiI1);
       //THe following is a 2-element vector of temperature-dependent partitio fns, U,
-      // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
+      // that are base e log_e U, a la Allen's Astrophysical Quantities
          //log10Gw1V = getPartFn(species); //base 10 log_10 U
          log10Gw1V = getPartFn2(species); //lburns
          thisGw1 = Math.pow(10.0, log10Gw1V[0]);
@@ -2771,8 +2771,8 @@ for (var i = 0; i < log10Gw1V.length; i++) {
         log10UwAArr[i][k] = 0.0; //lburns default initialization - logarithmic
     }
   }
-// This holds 2-element temperature-dependent base 10 logarithmic parition fn:
-// Change this to hold a five-element temp-dependent base 10 log part fn lburns
+// This holds 2-element temperature-dependent base e logarithmic parition fn:
+// Change this to hold a five-element temp-dependent base e log part fn lburns
         var thisUwV = []; 
         thisUwV.length = 5;
    // Below created a loop to initialize each value to zero for the five temperatures lburns
@@ -3057,7 +3057,7 @@ var chiI, peNumerator, peDenominator, logPhi, logPhiOverPe, logOnePlusPhiOverPe,
            species = cname[iElem] + "I";
            chiI = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
-    // that are base 10 log_10 U
+    // that are base e log_10 U
            //log10UwLArr = getPartFn(species); //base 10 log_10 U
            log10UwLArr = getPartFn2(species); //lburns
            species = cname[iElem] + "II";
@@ -3160,20 +3160,20 @@ var logAmu = Math.log(amu);
        species = cname[iElem] + "I";
        chiIArr[0] = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
-    // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-       log10UwAArr[0] = getPartFn2(species); //base 10 log_10 U
+    // that are base e log_e U, a la Allen's Astrophysical Quantities
+       log10UwAArr[0] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
        species = cname[iElem] + "II";
        chiIArr[1] = getIonE(species);
-       log10UwAArr[1] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[1] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
        species = cname[iElem] + "III";
        chiIArr[2] = getIonE(species);
-       log10UwAArr[2] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[2] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
        species = cname[iElem] + "IV";
        chiIArr[3] = getIonE(species);
-       log10UwAArr[3] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[3] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
        //Find any associated molecular species in which element A can participate:
@@ -3228,7 +3228,7 @@ var logAmu = Math.log(amu);
           }
           dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
           species = cname[specB_ptr[iMol]] + "I"; //neutral stage
-          log10UwBArr[iMol] = getPartFn2(species); //base 10 log_10 U 
+          log10UwBArr[iMol] = getPartFn2(species); //base e log_10 U 
           //logQwABArr[iMol] = defaultQwAB;
           logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
           //Compute the reduced mass, muAB, in g:
@@ -3482,20 +3482,20 @@ var logAmu = Math.log(amu);
        species = cname[iElem] + "I";
        chiIArr[0] = getIonE(species);
     //THe following is a 2-element vector of temperature-dependent partitio fns, U,
-    // that are base 10 log_10 U, a la Allen's Astrophysical Quantities
-       log10UwAArr[0] = getPartFn2(species); //base 10 log_10 U
+    // that are base e log_e U, a la Allen's Astrophysical Quantities
+       log10UwAArr[0] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI1 + " " + thisUw1V);
        species = cname[iElem] + "II";
        chiIArr[1] = getIonE(species);
-       log10UwAArr[1] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[1] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI2 + " " + thisUw2V);
        species = cname[iElem] + "III";
        chiIArr[2] = getIonE(species);
-       log10UwAArr[2] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[2] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI3 + " " + thisUw3V);
        species = cname[iElem] + "IV";
        chiIArr[3] = getIonE(species);
-       log10UwAArr[3] = getPartFn2(species); //base 10 log_10 U
+       log10UwAArr[3] = getPartFn2(species); //base e log_10 U
        //console.log(" " + species + " " + thisChiI4 + " " + thisUw4V);
        //double logN = (eheu[iElem] - 12.0) + logNH;
        //Find any associated moleculear species in which element A can participate:
@@ -3545,7 +3545,7 @@ var logAmu = Math.log(amu);
           }
           dissEArr[iMol] = getDissE(mname[mname_ptr[iMol]]);
           species = cname[specB_ptr[iMol]] + "I"; //neutral stage
-          log10UwBArr[iMol] = getPartFn2(species); //base 10 log_10 U 
+          log10UwBArr[iMol] = getPartFn2(species); //base e log_e U 
           //logQwABArr[iMol] = defaultQwAB;
           logQwABArr[iMol] = getMolPartFn(mname[mname_ptr[iMol]]);
           //Compute the reduced mass, muAB, in g:
@@ -3598,7 +3598,7 @@ var logAmu = Math.log(amu);
     }
 // Get its partition fn:
     species = cname[specA_ptr] + "I"; //neutral stage
-    var log10UwA = getPartFn2(species); //base 10 log_10 U
+    var log10UwA = getPartFn2(species); //base e log_10 U
   //console.log("specA_ptr " + specA_ptr + " cname[specA_ptr] " + cname[specA_ptr]); 
   //console.log("log10UwA " + log10UwA[0] + " " + log10UwA[1]);
 //
@@ -3678,7 +3678,7 @@ var logK = Math.log(k);
           dissEArr[im] = getDissE(mname[mname_ptr[im]]);
           //console.log("im " + im + " dissEArr " + dissEArr[im]);
           species = cname[specB_ptr[im]] + "I";
-          log10UwBArr[im] = getPartFn2(species); //base 10 log_10 U 
+          log10UwBArr[im] = getPartFn2(species); //base e log_10 U 
           //logQwABArr[im] = defaultQwAB;
           logQwABArr[im] = getMolPartFn(mname[mname_ptr[im]]);
           //Compute the reduced mass, muAB, in g:
@@ -5015,7 +5015,7 @@ var logK = Math.log(k);
                   species = cname[jj] + "V";
                   logNums_ptr = 6;
                 }
-                thisUwV = getPartFn2(species); //base 10 log_10 U
+                thisUwV = getPartFn2(species); //base e log_10 U
                  break;   //we found it
                  }
              iAbnd++;
@@ -5054,7 +5054,7 @@ var logK = Math.log(k);
                     numDeps, teff, tauRos, temp, pGas, tempSun, pGasSun, hjertComp);
             }
             var listLogKappaL = lineKap(listLam0nm, listLogNums[2], listLogf[iLine], listLinePoints, listLineProf,
-                    numDeps, zScaleList, tauRos, temp, rho);
+                    numDeps, zScaleList, tauRos, temp, rho, logFudgeTune);
             var listLineLambdas = [];
             listLineLambdas.length = listNumPoints;
             for (var il = 0; il < listNumPoints; il++) {
@@ -5636,7 +5636,7 @@ var logEv = Math.log(eV);
                 lineLambdas[il] = linePoints[0][il] + lam0;
             }
     var logKappaL = lineKap(lam0, logNums[2], logF, linePoints, lineProf,
-            numDeps, zScale, tauRos, temp, rho);
+            numDeps, zScale, tauRos, temp, rho, logFudgeTune);
     var logTotKappa = lineTotalKap(lineLambdas, logKappaL, numDeps, logKappa, 
          numPoints, numLams, lambdaScale);
     //
@@ -5864,6 +5864,8 @@ Spectral line \n\
     var luminClass = "V";//defaults to V
 //Determine the spectralClass and subClass of main sequence stars, subdwarfs and white dwarfs
 //var luminClass = "V" or luminClass = "VI" or luminClass = "WD"
+//#// Based on the data in Appendix G of An Introduction to Modern Astrophysics, 2nd Ed. by
+//#// Carroll & Ostlie
 if (((logg >= 4.0) && (logg < 5.0)) || ((logg >= 5.0) && (logg < 6.0)) || (logg >= 5.0)) {
     if (teff < 3000.0) {
         spectralClass = "L";
@@ -10768,17 +10770,21 @@ counter2 +=1;
         radiusPxIce = Math.ceil(radiusPxIce);
         var radiusPx1AU = logScale * logTen(radiusScale * radius * Math.exp(log1AULine));
         radiusPx1AU = Math.ceil(radiusPx1AU);
+    //console.log("radius " + radius + " radiusPx " + radiusPx + " radiusPxSteam " + radiusPxSteam + " radiusPxIce " + radiusPxIce + " radiusPx1AU " + radiusPx1AU)
         // Key radii in order of *DECREASING* size (important!):
         var numZone = 7;
         var radii = [];
         radii.length = numZone;
+// Safety defaults:
+        radii = [radiusPx1AU, radiusPx1AU, radiusPx1AU, radiusPx1AU, radiusPx1AU, radiusPx1AU, radiusPx1AU]
         rrI = saveRGB[0];
         ggI = saveRGB[1];
         bbI = saveRGB[2];
         var starRGBHex = "rgb(" + rrI + "," + ggI + "," + bbI + ")";
         var colors = [];
         colors.length = numZone;
-        if (radiusPx1AU > (radiusPxIce + 3)){
+
+        if (radiusPx1AU >= (radiusPxIce + 3)){
            radii = [radiusPx1AU+1, radiusPx1AU, radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx];
            colors = ["#000000", wDiskColor, "#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex];
         }
@@ -10802,6 +10808,7 @@ counter2 +=1;
            radii = [radiusPxIce + 3, radiusPxIce, radiusPxSteam, radiusPxSteam - 3, radiusPx, radiusPx1AU, radiusPx1AU-1];
            colors = ["#0000FF", "#00FF88", "#FF0000", wDiskColor, starRGBHex, "#000000", starRGBHex];
         }
+     //console.log("radii " + radii)
         //
         //var titleYPos = xLowerYOffset - yRange + 40;
 					//JB
@@ -10837,6 +10844,7 @@ counter2 +=1;
         //  Loop over radial zones - largest to smallest
         for (var i = 0; i < radii.length; i++) {
    // for (var i = parseFloat(radii.length); i > 2; i--) {
+       //console.log(i, radii[i])
             var radiusStr = numToPxStrng(radii[i]);
             // Adjust position to center star:
             // Radius is really the *diameter* of the symbol
