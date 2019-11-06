@@ -93,15 +93,16 @@ var logEv = Math.log(eV);
         areaId.appendChild(numId);
     }; // end numPrint
 
-    var txtPrint = function(text, x, y, RGBHex, areaId) {
+    var txtPrint = function(text, x, y, width, RGBHex, areaId) {
 
         var xStr = numToPxStrng(x);
         var yStr = numToPxStrng(y);
+        var wStr = numToPxStrng(width);
        // var RGBHex = colHex(r255, g255, b255);
         var txtId = document.createElement("p");
         txtId.style.position = "absolute";
         txtId.style.display = "block";
-        txtId.style.width = "750px";
+        txtId.style.width = wStr;
         txtId.style.marginTop = yStr;
         txtId.style.marginLeft = xStr;
         txtId.style.color = RGBHex;
@@ -110,24 +111,6 @@ var logEv = Math.log(eV);
         areaId.appendChild(txtId);
     }; // end txtPrint
 
-                        //JB
-    var txtPrintYAx = function(text, x, y, RGBHex, areaId) {
-
-        var xStr = numToPxStrng(x);
-        var yStr = numToPxStrng(y);
-       // var RGBHex = colHex(r255, g255, b255);
-        var txtId = document.createElement("p");
-        txtId.style.position = "absolute";
-        txtId.style.display = "block";
-        txtId.style.width = "50px";
-        txtId.style.marginTop = yStr;
-        txtId.style.marginLeft = xStr;
-        txtId.style.color = RGBHex;
-        txtId.innerHTML = text;
-        //masterId.appendChild(numId);
-        areaId.appendChild(txtId);
-    }; // end txtPrint
-                        //Jb
 
     /* Not needed with HTML5 <canvas> tag... ???
  *
@@ -2543,10 +2526,65 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
          RSqu = 5.24;
        }
 
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+       if (system == "CH_A2Delta_X2Pi"){
+         RSqu = 0.081; // #mean of two values given    
+       }
+
 //
     return RSqu;
 
   };  //end of method getSqTransMoment 
+
+var getFel = function(system){
+
+//    """//Input SYSTEM is a string with both the molecular species AND the band "system"
+// Oscillator strength "f_el(nu_00)" fromTab. 1, col. 4 of
+// Jorgensen, 1994, A&A, 284, 179
+// // ROtational & vibrational constants for TiO states:, Tab 2 of Jorgensen"""
+
+    var fel = 0.0; //default initialization
+
+    //#TiO alpha system
+    if (system == "TiO_C3Delta_X3Delta"){
+        fel = 0.17;
+    }
+
+    //#TiO beta system
+    if (system == "TiO_c1Phi_a1Delta"){
+        fel = 0.28;
+    }
+
+    //#TiO gamma system
+    if (system == "TiO_A3Phi_X3Delta"){
+        fel = 0.15;
+    }
+
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        fel  = 0.14;
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        fel = 0.014;
+    }
+
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        fel = 0.048 ;
+    }
+
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        fel = 0.052;
+    }
+
+//
+    return fel;
+
+};
+
 
 
    var getRotConst = function(system){
@@ -2588,6 +2626,37 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
          B[1] = 0.507390; // upper
          B[0] = 0.535431;; //lower
        }
+
+    //#These ones are from Jorgensen, 1994, A&A, 284, 179  
+    //#gamma prime system
+    //#Guess the lambda ranges of these bands: lambda_00 +/- 120 nm?
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        B[1] = 0.507812; // upper
+        B[0] = 0.535431; //lower
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        B[1] = 0.5173; // upper
+        B[0] = 0.535431; //lower
+    }
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        B[1] = 0.51334; // upper
+        B[0] = 0.53760; //lower
+    }
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        B[1] = 0.51334; // upper
+        B[0] = 0.5490; //lower  
+    }
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+    if (system == "CH_A2Delta_X2Pi"){
+        B[1] = 14.46; // upper   #Band average from Allen's Tab 3.12 for both levels
+        B[0] = 14.46; //lower        
+    }
+
 
 /*
 // Okay - try the omega_e values in Allen's Table 4.17
@@ -2636,6 +2705,37 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
          lambda[1] = 865.0;
        }
 
+    //#These ones are from Jorgensen, 1994, A&A, 284, 179  
+    //#gamma prime system
+    //#Guess the lambda ranges of these bands: lambda_00 +/- 120 nm?
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        lambda[0] = 619.2 - 120.0;
+        lambda[1] = 619.2 + 120.0;
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        lambda[0] = 840.8 - 120.0;
+        lambda[1] = 840.8 + 120.0;
+    }
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        lambda[0] = 887.1 - 120.0;
+        lambda[1] = 887.1 + 120.0;
+    }
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        lambda[0] = 1104.5 - 150.0;
+        lambda[1] = 1104.5 + 150.0;
+    }
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+    if (system == "CH_A2Delta_X2Pi"){
+        lambda[0] = 430.0 - 120.0; // upper  
+        lambda[1] = 430.0 + 120.0; //lower    
+    }
+
+
 //
     return lambda;
 
@@ -2662,6 +2762,34 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
          jolaQuantumS = 2.0e-14;
       }
 
+    //#These ones are from Jorgensen, 1994, A&A, 284, 179  
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        jolaQuantumS = 1.0e-15;
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        jolaQuantumS = 1.0e-14;
+    }
+
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        jolaQuantumS = 5.0e-15;
+    }
+
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        jolaQuantumS = 1.0e-14;
+    }
+
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+    if (system == "CH_A2Delta_X2Pi"){
+        jolaQuantumS = 1.0e-14; //  #who really knows...     
+    }
+
+
+
       return jolaQuantumS;
 
   }; //end method getQuantumS
@@ -2684,11 +2812,98 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
          nu00 = 14095.9;
        }
 
+    //#These ones are from Jorgensen, 1994, A&A, 284, 179  
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        nu00 = 16148.5;
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        nu00 = 11894.0;
+    }
+
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        nu00 = 11272.8;
+    }
+
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        nu00 = 9054.0;
+    }
+
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+    if (system == "CH_A2Delta_X2Pi"){
+        nu00 = 23217.5;
+    }
+
+
 //Return frequency:
   //no!  double omega00 = Useful.c * nu00;
     return nu00;
 
   };  //end of method getOrigin
+
+var getDeltaLambda = function(system){
+
+
+    // Wavenumber of band origin, omega_0 (cm^-1)
+    // //Allen's Astrophysical quantities, p. 91, Table 4.18
+
+    //# I *think* upper state fisrt, lower stste 2nd in system designation
+    //# State:  Sigma    Pi    Delta    Phi??
+    //#Lambda:   0       1     2        3
+
+    var deltaLambda = 0;
+
+    //#TiO alpha system
+    if (system == "TiO_C3Delta_X3Delta"){
+        deltaLambda = 0;
+    }
+
+    //#TiO beta system
+    if (system == "TiO_c1Phi_a1Delta"){
+        deltaLambda = 1;
+    }
+
+    //#TiO gamma system
+    if (system == "TiO_A3Phi_X3Delta"){
+        deltaLambda = 1;
+    }
+
+    //#These ones are from Jorgensen, 1994, A&A, 284, 179  
+    //#TiO gamma prime system
+    if (system == "TiO_B3Pi_X3Delta"){
+        deltaLambda = -1;
+    }
+
+    //#TiO epsilon system    
+    if (system == "TiO_E3Pi_X3Delta"){
+        deltaLambda = -1;
+    }
+
+    //#TiO delta system    
+    if (system == "TiO_b1Pi_a1Delta"){
+        deltaLambda = -1;
+    }
+
+    //#TiO phi system    
+    if (system == "TiO_b1Pi_d1Sigma"){
+        deltaLambda = 1;
+    }
+
+    //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
+    if (system == "CH_A2Delta_X2Pi"){
+        deltaLambda = 1;
+    }
+
+//#//Return frequency:
+//#  //no!  double omega00 = Useful.c * nu00;
+    return deltaLambda;
+};
+
+
 
 //
 //Input data on water phase in temp-press place
@@ -2849,12 +3064,24 @@ hjertComp[0][80] = 12.0; hjertComp[1][80] =  0.000000 ; hjertComp[2][80] =  0.00
 
 // Copied over getPartFn2 from Dr Short's PartitionFn.java file lburns
 
+   var getPartFnT2 = function(){
+
+    //Temperatures of tabulated partition fn values from Barklem, P. S.; Collet, R., 2016, Astronomy & Astrophysics, Volume 588, id.A96
+    // Supports getPartFn2() 
+
+       // in K
+       var pf2T = [130.0, 500.0, 3000.0, 8000.0, 10000.0];
+
+       return pf2T;
+
+   };
+
    var getPartFn2 = function(species){
 
 // Diatomic Partition fn values, QAB, from
 //http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+A/588/A96
 //See: Barklem, P. S.; Collet, R., 2016, Astronomy & Astrophysics, Volume 588, id.A96
-//Just do linear piecewise interpolation in log of to hottest five values for now:
+//Just interpolate among log of to hottest five values for now:
     var logPartFn = [];
     logPartFn.length = 5;
     
