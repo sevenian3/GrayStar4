@@ -2759,33 +2759,33 @@ var getFel = function(system){
          jolaQuantumS = 2.0e-14;
       }
       if (system == "TiO_A3Phi_X3Delta"){
-         jolaQuantumS = 2.0e-14;
+         jolaQuantumS = 2.0e-13;
       }
 
     //#These ones are from Jorgensen, 1994, A&A, 284, 179  
     //#TiO gamma prime system
     if (system == "TiO_B3Pi_X3Delta"){
-        jolaQuantumS = 1.0e-15;
+        jolaQuantumS = 1.0e-14;
     }
 
     //#TiO epsilon system    
     if (system == "TiO_E3Pi_X3Delta"){
-        jolaQuantumS = 1.0e-14;
+        jolaQuantumS = 1.0e-13;
     }
 
     //#TiO delta system    
     if (system == "TiO_b1Pi_a1Delta"){
-        jolaQuantumS = 5.0e-15;
+        jolaQuantumS = 5.0e-14;
     }
 
     //#TiO phi system    
     if (system == "TiO_b1Pi_d1Sigma"){
-        jolaQuantumS = 1.0e-14;
+        jolaQuantumS = 1.0e-13;
     }
 
     //#CH A^2Delta_X^2Pi system - "G band" at 4300 A
     if (system == "CH_A2Delta_X2Pi"){
-        jolaQuantumS = 1.0e-14; //  #who really knows...     
+        jolaQuantumS = 1.0e-13; //  #who really knows...     
     }
 
 

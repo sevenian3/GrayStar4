@@ -1649,6 +1649,35 @@ nameGs[104] = "CaOH"; ipr[104] = 2; nch[104] =  0; nel[104] = 3; nat[0][104] = 1
     //#Ends file read loop "with open(infile...??)
 
     //#After read loop:
+//#GAS composition should be corrected to CSPy values at this point:
+    //#CSPy/Phoenix eheu[] values on A_12 scale where
+    //# eheu[i] = log_10(N_i/N_H) + 12
+    //# I *think* GAS comp[] value are comp[i] = N_i/N_tot
+    //#print("n ", n)
+    var CSNiOverNH = 0.0;
+    var convTerm = 0.0;
+    var invComp = 1.0;
+    //#skip Hydrogen
+    for (var i=0; i<n; i++){
+        //#if (name[i].strip() != 'H'):
+            //#print("element: name ", name[i], " comp[] ", comp[iat[i]])
+            for (var j=0; j<cname.length; j++){ 
+                //#print("element: name ", name[i], " cname ", cname[j])
+                if (nameGs[i].trim() == cname[j].trim()){
+                    CSNiOverNH = 10.0**(eheu[j]-12.0);
+                    //#Assumes 1st GAS element is H
+                    for (var k=1; k<n; k++){
+                        convTerm += comp[iat[k]]/comp[iat[i]];
+                    }
+                    invComp = 1.0/CSNiOverNH + convTerm;
+                    comp[iat[i]] = 1.0 / invComp;
+                    //#print("Abundance fix element: name ", name[i], " cname ", cname[j], " newComp ", comp[iat[i]])
+                    convTerm = 0.0; //#reset accumulator
+                }
+            }
+    }
+//#c
+
 //#c
 //#c Normalize abundances such that SUM(COMP) = 1
 //#c
@@ -1732,7 +1761,6 @@ gsName.length = nspec;
 for (var i = 0; i < nspec; i++){
    gsName[i] = nameGs[i];
 }
-//#GAS composition should be corrected to CSPy values at this point:
 //# Number of atomic elements in GAS package:
 var gsNumEls = comp.length;
 var gsComp = [];
