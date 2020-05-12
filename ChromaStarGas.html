@@ -164,7 +164,7 @@
         * Philip D. Bennett
         * Saint Mary's University
         * Department of Astronomy and Physics
-        * Institute for Computational Astrophysics (ICA)
+        * Eureka Scientific
         * Halifax, NS, Canada
         *
         * Jason H. T. Bayer (Honours student)
@@ -336,13 +336,14 @@
                 </fieldset> 
             </div>
 
-            <div id="flipPlanet"><h4>Show/Hide habitable zone</h4></div>
+            <div id="flipPlanet"><h4>Show/Hide Exo-planet</h4></div>
             <div id="planetIn">
 
                 <!-- <h4><a href="http://en.wikipedia.org/wiki/Stellar_atmosphere" target="_blank">Stellar atmosphere</a> parameters</h4>-->
                 <fieldset>
                     <legend>
-                        <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">Habitable Planet Zone</a> parameters
+                        <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">Planetary parameters</a> parameters <br />
+                        Affects <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">Habitable zone</a> and <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank">Transit light curve</a> 
                     </legend> 
                     <table>
                         <tr>
@@ -375,6 +376,29 @@
                                 <!-- <div id="echoAlb"></div> -->
 
                             </td>
+                            <td>
+                                                                <span title="Radius of planetary orbit in Astronomical Units (AU) - determines orbital period">
+                                    <em>R</em><sub>Orbit</sub> <a href="https://en.wikipedia.org/wiki/Astronomical_unit" target="_blank">(AU)</a>
+                                    (0.01 - 50) <br />
+                                    <input id="rOrbit" type="number" name="rOrbit" value="1.0" size="3" min="0.01" max="50" step="0.01" />
+                                </span>
+
+                            </td>
+                            <td>
+                                <span title="Planet's radius (Earth radii)">
+                                    <em>R</em><sub>Planet</sub> (<a href="https://en.wikipedia.org/wiki/Earth_radius"><em>R</em><sub>Earth</sub></a>)</a>
+                                    (0.1 - 20) <br />
+                                    <input id="rPlanet" type="number" name="rPlanet" value="1.0" size="3" min="0.1" max="20" step="0.1" />
+                                </span>
+
+                            </td> 
+                            <td>
+                                <span title="Orbital axis inclination wrt line-of-sight ">
+                                    <em>i</em><sub>Orb</sub> (0 - 90 <sup>o</sup>) <br />
+                                    <input id="orbI" type="number" name="orbI" value="90.0" min="0.0" max="90.0" step="0.01" size="4"/>
+                                </span>
+                            </td>
+
                         </tr>
                         <tr>
                             <th>
@@ -583,7 +607,7 @@
                                 </span>
                             </td>
                             <td>
-                                <span title="Rotational axis inclination wrt line-of-sight">
+                                <span title="Rotational axis inclination wrt line-of-sight ">
                                   <a href="https://en.wikipedia.org/wiki/Stellar_rotation" target="_blank">
                                     <em>i</em><sub>Rot</sub> (0 - 90 <sup>o</sup>) <br />
                                   </a>
@@ -1072,8 +1096,8 @@
                 <span title="Ionization stage of molecule number density">
                     <input id="printChem" type="radio" name="whichPrint" value="chem"/>Chem Eq <span style="font-size:x-small">(See Plot section menu)</span>
                 </span>
-                <span title="Partial pressures">
-                    <input id="printPP" type="radio" name="whichPrint" value="logPP"/>Partial pressures
+                <span title="Exo-planet transit light curve">
+                    <input id="printTrans" type="radio" name="whichPrint" value="transit"/>Transit light curves
                 </span>
             </fieldset>            
         </form>
@@ -1121,6 +1145,11 @@
         <div id="plotEleven" class="radPanel">
             <svg id="plotElevenCnvs" width="450" height="350"></svg>
         </div>
+
+        <!-- Planetary transit light-curves -->
+        <div id="plotNineteen" class="planetPanel">
+            <svg id="plotNineteenCnvs" width="450" height="350"></svg>
+        </div> 
 
         <!-- Tunable monochromatic image -->
         <div id="plotTwelve" class="radPanel">
@@ -1186,6 +1215,11 @@
         <div id="plotEighteen" class="radPanel">
             <svg id="plotEighteenCnvs" width="450" height="350"></svg>
         </div>
+
+        <!-- Tunable monochromatic image -->
+        <div id="plotTwelve" class="radPanel">
+            <svg id="plotTwelveCnvs" width="450" height="350"></svg>
+
 
 
         <!-- Print-out panel -->

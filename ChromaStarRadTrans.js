@@ -61,6 +61,14 @@ var logMe = Math.log(mE);
 //Conversion factors
 var logAmu = Math.log(amu);
 var logEv = Math.log(eV);
+
+var rSun = 6.955e10;   //#// solar radii to cm
+var rEarth = 6.371e8;  //# cm
+var AU2cm = 1.50e13;  //#cm
+var logRSun = Math.log(rSun);
+var logREarth = Math.log(rEarth);
+var logAU2cm = Math.log(AU2cm);
+
 // ********************************************
 // 
 // // *********************************************************
@@ -758,4 +766,75 @@ var flux3 = function(intens, lambdas, cosTheta, phi, radius, omegaSini, macroV) 
 
     return fluxSurfSpec;
 };
+//#Returns a vector of reduced fluxes for each angle theta being tannsited by planet
+
+var fluxTrans = function(intens, flx, lambdas, cosTheta, 
+          radius, iFirstTheta, numTransThetas, rPlanet){
+    //#print("iFirstTheta ", iFirstTheta, " numTransThetas ", numTransThetas,\
+    //#      " rPlanet ", rPlanet)
+
+
+    //System.out.println("radius " + radius + " omegaSini " + omegaSini + " macroV " + macroV);
+
+    var logTiny = -49.0;
+    var tiny = Math.exp(logTiny);
+
+    var numLams = lambdas.length;
+    var numThetas = cosTheta[0].length;
+    var fluxTransSpec = [];
+    fluxTransSpec.length = 2;
+    fluxTransSpec[0] = [];
+    fluxTransSpec[1] = [];
+    fluxTransSpec[0].length = numLams;
+    fluxTransSpec[1].length = numLams;
+    for (var i = 0; i < numLams; i++){
+      fluxTransSpec[0][i] = [];
+      fluxTransSpec[1][i] = [];
+      fluxTransSpec[0][i].length = numTransThetas;
+      fluxTransSpec[1][i].length = numTransThetas;
+      for (var j = 0; j < numTransThetas; j++){
+         fluxTransSpec[0][i][j] = 0.0;
+         fluxTransSpec[1][i][j] = 0.0;
+      }
+    }
+    //#Earth-radii to solar radii:
+    var rPlanet = rPlanet * rEarth / rSun;
+
+    //#dPlanet = 2.0 * rPlanet
+    //#print("dPlanet ", dPlanet)
+
+    //#subtract off flux eclipsed by transiting planet:
+    //#thisImpct = rPlanet  #Default
+    //##Can it really be this simple??:
+    var logOmega = Math.log(Math.PI) + 2.0 * ( Math.log(rPlanet) - Math.log(radius) );
+    //var omega = Math.PI * Math.exp(logOmega);
+    //console.log("logOmega " + logOmega + " omega "+ omega); 
+    var helper = 0.0;
+    var logHelper = 0.0;
+
+    //console.log("iFirstTheta " + iFirstTheta + " numThetas " + numThetas + " numLams " + numLams);
+    for (var it = iFirstTheta; it < numThetas; it++){
+
+        for (var il = 0; il < numLams; il++){
+
+            //#Subtracting the very small from the very large - let's be sophisticated about it:
+            logHelper = Math.log(intens[il][it]) + logOmega - flx[1][il];
+            helper = 1.0 - Math.exp(logHelper);
+            //#if (fluxTransSpec[0][il][it-iFirstTheta] > tiny):
+            fluxTransSpec[1][il][it-iFirstTheta] = flx[1][il] + Math.log(helper);
+            //#if (il == 150):
+            //#    print("logHelper ", logHelper, " helper ", helper, " logFluxTransSpec ", logFluxTransSpec)
+            fluxTransSpec[0][il][it-iFirstTheta] = Math.exp(fluxTransSpec[1][il][it-iFirstTheta]);
+            //if (il == 100){
+            //    console.log("fluxTransSpec 2 "+ fluxTransSpec[1][il][it-iFirstTheta])
+            //}
+
+        }
+        //#plt.plot(cosTheta[1][iFirstTheta: iFirstTheta+numTransThetas],\
+        //#         )
+    }
+
+    return fluxTransSpec;
+
+}; //end function fluxTrans
 

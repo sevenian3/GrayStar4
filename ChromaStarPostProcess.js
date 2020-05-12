@@ -7,35 +7,15 @@
  * First, reality check raw colours, THEN Run Vega model and subtract off Vega
  * colours for single-point calibration
  */
-var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
+var UBVRIraw = function(lambdaScale, flux, numDeps, tauRos, temp) {
 
     var filters = filterSet();
-
-    var numCols = 7;  //seven band combinations in Johnson-Bessell UxBxBVRI + Bessell & Brett 1988 JHK: Ux-Bx, B-V, V-R, V-I, R-I, V-K, J-K
-    var colors = [];
-    colors.length = numCols;
 
     var numBands = filters.length;
     var numLambdaFilt;
 
     var bandFlux = [];
     bandFlux.length = numBands;
-
-
-    // Single-point calibration to Vega:
-    // Vega colours computed self-consistntly with GrayFox 1.0 using 
-    // Stellar parameters of Castelli, F.; Kurucz, R. L., 1994, A&A, 281, 817
-    // Teff = 9550 K, log(g) = 3.95, ([Fe/H] = -0.5 - not directly relevent):
-
-    var vegaColors = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]; //For re-calibrating with raw Vega colours
-    // Aug 2015 - with 14-line linelist:
-    //var vegaColors = [0.289244, -0.400324, 0.222397, -0.288568, -0.510965];
-    //var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
-    //With Balmer line linear Stark broadening wings:
-    //var vegaColors = [0.321691, -0.248000, 0.061419, -0.463083, -0.524502];
-    //var vegaColors = [0.09, 0.00, 0.08, -0.43, -0.51];
-    //var vegaColors = [0.17, -0.09, 0.10, -0.44, -0.54, -3.11, -1.54];//lburns, June 2017
-    var vegaColors = [0.49, -0.58, 0.11, -0.51, -0.62, -3.17, -1.54];
 
     var deltaLam, newY, product;
 
@@ -54,15 +34,15 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
             //deltaLam = 1.0e-7 * deltaLam;  //cm
             //console.log("ib: " + ib + " il: " + il + " filters[ib][0][il] " + filters[ib][0][il] + " deltaLam: " + deltaLam + " filters[ib][1][il] " + filters[ib][1][il]);
 
-            //hand log flux (row 1) to interpolation routine: 
+            //hand log flux (row 1) to interpolation routine:
             newY = interpol(lambdaScale, flux[1], filters[ib][0][il]);
             // linearize interpolated flux: - fluxes add *linearly*
             newY = Math.exp(newY);
 
             product = filters[ib][1][il] * newY;
-            if (ib === 2) {
+            //if (ib === 2) {
                 //console.log("Photometry: il: " + il + " newY: " + newY + " filterLamb: " + filters[ib][0][il] + " filterTrans: " + filters[ib][1][il] + " product " + product);
-            }
+            //}
             //System.out.println("Photometry: filtertrans: " + filters[ib][1][il] + " product: " + product + " deltaLam: " + deltaLam);
             //Rectangular picket integration
             bandFlux[ib] = bandFlux[ib] + (product * deltaLam);
@@ -73,9 +53,36 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
 
     }  //ib loop - bands
 
-    var raw;
+    return bandFlux;
 
-    // Ux-Bx: 
+}; //UBVRI
+
+var UBVRI = function(bandFlux) {
+
+
+    var numCols = 7;  //seven band combinations in Johnson-Bessell UxBxBVRI + Bessell & Brett 1988 JHK: Ux-Bx, B-V, V-R, V-I, R-I, V-K, J-K
+    var colors = [];
+    colors.length = numCols;
+
+
+    // Single-point calibration to Vega:
+    // Vega colours computed self-consistntly with GrayFox 1.0 using
+    // Stellar parameters of Castelli, F.; Kurucz, R. L., 1994, A&A, 281, 817
+    // Teff = 9550 K, log(g) = 3.95, ([Fe/H] = -0.5 - not directly relevent):
+
+    //var vegaColors = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]; //For re-calibrating with raw Vega colours
+    // Aug 2015 - with 14-line linelist:
+    //var vegaColors = [0.289244, -0.400324, 0.222397, -0.288568, -0.510965];
+    //var vegaColors = [0.163003, -0.491341, 0.161940, -0.464265, -0.626204];
+    //With Balmer line linear Stark broadening wings:
+    //var vegaColors = [0.321691, -0.248000, 0.061419, -0.463083, -0.524502];
+    //var vegaColors = [0.09, 0.00, 0.08, -0.43, -0.51];
+    //var vegaColors = [0.17, -0.09, 0.10, -0.44, -0.54, -3.11, -1.54];//lburns, June 2017
+    var vegaColors = [0.49, -0.58, 0.11, -0.51, -0.62, -3.17, -1.54];
+
+    var raw = 0.0;
+
+    // Ux-Bx:
     raw = 2.5 * logTen(bandFlux[1] / bandFlux[0]);
     colors[0] = raw - vegaColors[0];
     //console.log("U-B: " + colors[0] + " raw " + raw + " bandFlux[1] " + bandFlux[1] + " bandFlux[0] " + bandFlux[0]);
@@ -113,6 +120,7 @@ var UBVRI = function(lambdaScale, flux, numDeps, tauRos, temp) {
     return colors;
 
 }; //UBVRI
+
 
 //
 //
@@ -1219,3 +1227,89 @@ var gaussian = function(lambdaScale, numLams, lambdaIn, sigmaIn, lamUV, lamIR) {
       return ft;
 
    }; //end method fourier
+
+/*"""
+# Reads in planetary system parameters for a single planet around a single star
+#and computes the impact parameter and time coordinate of snapshots
+# corresponding to the Gauss-Legendre quadrature as the planet transits the star
+#in the stellar atmosphere coordinate system
+
+#Integrated transit solution with stellar atmosphere and radiative tranfer code
+#  :: transit light curve entirely due to specific intensity variation across
+#   projected disk of background star
+#  - ie. No limb darkening coefficient (LDC) parameterization!
+
+Assumptions:
+    o Planet's transit path is a chord (not an arc)
+     :: equal intevals of length along chord --> equal intervals of transit time
+         - okay if r_orbit >> R_star
+    o Eclipsed intensity (I) does not vary as a function of position across the
+       projected disk of the planet
+         - okay if R_planet << R_star
+    o Planet's orbit is circular and centered on centre of star
+    o Planet's intensity is 0
+    o Ingress and egress excluded
+
+    - All light variation will be from background stellar intensity
+        variation across projected stellar disk
+    - Okay if r_planet << R_star - ??
+
+#Input:
+  o radius = radius of star (R_Sun)
+     - NOTE: already fixed by stellar parameters massStar and grav
+  o cosTheta - 2D array [2 x numThetas] - 2nd row is grid of cosTheta values in
+     stellar atmosphere coord system from main program
+  o vTrans - velocity of planet's transit motion projected to surface of star
+
+#Output:
+  o 1D vector of transit times corresponding to theta values transited along transit chord
+
+"""
+*/
+
+var transLight2 = function(radius, cosTheta, vTrans, iFirstTheta, numTransThetas, impct){
+
+    //#Safety first:
+
+    var tiny = 1.0e-49;
+    var logTiny = Math.log(tiny);
+
+    if (impct >= radius){
+        //#There is no eclipse (transit)
+        return;
+    }
+    //#thetaMinRad is also the minimum theta of the eclipse path chord, in RAD
+    var thetaMinRad =  Math.asin(impct/radius);
+    //#cos(theta) *decreases* with increasing theta in Quadrant I:
+    var cosThetaMax = Math.cos(thetaMinRad);
+
+
+    //#Compute array of distances traveled, r, along semi-chord from position of
+    //#minimum impact parameter
+    //#12D array of length number-of-eclipse-thetas
+    //transit = [0.0 for i in range(numTransThetas)]
+    //#test = [0.0 for i in range(numThetas)]
+    var transit = [];
+    transit.length = numTransThetas;
+
+    var thisImpct = 0.0;
+
+    for (var i = 0; i < numTransThetas; i++){
+        //#print("i ", i)
+        var thisTheta = Math.acos(cosTheta[1][i+iFirstTheta]);
+        thisImpct = radius * Math.sin(thisTheta);
+        //#test[i+iFirstTheta] = Math.exp(logRatio)
+        //# impact parameter corresponding to this theta:
+        var thisB = radius * Math.sin(thisTheta);
+        //# linear distance travelled along transit semi-path in solar radii
+        transit[i] = Math.sqrt(thisB**2 - impct**2);
+        transit[i] = transit[i]*rSun; //#RSun to cm
+        //#row 1 is Times at which successive annuli are eclipsed, in s:
+        //#Ephemeris zero point at transit mid-point
+        transit[i] = transit[i]/vTrans;
+        //#print("i ", i, " i+iFirstTheta ", i+iFirstTheta, " transit[1] ", transit[1][i+iFirstTheta])
+    }
+
+    return transit;
+
+};

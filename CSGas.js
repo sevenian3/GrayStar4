@@ -192,7 +192,7 @@ var isign = function(a, b){
 
 var gas = function(isolv, temp, pt, pe0, p0, neq, tol, maxit){
 
-console.log("Gas called!");
+//console.log("Gas called!");
 //, outFile):
 
 /*    
