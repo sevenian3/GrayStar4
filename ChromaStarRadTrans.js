@@ -779,6 +779,8 @@ var fluxTrans = function(intens, flx, lambdas, cosTheta,
     var logTiny = -49.0;
     var tiny = Math.exp(logTiny);
 
+    var logPi = Math.log(Math.PI);
+
     var numLams = lambdas.length;
     var numThetas = cosTheta[0].length;
     var fluxTransSpec = [];
@@ -818,7 +820,7 @@ var fluxTrans = function(intens, flx, lambdas, cosTheta,
         for (var il = 0; il < numLams; il++){
 
             //#Subtracting the very small from the very large - let's be sophisticated about it:
-            logHelper = Math.log(intens[il][it]) + logOmega - flx[1][il];
+            logHelper = logPi + Math.log(intens[il][it]) + logOmega - flx[1][il];
             helper = 1.0 - Math.exp(logHelper);
             //#if (fluxTransSpec[0][il][it-iFirstTheta] > tiny):
             fluxTransSpec[1][il][it-iFirstTheta] = flx[1][il] + Math.log(helper);
